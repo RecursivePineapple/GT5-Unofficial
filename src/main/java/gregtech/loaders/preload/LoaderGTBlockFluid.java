@@ -73,6 +73,7 @@ import gregtech.common.blocks.BlockGranites;
 import gregtech.common.blocks.BlockLaser;
 import gregtech.common.blocks.BlockMachines;
 import gregtech.common.blocks.BlockMetal;
+import gregtech.common.blocks.BlockMetal2;
 import gregtech.common.blocks.BlockOres;
 import gregtech.common.blocks.BlockReinforced;
 import gregtech.common.blocks.BlockStones;

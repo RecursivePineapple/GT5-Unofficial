@@ -238,7 +238,7 @@ public class MathUtils {
         return new long[] {};
     }
 
-    private static long gcd(long a, long b) {
+    public static long gcd(long a, long b) {
         while (b > 0) {
             final long temp = b;
             b = a % b; // % is remainder

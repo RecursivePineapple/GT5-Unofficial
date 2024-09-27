@@ -33,6 +33,8 @@ import gregtech.api.interfaces.IMaterialHandler;
 import gregtech.api.interfaces.ISubTagContainer;
 import gregtech.api.objects.MaterialStack;
 import gregtech.api.util.GTOreDictUnificator;
+import gregtech.api.util.GTRecipe;
+import gregtech.api.util.GTRecipeBuilder;
 import gregtech.api.util.GTUtility;
 import gregtech.common.config.Gregtech;
 import gregtech.common.render.items.CosmicNeutroniumRenderer;
@@ -1051,7 +1053,7 @@ public class Materials implements IColorModulationContainer, ISubTagContainer {
     public Enchantment mEnchantmentTools = null, mEnchantmentArmors = null;
     public boolean mUnificatable, mBlastFurnaceRequired = false, mAutoGenerateBlastFurnaceRecipes = true,
         mAutoGenerateVacuumFreezerRecipes = true, mAutoGenerateRecycleRecipes = true, mTransparent = false,
-        mHasParentMod = true, mHasPlasma = false, mHasGas = false, mCustomOre = false;
+        mHasParentMod = true, mHasPlasma = false, mHasGas = false, mCustomOre = false, mIsBridge = false;
     public byte mEnchantmentToolsLevel = 0, mEnchantmentArmorsLevel = 0, mToolQuality = 0;
     public short mBlastFurnaceTemp = 0;
     public int mMeltingPoint = 0;
@@ -2919,6 +2921,14 @@ public class Materials implements IColorModulationContainer, ISubTagContainer {
     public Materials setHeatDamage(float aHeatDamage) {
         mHeatDamage = aHeatDamage;
         return this;
+    }
+
+    /**
+     * Prefix item generation override.
+     * @return null: no override; true: generate; false: never generate
+     */
+    public Boolean shouldGeneratePrefix(OrePrefixes prefix) {
+        return null;
     }
 
     /**

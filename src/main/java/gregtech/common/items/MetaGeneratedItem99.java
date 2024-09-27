@@ -61,11 +61,19 @@ public class MetaGeneratedItem99 extends MetaGeneratedItem {
                 continue;
             }
 
-            if ((tMaterial.contains(SubTag.SMELTING_TO_FLUID)) && (!tMaterial.contains(SubTag.NO_SMELTING))
-                && !tMaterial.contains(SubTag.SMELTING_TO_GEM)) {
+            Boolean override = tMaterial.shouldGeneratePrefix(OrePrefixes.cellMolten);
+
+            boolean generateMolten = false;
+
+            if (override != null) {
+                generateMolten = override;
+            } else {
+                generateMolten = tMaterial.contains(SubTag.SMELTING_TO_FLUID) && !tMaterial.contains(SubTag.NO_SMELTING) && !tMaterial.contains(SubTag.SMELTING_TO_GEM);
+            }
+
+            if (generateMolten) {
                 registerMolten(tMaterial, tMaterial.mMetaItemSubID);
-                if (tMaterial.mSmeltInto != tMaterial && tMaterial.mSmeltInto.mMetaItemSubID >= 0
-                    && tMaterial.mSmeltInto.mMetaItemSubID < 1_000) {
+                if (tMaterial.mSmeltInto != tMaterial && tMaterial.mSmeltInto.mMetaItemSubID >= 0 && tMaterial.mSmeltInto.mMetaItemSubID < 1_000) {
                     registerMolten(tMaterial.mSmeltInto, tMaterial.mSmeltInto.mMetaItemSubID);
                 }
             }

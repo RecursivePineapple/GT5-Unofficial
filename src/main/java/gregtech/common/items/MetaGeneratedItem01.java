@@ -3538,6 +3538,10 @@ public class MetaGeneratedItem01 extends MetaGeneratedItemX32 {
     }
 
     public boolean isPlasmaCellUsed(OrePrefixes aPrefix, Materials aMaterial) {
+        Boolean override = aMaterial.shouldGeneratePrefix(aPrefix);
+
+        if (override != null && override == true) return true;
+
         Collection<GTRecipe> fusionRecipes = RecipeMaps.fusionRecipes.getAllRecipes();
         if (aPrefix == OrePrefixes.cellPlasma && aMaterial.getPlasma(1L) != null) { // Materials has a plasma fluid
             for (GTRecipe recipe : fusionRecipes) { // Loop through fusion recipes

@@ -1,6 +1,9 @@
 package gregtech.api.enums;
 
+import static gregtech.api.enums.Mods.GregTech;
+
 import gregtech.api.interfaces.IIconContainer;
+import net.minecraft.util.ResourceLocation;
 
 public class TextureSet {
 
@@ -123,6 +126,10 @@ public class TextureSet {
 
     public TextureSet withBlockTextures(String aNewSetName) {
         return new TextureSet(aNewSetName, this, true, false);
+    }
+
+    public ResourceLocation getLocation(int suffixIndex) {
+        return new ResourceLocation(GregTech.resourceDomain, "textures/blocks/" + aTextMatIconDir + mSetName + SUFFIXES[suffixIndex] + ".png");
     }
 
     private enum TextureType {

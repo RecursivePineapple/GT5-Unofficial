@@ -64,6 +64,7 @@ import gregtech.api.util.GTUtility;
 import gregtech.api.util.item.ItemHolder;
 import gregtech.api.world.GTWorldgen;
 import gregtech.common.GTDummyWorld;
+import gregtech.common.blocks.BlockMetal2;
 import gregtech.common.items.ItemIntegratedCircuit;
 
 /**

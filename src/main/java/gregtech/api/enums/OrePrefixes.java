@@ -1273,8 +1273,17 @@ public enum OrePrefixes {
     }
 
     public boolean doGenerateItem(Materials aMaterial) {
-        return aMaterial != null && aMaterial != Materials._NULL
-            && ((aMaterial.mTypes & mMaterialGenerationBits) != 0 || mGeneratedItems.contains(aMaterial))
+        if (aMaterial == null || aMaterial == Materials._NULL) {
+            return false;
+        }
+
+        Boolean override = aMaterial.shouldGeneratePrefix(this);
+
+        if (override != null) {
+            return override;
+        }
+
+        return ((aMaterial.mTypes & mMaterialGenerationBits) != 0 || mGeneratedItems.contains(aMaterial))
             && !mNotGeneratedItems.contains(aMaterial)
             && !mDisabledItems.contains(aMaterial)
             && (mCondition == null || mCondition.isTrue(aMaterial));
@@ -1323,16 +1332,18 @@ public enum OrePrefixes {
             return;
         }
 
-        for (IOreRecipeRegistrator tRegistrator : mOreProcessing) {
-            if (D2) GTLog.ore.println(
-                "Processing '" + aOreDictName
-                    + "' with the Prefix '"
-                    + name()
-                    + "' and the Material '"
-                    + aMaterial.mName
-                    + "' at "
-                    + GTUtility.getClassName(tRegistrator));
-            tRegistrator.registerOre(this, aMaterial, aOreDictName, aModName, GTUtility.copyAmount(1, aStack));
+        if (!aMaterial.mIsBridge) {
+            for (IOreRecipeRegistrator tRegistrator : mOreProcessing) {
+                if (D2) GTLog.ore.println(
+                    "Processing '" + aOreDictName
+                        + "' with the Prefix '"
+                        + name()
+                        + "' and the Material '"
+                        + aMaterial.mName
+                        + "' at "
+                        + GTUtility.getClassName(tRegistrator));
+                tRegistrator.registerOre(this, aMaterial, aOreDictName, aModName, GTUtility.copyAmount(1, aStack));
+            }
         }
     }
 

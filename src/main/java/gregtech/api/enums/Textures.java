@@ -1455,7 +1455,8 @@ public class Textures {
         NEUTRONIUM_STABLE_CASING,
         EXTREME_DENSITY_CASING,
         RADIATION_ABSORBENT_CASING,
-        HAWKING_GLASS;
+        HAWKING_GLASS,
+        BLOCK_FOO;
 
         /**
          * Icon for Fresh CFoam

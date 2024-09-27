@@ -55,6 +55,8 @@ import gregtech.api.enchants.EnchantmentHazmat;
 import gregtech.api.enchants.EnchantmentRadioactivity;
 import gregtech.api.enums.GTValues;
 import gregtech.api.enums.ItemList;
+import gregtech.api.enums.MaterialBuilder2;
+import gregtech.api.enums.MaterialList;
 import gregtech.api.enums.Materials;
 import gregtech.api.enums.Mods;
 import gregtech.api.enums.OrePrefixes;
@@ -279,6 +281,8 @@ public class GTMod implements IGTMod {
         new EnchantmentEnderDamage();
         new EnchantmentRadioactivity();
 
+        MaterialList.init();
+        MaterialBuilder2.onPreload();
         Materials.init();
 
         GTPreLoad.initLocalization(
@@ -384,6 +388,8 @@ public class GTMod implements IGTMod {
         GT_FML_LOGGER.debug("Registering SpaceDimensions");
         SpaceDimRegisterer.register();
 
+        MaterialBuilder2.onLoad();
+
         GregTechAPI.sLoadFinished = true;
         GTLog.out.println("GTMod: Load-Phase finished!");
         GTLog.ore.println("GTMod: Load-Phase finished!");
@@ -437,6 +443,7 @@ public class GTMod implements IGTMod {
         new CropLoader().run();
         new GTWorldgenloader().run();
         new CoverLoader().run();
+        MaterialBuilder2.onPostLoad();
 
         GTRecipeRegistrator.registerUsagesForMaterials(
             null,

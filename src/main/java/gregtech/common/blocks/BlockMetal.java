@@ -42,14 +42,14 @@ public class BlockMetal extends BlockStorage {
                 }
             }
         }
-        if (aMats.length < 16 && mNEIisLoaded) {
-            for (int i = aMats.length; i < 16; i++) codechicken.nei.api.API.hideItem(new ItemStack(this, 1, i));
+        if (aMats.length < getMaxMeta() && mNEIisLoaded) {
+            for (int i = aMats.length; i < getMaxMeta(); i++) codechicken.nei.api.API.hideItem(new ItemStack(this, 1, i));
         }
     }
 
     @Override
     public IIcon getIcon(int ordinalSide, int aMeta) {
-        if ((aMeta >= 0) && (aMeta < 16) && aMeta < mMats.length) {
+        if (aMeta >= 0 && aMeta < getMaxMeta() && aMeta < mMats.length) {
             return mBlockIcons[aMeta].getIcon();
         }
         return null;

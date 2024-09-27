@@ -2325,6 +2325,26 @@ public class GTUtility {
         return listContains(aObject, Arrays.asList(aObjects));
     }
 
+    public static <T> T[] concat(@SuppressWarnings("unchecked") T[]... arrays) {
+        if (arrays == null || arrays.length == 0) return null;
+
+        int total = 0;
+
+        for (int i = 0; i < arrays.length; i++) total += arrays[i].length;
+
+        T[] out = Arrays.copyOf(arrays[0], total);
+
+        int cursor = arrays[0].length;
+
+        for (int i = 1; i < arrays.length; i++) {
+            T[] curr = arrays[i];
+            System.arraycopy(curr, 0, out, cursor, curr.length);
+            cursor += curr.length;
+        }
+
+        return out;
+    }
+
     public static boolean listContains(Object aObject, Collection<?> aObjects) {
         if (aObjects == null) return false;
         return aObjects.contains(aObject);

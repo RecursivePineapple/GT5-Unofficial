@@ -1,5 +1,6 @@
 package gregtech.api.util;
 
+import static gregtech.api.enums.Mods.NewHorizonsCoreMod;
 import static gregtech.api.util.GTRecipeMapUtil.SPECIAL_VALUE_ALIASES;
 import static gregtech.api.util.GTUtility.copyFluidArray;
 import static gregtech.api.util.GTUtility.copyItemArray;
@@ -11,6 +12,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 import javax.annotation.Nonnull;
@@ -23,8 +25,11 @@ import net.minecraftforge.fluids.FluidStack;
 import org.jetbrains.annotations.Contract;
 
 import gregtech.GTMod;
+import gregtech.api.enums.FluidType;
 import gregtech.api.enums.GTValues;
+import gregtech.api.enums.Materials;
 import gregtech.api.enums.Mods;
+import gregtech.api.enums.OrePrefixes;
 import gregtech.api.interfaces.IRecipeMap;
 import gregtech.api.recipe.RecipeCategory;
 import gregtech.api.recipe.RecipeMetadataKey;
@@ -536,6 +541,11 @@ public class GTRecipeBuilder {
 
     public GTRecipeBuilder requiresLowGravity() {
         return metadata(GTRecipeConstants.LOW_GRAVITY, true);
+    }
+
+    public GTRecipeBuilder apply(Consumer<GTRecipeBuilder> fn) {
+        fn.accept(this);
+        return this;
     }
 
     // endregion

@@ -62,7 +62,11 @@ public class BlockFrameBox extends BlockContainer {
 
         for (int meta = 1; meta < GregTechAPI.sGeneratedMaterials.length; meta++) {
             Materials material = GregTechAPI.sGeneratedMaterials[meta];
-            if (material != null && (material.mTypes & 0x02) != 0) {
+            if (material == null) continue;
+
+            Boolean override = material.shouldGeneratePrefix(OrePrefixes.frameGt);
+
+            if ((material.mTypes & 0x02) != 0 || (override != null && override == true)) {
                 GTLanguageManager.addStringLocalization(
                     getUnlocalizedName() + "." + meta + DOT_NAME,
                     GTLanguageManager.i18nPlaceholder ? getLocalizedNameFormat(material) : getLocalizedName(material));

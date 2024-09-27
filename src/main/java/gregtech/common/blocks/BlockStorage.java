@@ -92,12 +92,18 @@ public class BlockStorage extends GTGenericBlock {
     @SideOnly(Side.CLIENT)
     public void registerBlockIcons(IIconRegister aIconRegister) {}
 
+    protected int getMaxMeta() {
+        return 16;
+    }
+
     @Override
     @SideOnly(Side.CLIENT)
     public void getSubBlocks(Item aItem, CreativeTabs aCreativeTab, List<ItemStack> aList) {
-        for (int i = 0; i < 16; i++) {
-            if (!(new ItemStack(aItem, 1, i).getDisplayName()
-                .contains(".name"))) aList.add(new ItemStack(aItem, 1, i));
+        for (int i = 0; i < getMaxMeta(); i++) {
+            ItemStack stack = new ItemStack(aItem, 1, i);
+            if (!stack.getDisplayName().contains(".name")) {
+                aList.add(stack);
+            }
         }
     }
 }
