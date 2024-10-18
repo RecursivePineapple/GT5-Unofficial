@@ -2118,6 +2118,7 @@ public enum ItemList implements IItemContainer {
     BlockQuarkContainmentCasing,
     LargeFluidExtractor,
     MatterManipulatorUplink,
+    Hatch_MatterManipulatorUplink_ME,
     AcceleratorLV,
     AcceleratorMV,
     AcceleratorHV,
@@ -2571,6 +2572,7 @@ public enum ItemList implements IItemContainer {
     ResearchCompleter, // Populated in EMT
     SpaceElevatorController, // Populated in GTNH-Intergalactic
     Spray_Color_Infinite,
+    MatterManipulatorHologram,
     MatterManipulator0,
     MatterManipulator1,
     MatterManipulator2,
