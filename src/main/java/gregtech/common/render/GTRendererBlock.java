@@ -46,6 +46,7 @@ import gregtech.GTMod;
 import gregtech.api.GregTechAPI;
 import gregtech.api.interfaces.ITexture;
 import gregtech.api.interfaces.metatileentity.IMetaTileEntity;
+import gregtech.api.interfaces.metatileentity.IRendersDecorations;
 import gregtech.api.interfaces.tileentity.IAllSidedTexturedTileEntity;
 import gregtech.api.interfaces.tileentity.IGregTechTileEntity;
 import gregtech.api.interfaces.tileentity.IPipeRenderedTileEntity;
@@ -747,16 +748,19 @@ public class GTRendererBlock implements ISimpleBlockRenderingHandler {
 
         if (tileEntity == null) return false;
 
-        if (tileEntity instanceof IGregTechTileEntity) {
-            final IMetaTileEntity metaTileEntity;
-            if ((metaTileEntity = ((IGregTechTileEntity) tileEntity).getMetaTileEntity()) != null
-                && metaTileEntity.renderInWorld(aWorld, aX, aY, aZ, aBlock, aRenderer)) {
+        if (tileEntity instanceof final IGregTechTileEntity igte) {
+            final IMetaTileEntity mte = igte.getMetaTileEntity();
+
+            if (mte instanceof final IRendersDecorations decorated) {
+                decorated.renderDecorations();
+            }
+
+            if (mte != null && mte.renderInWorld(aWorld, aX, aY, aZ, aBlock, aRenderer)) {
                 aRenderer.enableAO = false;
                 return true;
             }
         }
-        if (tileEntity instanceof IPipeRenderedTileEntity
-            && renderPipeBlock(aWorld, aX, aY, aZ, aBlock, (IPipeRenderedTileEntity) tileEntity, aRenderer)) {
+        if (tileEntity instanceof IPipeRenderedTileEntity && renderPipeBlock(aWorld, aX, aY, aZ, aBlock, (IPipeRenderedTileEntity) tileEntity, aRenderer)) {
             aRenderer.enableAO = false;
             return true;
         }
