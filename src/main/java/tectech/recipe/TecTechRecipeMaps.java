@@ -85,4 +85,13 @@ public class TecTechRecipeMaps {
         .logoPos(151, 63)
         .build();
 
+    public static final RecipeMap<RecipeMapBackend> condensateRecipes = RecipeMapBuilder
+        .of("gt.recipe.condensate")
+        .maxIO(1, 1, 1, 0)
+        .progressBar(TecTechUITextures.PROGRESSBAR_GODFORGE_PLASMA, ProgressBar.Direction.RIGHT)
+        .progressBarPos(78, 33)
+        .neiTransferRect(78, 33, 20, 20)
+        .frontend(GodforgeExoticFrontend::new)
+        .build();
+
 }
