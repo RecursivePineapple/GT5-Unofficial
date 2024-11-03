@@ -10,6 +10,8 @@ import net.minecraft.item.ItemStack;
 
 import gregtech.api.enums.GTValues;
 import gregtech.api.enums.MetaTileEntityIDs;
+import gregtech.api.factory.test.TestFactoryHatch;
+import gregtech.api.factory.test.TestFactoryPipe;
 import tectech.thing.metaTileEntity.hatch.MTEHatchBECInput;
 import tectech.thing.metaTileEntity.hatch.MTEHatchBECOutput;
 import tectech.thing.metaTileEntity.hatch.MTEHatchCapacitor;
@@ -1762,6 +1764,8 @@ public class MachineLoader implements Runnable {
             new MTEPipeEnergyMirror(LaserVacuumMirror.ID, "pipe.energymirror", "Laser Vacuum Mirror").getStackForm(1L));
         DATApipe.set(new MTEPipeData(OpticalFiberCable.ID, "pipe.datastream", "Optical Fiber Cable").getStackForm(1L));
         BECpipe.set(new MTEPipeBEC(BoseEinsteinCondensatePipe.ID, "pipe.bec", "Bose-Einstein Condensate Pipe").getStackForm(1L));
+        TestPipe.set(new TestFactoryPipe(15478, "pipe.test", "Test Factory Pipe").getStackForm(1));
+        TestHatch.set(new TestFactoryHatch(15479, "hatch.test", "Test Factory Hatch", 7).getStackForm(1));
 
         LASERpipeBlock.set(
             new MTEPipeBlockEnergy(LaserVacuumPipeCasing.ID, "pipe.energystream.block", "Laser Vacuum Pipe Casing")

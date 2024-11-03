@@ -27,14 +27,14 @@ import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.StatCollector;
 import net.minecraftforge.common.util.ForgeDirection;
 import net.minecraftforge.fluids.FluidStack;
-import tectech.mechanics.boseEinsteinCondensate.IBECInventory;
+import tectech.mechanics.boseEinsteinCondensate.BECInventory;
 import tectech.mechanics.boseEinsteinCondensate.IBECSink;
 import tectech.mechanics.pipe.IConnectsToBECPipe;
 import tectech.thing.metaTileEntity.pipe.MTEPipeBEC;
 import tectech.util.CommonValues;
 import tectech.util.TTUtility;
 
-public class MTEHatchBECOutput extends MTEHatch implements IConnectsToBECPipe, IBECInventory {
+public class MTEHatchBECOutput extends MTEHatch implements IConnectsToBECPipe, BECInventory {
     
     public static final CustomIcon EM_D_ACTIVE = new CustomIcon("iconsets/OVERLAY_EM_D_ACTIVE");
     public static final CustomIcon EM_D_SIDES = new CustomIcon("iconsets/OVERLAY_EM_D_SIDES");
@@ -162,7 +162,7 @@ public class MTEHatchBECOutput extends MTEHatch implements IConnectsToBECPipe, I
     }
 
     @Override
-    public boolean isConnectedTo(IBECInventory other) {
+    public boolean isConnectedTo(BECInventory other) {
         return other == mSink;
     }
 

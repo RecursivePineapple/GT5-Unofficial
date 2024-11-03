@@ -1,138 +1,56 @@
 package tectech.thing.metaTileEntity.hatch;
 
-import static gregtech.api.enums.Dyes.MACHINE_METAL;
-import static gregtech.api.enums.GTValues.L;
-import static gregtech.api.enums.GTValues.M;
-
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-
-import gregtech.api.enums.Dyes;
-import gregtech.api.enums.Textures.BlockIcons.CustomIcon;
-import gregtech.api.interfaces.ITexture;
+import gregtech.api.factory.test.TestFactoryHatch;
 import gregtech.api.interfaces.tileentity.IGregTechTileEntity;
 import gregtech.api.metatileentity.MetaTileEntity;
-import gregtech.api.metatileentity.implementations.MTEHatch;
-import gregtech.api.objects.MaterialStack;
-import gregtech.api.render.TextureFactory;
-import net.minecraft.entity.player.EntityPlayer;
+import it.unimi.dsi.fastutil.Pair;
+import mcp.mobius.waila.api.IWailaConfigHandler;
+import mcp.mobius.waila.api.IWailaDataAccessor;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.EnumChatFormatting;
-import net.minecraft.util.StatCollector;
+import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.tileentity.TileEntity;
+import net.minecraft.world.World;
 import net.minecraftforge.common.util.ForgeDirection;
-import net.minecraftforge.fluids.FluidStack;
-import tectech.mechanics.boseEinsteinCondensate.IBECInventory;
-import tectech.mechanics.boseEinsteinCondensate.IBECSink;
-import tectech.mechanics.pipe.IConnectsToBECPipe;
-import tectech.util.CommonValues;
-import tectech.util.TTUtility;
+import tectech.mechanics.boseEinsteinCondensate.BECFactoryElement;
+import tectech.mechanics.boseEinsteinCondensate.BECFactoryGrid;
+import tectech.mechanics.boseEinsteinCondensate.BECFactoryNetwork;
+import tectech.mechanics.boseEinsteinCondensate.BECInventory;
 
-public class MTEHatchBECInput extends MTEHatch implements IBECSink {
-    
-    public static final CustomIcon EM_D_ACTIVE = new CustomIcon("iconsets/OVERLAY_EM_D_ACTIVE");
-    public static final CustomIcon EM_D_SIDES = new CustomIcon("iconsets/OVERLAY_EM_D_SIDES");
-    public static final CustomIcon EM_D_CONN = new CustomIcon("iconsets/EM_DATA_CONN");
+public class MTEHatchBECInput extends MTEBaseFactoryHatch implements BECFactoryElement {
 
-    private IBECInventory mSource;
-
-    protected MTEHatchBECInput(String aName, int aTier, String[] aDescription, ITexture[][][] aTextures) {
-        super(aName, aTier, 0, aDescription, aTextures);
+    private BECFactoryNetwork network;
+    protected MTEHatchBECInput(MTEHatchBECInput prototype) {
+        super(prototype);
     }
 
     public MTEHatchBECInput(int aID, String aName, String aNameRegional, int aTier) {
-        super(
-            aID,
-            aName,
-            aNameRegional,
-            aTier,
-            0,
-            new String[] {
-                CommonValues.TEC_MARK_EM,
-                StatCollector.translateToLocal("gt.blockmachines.hatch.datain.desc.0"),
-                StatCollector.translateToLocal("gt.blockmachines.hatch.datain.desc.1"),
-                EnumChatFormatting.AQUA + StatCollector.translateToLocal("gt.blockmachines.hatch.datain.desc.2")
-            });
-        TTUtility.setTier(aTier, this);
+        super(aID, aName, aNameRegional, aTier, null);
     }
 
     @Override
-    public MetaTileEntity newMetaEntity(IGregTechTileEntity aTileEntity) {
-        return new MTEHatchBECInput(mName, mTier, mDescriptionArray, mTextures);
+    public MetaTileEntity newMetaEntity(IGregTechTileEntity igte) {
+        return new MTEHatchBECInput(this);
     }
 
     @Override
-    public ITexture[] getTexturesActive(ITexture aBaseTexture) {
-        return new ITexture[] {
-            aBaseTexture,
-            TextureFactory.builder()
-                .addIcon(EM_D_ACTIVE)
-                .setRGBA(Dyes.getModulation(getBaseMetaTileEntity().getColorization(), MACHINE_METAL.getRGBA()))
-                .build(),
-            TextureFactory.of(EM_D_CONN)
-        };
+    public void getWailaNBTData(EntityPlayerMP player, TileEntity tile, NBTTagCompound tag, World world, int x, int y,
+            int z) {
+        super.getWailaNBTData(player, tile, tag, world, x, y, z);
+        tag.setString("network", network == null ? "null" : network.toString());
     }
 
     @Override
-    public ITexture[] getTexturesInactive(ITexture aBaseTexture) {
-        return new ITexture[] {
-            aBaseTexture,
-            TextureFactory.builder()
-                .addIcon(EM_D_SIDES)
-                .setRGBA(Dyes.getModulation(getBaseMetaTileEntity().getColorization(), MACHINE_METAL.getRGBA()))
-                .build(),
-            TextureFactory.of(EM_D_CONN)
-        };
-    }
-
-    @Override
-    public @Nullable IConnectsToBECPipe getNext(@NotNull IConnectsToBECPipe source) {
-        return null;
-    }
-
-    @Override
-    public int getConnectionOnSide(ForgeDirection side, byte colorization) {
-        return colorization == getBaseMetaTileEntity().getColorization() && side == getBaseMetaTileEntity().getFrontFacing() ? CONNECTION_INPUT : CONNECTION_NONE;
-    }
-
-    @Override
-    public void markUsed() {
-        // do nothing
-    }
-
-    private boolean isConnected() {
-        return mSource != null && mSource.isConnectedTo(this);
-    }
-
-    @Override
-    public List<MaterialStack> getContents() {
-        return isConnected() ? null : mSource.getContents();
-    }
-
-    @Override
-    public boolean isEmpty() {
-        return isConnected() ? false : mSource.isEmpty();
-    }
-
-    @Override
-    public void consumeCondensate(MaterialStack... stacks) {
-        if (isConnected()) {
-            mSource.consumeCondensate(stacks);
-        }
-    }
-
-    @Override
-    public void addCondensate(MaterialStack... stacks) {
-        if (isConnected()) {
-            mSource.addCondensate(stacks);
-        }
-    }
-
-    @Override
-    public boolean isConnectedTo(IBECInventory other) {
-        return other == mSource;
+    public void getWailaBody(ItemStack itemStack, List<String> currenttip, IWailaDataAccessor accessor,
+            IWailaConfigHandler config) {
+        super.getWailaBody(itemStack, currenttip, accessor, config);
+        currenttip.add("Network: " + accessor.getNBTData().getString("network"));
     }
 
     @Override
@@ -142,81 +60,77 @@ public class MTEHatchBECInput extends MTEHatch implements IBECSink {
 
     @Override
     public String[] getInfoData() {
-        List<String> data = new ArrayList<>();
+        List<String> data = new ArrayList<>(Arrays.asList(super.getInfoData()));
 
-        if (isConnected()) {
-            data.add("Connected.");
-
-            List<MaterialStack> contents = mSource.getContents();
-
-            if (!contents.isEmpty()) {
-                data.add("Contained Bose-Einstein Condensate:");
-            }
-
-            for(MaterialStack stack : contents) {
-                data.add(String.format("%s: %,d L", stack.mMaterial.mLocalizedName, stack.mAmount * L / M));
-            }
+        if (network == null) {
+            data.add("No network");
         } else {
-            data.add("Not connected.");
+            for (BECInventory inv : network.getComponents(BECInventory.class)) {
+                IGregTechTileEntity base = inv.getBaseMetaTileEntity();
+
+                data.add(base.getXCoord() + ", " + base.getYCoord() + ", " + base.getZCoord() + ": " + inv.getContents().toString());
+            }
         }
 
-        return data.toArray(new String[0]);
+        return data.toArray(new String[data.size()]);
     }
 
     @Override
-    public void onPostTick(IGregTechTileEntity aBaseMetaTileEntity, long aTick) {
-        super.onPostTick(aBaseMetaTileEntity, aTick);
+    public List<Pair<Class<?>, Object>> getComponents() {
+        return Collections.singletonList(Pair.of(TestFactoryHatch.class, this));
+    }
 
-        if (aBaseMetaTileEntity.isServerSide() && (aTick & 31) == 31) {
-            getBaseMetaTileEntity().setActive(aBaseMetaTileEntity.isAllowedToWork() && mSource != null);
+    @Override
+    public boolean canConnectOnSide(ForgeDirection side) {
+        return side == getBaseMetaTileEntity().getFrontFacing();
+    }
+
+    @Override
+    public void getNeighbours(Collection<BECFactoryElement> neighbours) {
+        IGregTechTileEntity base = getBaseMetaTileEntity();
+
+        if (base.getTileEntityAtSide(base.getFrontFacing()) instanceof IGregTechTileEntity igte) {
+            if (igte.getColorization() == base.getColorization()) {
+                if (igte.getMetaTileEntity() instanceof BECFactoryElement element) {
+                    neighbours.add(element);
+                }
+            }
         }
     }
 
     @Override
-    public void setSource(IBECInventory source) {
-        mSource = source;
-        getBaseMetaTileEntity().setActive(getBaseMetaTileEntity().isAllowedToWork() && mSource != null);
+    public BECFactoryNetwork getNetwork() {
+        return network;
     }
 
     @Override
-    public void onSourceInventoryChanged() {
-
+    public void setNetwork(BECFactoryNetwork network) {
+        this.network = network;
     }
 
     @Override
-    public boolean isFacingValid(ForgeDirection facing) {
-        return true;
+    public void onFirstTick(IGregTechTileEntity aBaseMetaTileEntity) {
+        super.onFirstTick(aBaseMetaTileEntity);
+
+        BECFactoryGrid.INSTANCE.addElement(this);
     }
 
     @Override
-    public boolean isAccessAllowed(EntityPlayer aPlayer) {
-        return true;
+    public void onRemoval() {
+        super.onRemoval();
+
+        BECFactoryGrid.INSTANCE.removeElement(this);
     }
 
     @Override
-    public boolean isLiquidInput(ForgeDirection side) {
-        return false;
+    public void onFacingChange() {
+        super.onFacingChange();
+
+        BECFactoryGrid.INSTANCE.addElement(this);
     }
 
     @Override
-    public boolean isFluidInputAllowed(FluidStack aFluid) {
-        return false;
-    }
-
-    @Override
-    public boolean allowPullStack(IGregTechTileEntity aBaseMetaTileEntity, int aIndex, ForgeDirection side,
-        ItemStack aStack) {
-        return false;
-    }
-
-    @Override
-    public boolean allowPutStack(IGregTechTileEntity aBaseMetaTileEntity, int aIndex, ForgeDirection side,
-        ItemStack aStack) {
-        return false;
-    }
-
-    @Override
-    public boolean isValidSlot(int aIndex) {
-        return false;
+    public void onColorChangeServer(byte aColor) {
+        BECFactoryGrid.INSTANCE.addElement(this);
     }
 }

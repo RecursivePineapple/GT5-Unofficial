@@ -68,7 +68,7 @@ import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.StatCollector;
 import net.minecraftforge.common.util.ForgeDirection;
 import net.minecraftforge.fluids.FluidStack;
-import tectech.mechanics.boseEinsteinCondensate.IBECInventory;
+import tectech.mechanics.boseEinsteinCondensate.BECInventory;
 import tectech.thing.block.BlockQuantumGlass;
 import tectech.thing.casing.BlockGTCasingsTT;
 import tectech.thing.casing.TTCasingsContainer;
@@ -89,7 +89,7 @@ public class MTEBECGenerator extends TTMultiblockBase implements ISurvivalConstr
 
     private static final int MOL_CASING_TEX_OFFSET = BlockGTCasingsTT.textureOffset + 4;
 
-    private final List<IBECInventory> mBECOutputs = new ArrayList<>();
+    private final List<BECInventory> mBECOutputs = new ArrayList<>();
     private final HashMap<ItemId, Optional<MaterialInfo>> itemMaterialCache = new HashMap<>();
 
     private MaterialStack[] mOutputMaterials;
@@ -165,7 +165,7 @@ public class MTEBECGenerator extends TTMultiblockBase implements ISurvivalConstr
             return (self, igtme, id) -> {
                 IMetaTileEntity imte = igtme.getMetaTileEntity();
 
-                if (imte instanceof MTEHatch hatch && imte instanceof IBECInventory becInv) {
+                if (imte instanceof MTEHatch hatch && imte instanceof BECInventory becInv) {
                     hatch.updateTexture(MOL_CASING_TEX_OFFSET);
                     hatch.updateCraftingIcon(self.getMachineCraftingIcon());
                     self.mBECOutputs.add(becInv);

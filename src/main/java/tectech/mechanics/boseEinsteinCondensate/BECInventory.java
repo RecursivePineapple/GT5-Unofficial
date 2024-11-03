@@ -6,12 +6,9 @@ import org.jetbrains.annotations.Nullable;
 
 import gregtech.api.objects.MaterialStack;
 
-public interface IBECInventory {
+public interface BECInventory extends BECFactoryElement {
+
     @Nullable List<MaterialStack> getContents();
-
-    boolean isEmpty();
-
-    boolean isConnectedTo(IBECInventory other);
 
     void addCondensate(MaterialStack... stacks);
 

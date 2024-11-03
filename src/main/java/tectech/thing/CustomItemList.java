@@ -69,6 +69,8 @@ public enum CustomItemList implements IItemContainer {
     DATApipe,
     LASERpipe,
     BECpipe,
+    TestPipe,
+    TestHatch,
     Machine_Multi_BECGenerator,
     rack_Hatch,
     holder_Hatch,
