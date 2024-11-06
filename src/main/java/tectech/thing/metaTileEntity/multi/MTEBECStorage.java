@@ -8,10 +8,8 @@ import static gregtech.api.casing.Casings.MolecularCasing;
 import static gregtech.api.enums.HatchElement.Energy;
 import static gregtech.api.enums.HatchElement.ExoticEnergy;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -20,9 +18,7 @@ import javax.annotation.Nonnull;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import com.gtnewhorizon.structurelib.alignment.constructable.ISurvivalConstructable;
 import com.gtnewhorizon.structurelib.structure.IStructureDefinition;
-import com.gtnewhorizon.structurelib.structure.ISurvivalBuildEnvironment;
 import com.gtnewhorizon.structurelib.structure.StructureDefinition;
 import com.gtnewhorizons.modularui.api.math.Alignment;
 import com.gtnewhorizons.modularui.common.widget.DynamicPositionedColumn;
@@ -31,207 +27,69 @@ import com.gtnewhorizons.modularui.common.widget.TextWidget;
 
 import gregtech.api.enums.GTValues;
 import gregtech.api.enums.Materials;
-import gregtech.api.interfaces.IHatchElement;
-import gregtech.api.interfaces.ITexture;
 import gregtech.api.interfaces.metatileentity.IMetaTileEntity;
 import gregtech.api.interfaces.tileentity.IGregTechTileEntity;
 import gregtech.api.recipe.check.CheckRecipeResult;
 import gregtech.api.recipe.check.CheckRecipeResultRegistry;
-import gregtech.api.render.TextureFactory;
 import gregtech.api.util.HatchElementBuilder;
-import gregtech.api.util.IGTHatchAdder;
 import gregtech.api.util.MultiblockTooltipBuilder;
 import gregtech.api.util.shutdown.ShutDownReason;
-import gtPlusPlus.xmod.gregtech.common.blocks.textures.TexturesGtBlock;
 import it.unimi.dsi.fastutil.Pair;
 import it.unimi.dsi.fastutil.objects.Object2LongOpenHashMap;
-import mcp.mobius.waila.api.IWailaConfigHandler;
-import mcp.mobius.waila.api.IWailaDataAccessor;
-import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumChatFormatting;
-import net.minecraft.world.World;
-import net.minecraftforge.common.util.ForgeDirection;
-import tectech.mechanics.boseEinsteinCondensate.BECFactoryElement;
 import tectech.mechanics.boseEinsteinCondensate.BECFactoryGrid;
-import tectech.mechanics.boseEinsteinCondensate.BECFactoryNetwork;
 import tectech.mechanics.boseEinsteinCondensate.BECInventory;
 import tectech.mechanics.boseEinsteinCondensate.CondensateStack;
 import tectech.thing.block.BlockQuantumGlass;
-import tectech.thing.metaTileEntity.hatch.MTEHatchBEC;
-import tectech.thing.metaTileEntity.multi.base.TTMultiblockBase;
+import tectech.thing.metaTileEntity.multi.base.MTEBECMultiblockBase;
 import tectech.thing.metaTileEntity.multi.structures.BECGeneratorStructureDef;
 
-public class MTEBECStorage extends TTMultiblockBase implements ISurvivalConstructable, BECFactoryElement, BECInventory {
+public class MTEBECStorage extends MTEBECMultiblockBase<MTEBECStorage> implements BECInventory {
     
-    private static final String STRUCTURE_PIECE_MAIN = "main";
-
-    private final List<BECFactoryElement> mBECHatches = new ArrayList<>();
-
     private final Object2LongOpenHashMap<Materials> mStoredCondensate = new Object2LongOpenHashMap<>();
-
-    private BECFactoryNetwork network;
 
     public MTEBECStorage(int aID, String aName, String aNameRegional) {
         super(aID, aName, aNameRegional);
     }
 
-    public MTEBECStorage(String aName) {
-        super(aName);
+    public MTEBECStorage(MTEBECStorage prototype) {
+        super(prototype);
     }
-
-    //#region Structure
-
-    // spotless:off
-    private static final IStructureDefinition<MTEBECStorage> STRUCTURE_DEFINITION = StructureDefinition
-        .<MTEBECStorage>builder()
-        .addShape(STRUCTURE_PIECE_MAIN, BECGeneratorStructureDef.BEC_CONTAINMENT_FIELD)
-        .addElement('A', MolecularCasing.asElement())
-        .addElement('B', AdvancedMolecularCasing.asElement())
-        .addElement('C', ContainmentFieldGenerator.asElement())
-        .addElement('D', lazy(() -> ofBlock(BlockQuantumGlass.INSTANCE, 0)))
-        .addElement('E', lazy(() -> 
-            HatchElementBuilder.<MTEBECStorage>builder()
-                .anyOf(BECHatches.Hatch)
-                .casingIndex(MolecularCasing.getTextureId())
-                .dot(2)
-                .buildAndChain(MolecularCasing.asElement())
-        ))
-        .addElement('1', lazy(() -> 
-            HatchElementBuilder.<MTEBECStorage>builder()
-                .anyOf(Energy, ExoticEnergy)
-                .casingIndex(MolecularCasing.getTextureId())
-                .dot(1)
-                .buildAndChain(MolecularCasing.asElement())
-        ))
-        .build();
-    // spotless:on
-
-    @Override
-    public boolean isCorrectMachinePart(ItemStack aStack) {
-        return true;
-    }
-
-    @Override
-    public IStructureDefinition<? extends TTMultiblockBase> getStructure_EM() {
-        return STRUCTURE_DEFINITION;
-    }
-
-    private static enum BECHatches implements IHatchElement<MTEBECStorage> {
-
-        Hatch(MTEHatchBEC.class) {
-            @Override
-            public long count(MTEBECStorage t) {
-                return t.mBECHatches.size();
-            }
-        };
-
-        private final List<? extends Class<? extends IMetaTileEntity>> mteClasses;
-
-        @SafeVarargs
-        BECHatches(Class<? extends IMetaTileEntity>... mteClasses) {
-            this.mteClasses = Collections.unmodifiableList(Arrays.asList(mteClasses));
-        }
-
-        @Override
-        public List<? extends Class<? extends IMetaTileEntity>> mteClasses() {
-            return mteClasses;
-        }
-
-        @Override
-        public IGTHatchAdder<? super MTEBECStorage> adder() {
-            return (self, igtme, id) -> {
-                IMetaTileEntity imte = igtme.getMetaTileEntity();
-
-                if (imte instanceof MTEHatchBEC hatch) {
-                    hatch.updateTexture(MolecularCasing.getTextureId());
-                    hatch.updateCraftingIcon(self.getMachineCraftingIcon());
-                    self.mBECHatches.add(hatch);
-                    hatch.setController(self);
-                    return true;
-                } else {
-                    return false;
-                }
-            };
-        }
-    }
-
-    @Override
-    protected void clearHatches_EM() {
-        super.clearHatches_EM();
-
-        mBECHatches.clear();
-    }
-
-    @Override
-    public void construct(ItemStack stackSize, boolean hintsOnly) {
-        structureBuild_EM(STRUCTURE_PIECE_MAIN, 9, 2, 0, stackSize, hintsOnly);
-    }
-
-    @Override
-    public int survivalConstruct(ItemStack stackSize, int elementBudget, ISurvivalBuildEnvironment env) {
-        if (mMachine) return -1;
-        return survivialBuildPiece(STRUCTURE_PIECE_MAIN, stackSize, 9, 2, 0, elementBudget, env, false, true);
-    }
-
-    @Override
-    public boolean checkMachine_EM(IGregTechTileEntity iGregTechTileEntity, ItemStack itemStack) {
-        if (!structureCheck_EM(STRUCTURE_PIECE_MAIN, 9, 2, 0)) {
-            return false;
-        }
-
-        return true;
-    }
-
-    @Override
-    public int getDamageToComponent(ItemStack aStack) {
-        return 0;
-    }
-
-    @Override
-    public boolean explodesOnComponentBreak(ItemStack aStack) {
-        return false;
-    }
-
-    @Override
-    public boolean shouldCheckMaintenance() {
-        return false;
-    }
-
-    //#endregion
-
-    //#region Misc TE Code
 
     @Override
     public IMetaTileEntity newMetaEntity(IGregTechTileEntity aTileEntity) {
-        return new MTEBECStorage(mName);
+        return new MTEBECStorage(this);
     }
 
     @Override
-    public ITexture[] getTexture(IGregTechTileEntity baseMetaTileEntity, ForgeDirection side, ForgeDirection facing,
-        int colorIndex, boolean active, boolean redstoneLevel) {
+    public String[][] getDefinition() {
+        return BECGeneratorStructureDef.BEC_CONTAINMENT_FIELD;
+    }
 
-        ArrayList<ITexture> textures = new ArrayList<>(2);
-
-        textures.add(MolecularCasing.getCasingTexture());
-
-        if (side == facing) {
-            if (active) {
-                textures.add(TextureFactory.builder()
-                    .addIcon(TexturesGtBlock.Overlay_Machine_Controller_Advanced_Active)
-                    .extFacing()
-                    .build());
-            } else {
-                textures.add(TextureFactory.builder()
-                    .addIcon(TexturesGtBlock.Overlay_Machine_Controller_Advanced)
-                    .extFacing()
-                    .build());
-            }
-        }
-
-        return textures.toArray(new ITexture[textures.size()]);
+    @Override
+    public IStructureDefinition<MTEBECStorage> compile(String[][] definition) {
+        return StructureDefinition.<MTEBECStorage>builder()
+            .addShape(STRUCTURE_PIECE_MAIN, definition)
+            .addElement('A', MolecularCasing.asElement())
+            .addElement('B', AdvancedMolecularCasing.asElement())
+            .addElement('C', ContainmentFieldGenerator.asElement())
+            .addElement('D', lazy(() -> ofBlock(BlockQuantumGlass.INSTANCE, 0)))
+            .addElement('E', lazy(() -> 
+                HatchElementBuilder.<MTEBECStorage>builder()
+                    .anyOf(BECHatches.Hatch)
+                    .casingIndex(MolecularCasing.getTextureId())
+                    .dot(2)
+                    .buildAndChain(MolecularCasing.asElement())
+            ))
+            .addElement('1', lazy(() -> 
+                HatchElementBuilder.<MTEBECStorage>builder()
+                    .anyOf(Energy, ExoticEnergy)
+                    .casingIndex(MolecularCasing.getTextureId())
+                    .dot(1)
+                    .buildAndChain(MolecularCasing.asElement())
+            ))
+            .build();
     }
 
     @Override
@@ -245,11 +103,6 @@ public class MTEBECStorage extends TTMultiblockBase implements ISurvivalConstruc
         // spotless:on
 
         return tt;
-    }
-
-    @Override
-    public int getMaxEfficiency(ItemStack aStack) {
-        return 10_000;
     }
 
     @Override
@@ -335,44 +188,6 @@ public class MTEBECStorage extends TTMultiblockBase implements ISurvivalConstruc
     public void stopMachine(@Nonnull ShutDownReason reason) {
         super.stopMachine(reason);
         BECFactoryGrid.INSTANCE.removeElement(this);
-    }
-
-    @Override
-    public void getWailaNBTData(EntityPlayerMP player, TileEntity tile, NBTTagCompound tag, World world, int x, int y,
-            int z) {
-        super.getWailaNBTData(player, tile, tag, world, x, y, z);
-        tag.setString("network", network == null ? "null" : network.toString());
-    }
-
-    @Override
-    public void getWailaBody(ItemStack itemStack, List<String> currenttip, IWailaDataAccessor accessor,
-            IWailaConfigHandler config) {
-        super.getWailaBody(itemStack, currenttip, accessor, config);
-        currenttip.add("Network: " + accessor.getNBTData().getString("network"));
-    }
-
-    @Override
-    public void getNeighbours(Collection<BECFactoryElement> neighbours) {
-        IGregTechTileEntity base = getBaseMetaTileEntity();
-
-        if (base == null || base.isDead()) return;
-
-        neighbours.addAll(mBECHatches);
-    }
-
-    @Override
-    public BECFactoryNetwork getNetwork() {
-        return this.network;
-    }
-
-    @Override
-    public void setNetwork(BECFactoryNetwork network) {
-        this.network = network;
-    }
-
-    @Override
-    public boolean canConnectOnSide(ForgeDirection side) {
-        return false;
     }
 
     @Override

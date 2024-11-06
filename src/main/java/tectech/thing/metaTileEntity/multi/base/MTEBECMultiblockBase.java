@@ -4,11 +4,17 @@ import static gregtech.api.casing.Casings.MolecularCasing;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
 import com.gtnewhorizon.structurelib.alignment.constructable.ISurvivalConstructable;
+import com.gtnewhorizon.structurelib.structure.IStructureDefinition;
 import com.gtnewhorizon.structurelib.structure.ISurvivalBuildEnvironment;
+import com.gtnewhorizons.modularui.api.math.Alignment;
+import com.gtnewhorizons.modularui.common.widget.DynamicPositionedColumn;
+import com.gtnewhorizons.modularui.common.widget.SlotWidget;
+import com.gtnewhorizons.modularui.common.widget.TextWidget;
 
 import gregtech.api.interfaces.IHatchElement;
 import gregtech.api.interfaces.IIconContainer;
@@ -18,35 +24,46 @@ import gregtech.api.interfaces.tileentity.IGregTechTileEntity;
 import gregtech.api.render.TextureFactory;
 import gregtech.api.util.IGTHatchAdder;
 import gtPlusPlus.xmod.gregtech.common.blocks.textures.TexturesGtBlock;
+import mcp.mobius.waila.api.IWailaConfigHandler;
+import mcp.mobius.waila.api.IWailaDataAccessor;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.tileentity.TileEntity;
+import net.minecraft.world.World;
 import net.minecraftforge.common.util.ForgeDirection;
 import tectech.mechanics.boseEinsteinCondensate.BECFactoryElement;
 import tectech.mechanics.boseEinsteinCondensate.BECFactoryNetwork;
 import tectech.thing.metaTileEntity.hatch.MTEHatchBEC;
-import tectech.thing.metaTileEntity.multi.MTEBECLiquifier;
+import tectech.thing.metaTileEntity.multi.IStructureProvider;
 import tectech.thing.metaTileEntity.multi.StructureWrapper;
-import tectech.thing.metaTileEntity.multi.StructureWrapper.IStructureProvider;
+import tectech.thing.metaTileEntity.multi.StructureWrapperInstanceInfo;
 
 public abstract class MTEBECMultiblockBase<TSelf extends MTEBECMultiblockBase<TSelf>> extends TTMultiblockBase implements ISurvivalConstructable, BECFactoryElement, IStructureProvider<TSelf> {
     
-    private static final String STRUCTURE_PIECE_MAIN = "main";
+    protected static final String STRUCTURE_PIECE_MAIN = "main";
 
     protected final List<BECFactoryElement> mBECHatches = new ArrayList<>();
 
     protected BECFactoryNetwork network;
 
     protected final StructureWrapper<TSelf> structure;
+    protected final StructureWrapperInstanceInfo<TSelf> structureInstanceInfo;
 
     public MTEBECMultiblockBase(int aID, String aName, String aNameRegional) {
         super(aID, aName, aNameRegional);
 
         structure = new StructureWrapper<TSelf>(this);
+        structureInstanceInfo = null;
+
+        structure.loadStructure();
     }
 
     protected MTEBECMultiblockBase(TSelf base) {
         super(base.mName);
 
         structure = base.structure;
+        structureInstanceInfo = new StructureWrapperInstanceInfo<>(structure);
     }
 
     @Override
@@ -67,6 +84,11 @@ public abstract class MTEBECMultiblockBase<TSelf extends MTEBECMultiblockBase<TS
     @Override
     public boolean shouldCheckMaintenance() {
         return false;
+    }
+
+    @Override
+    public int getMaxEfficiency(ItemStack aStack) {
+        return 10_000;
     }
 
     @Override
@@ -107,21 +129,87 @@ public abstract class MTEBECMultiblockBase<TSelf extends MTEBECMultiblockBase<TS
     }
 
     @Override
+    public IStructureDefinition<? extends TTMultiblockBase> getStructure_EM() {
+        return structure.structureDefinition;
+    }
+
+    @Override
+    public StructureWrapperInstanceInfo<TSelf> getWrapperInstanceInfo() {
+        return structureInstanceInfo;
+    }
+
+    @Override
+    protected void clearHatches_EM() {
+        super.clearHatches_EM();
+
+        mBECHatches.clear();
+    }
+
+    @Override
     @SuppressWarnings("unchecked")
     public void construct(ItemStack stackSize, boolean hintsOnly) {
-        structure.construct((TSelf) this, stackSize, hintsOnly);
+        structureInstanceInfo.construct((TSelf) this, stackSize, hintsOnly);
     }
 
     @Override
     @SuppressWarnings("unchecked")
     public int survivalConstruct(ItemStack stackSize, int elementBudget, ISurvivalBuildEnvironment env) {
-        return structure.survivalConstruct((TSelf) this, stackSize, elementBudget, env);
+        return structureInstanceInfo.survivalConstruct((TSelf) this, stackSize, elementBudget, env);
     }
 
     @Override
     @SuppressWarnings("unchecked")
     public boolean checkMachine_EM(IGregTechTileEntity iGregTechTileEntity, ItemStack itemStack) {
-        return structure.checkStructure((TSelf) this);
+        return structureInstanceInfo.checkStructure((TSelf) this);
+    }
+
+    @Override
+    protected void drawTexts(DynamicPositionedColumn screenElements, SlotWidget inventorySlot) {
+        super.drawTexts(screenElements, inventorySlot);
+
+        screenElements.widget(
+            TextWidget.dynamicString(() -> {
+                return String.join("\n", structureInstanceInfo.getErrors());
+            }).setTextAlignment(Alignment.CenterLeft)
+            .setEnabled(!mMachine));
+    }
+
+    @Override
+    public void getWailaNBTData(EntityPlayerMP player, TileEntity tile, NBTTagCompound tag, World world, int x, int y,
+            int z) {
+        super.getWailaNBTData(player, tile, tag, world, x, y, z);
+        tag.setString("network", network == null ? "null" : network.toString());
+    }
+
+    @Override
+    public void getWailaBody(ItemStack itemStack, List<String> currenttip, IWailaDataAccessor accessor,
+            IWailaConfigHandler config) {
+        super.getWailaBody(itemStack, currenttip, accessor, config);
+        currenttip.add("Network: " + accessor.getNBTData().getString("network"));
+    }
+
+    @Override
+    public void getNeighbours(Collection<BECFactoryElement> neighbours) {
+        IGregTechTileEntity base = getBaseMetaTileEntity();
+
+        if (base == null || base.isDead()) return;
+
+        neighbours.addAll(mBECHatches);
+    }
+
+    @Override
+    public BECFactoryNetwork getNetwork() {
+        return this.network;
+    }
+
+    @Override
+    public void setNetwork(BECFactoryNetwork network) {
+        this.network = network;
+    }
+
+    @Override
+    public boolean canConnectOnSide(ForgeDirection side) {
+        return false;
     }
 
     public static enum BECHatches implements IHatchElement<MTEBECMultiblockBase<?>> {

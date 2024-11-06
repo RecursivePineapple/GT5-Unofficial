@@ -1,28 +1,33 @@
 package tectech.thing.metaTileEntity.multi;
 
+import static com.gtnewhorizon.structurelib.structure.StructureUtility.onElementPass;
 import static gregtech.api.enums.Mods.NewHorizonsCoreMod;
-
-import java.util.function.Consumer;
 
 import org.joml.Vector3i;
 
 import com.gtnewhorizon.structurelib.structure.IStructureDefinition;
+import com.gtnewhorizon.structurelib.structure.IStructureElement;
 import com.gtnewhorizon.structurelib.structure.ISurvivalBuildEnvironment;
 
 import gregtech.GTMod;
+import gregtech.api.casing.ICasing;
+import gregtech.api.interfaces.IHatchElement;
 import gregtech.api.interfaces.tileentity.IGregTechTileEntity;
 import gregtech.api.metatileentity.implementations.MTEEnhancedMultiBlockBase;
+import gregtech.api.util.HatchElementBuilder;
 import it.unimi.dsi.fastutil.chars.Char2IntArrayMap;
+import it.unimi.dsi.fastutil.chars.Char2ObjectArrayMap;
 import it.unimi.dsi.fastutil.ints.IntBinaryOperator;
 import net.minecraft.item.ItemStack;
+import tectech.thing.metaTileEntity.multi.base.MTEBECMultiblockBase.BECHatches;
 
 /**
  * A wrapper for structure checking.
  * This should only be stored in the prototype MTE, then shared among the instance MTEs.
  */
-public class StructureWrapper<MTE extends MTEEnhancedMultiBlockBase<?>> {
+public class StructureWrapper<MTE extends MTEEnhancedMultiBlockBase<?> & IStructureProvider<MTE>> {
 
-    public static final String STRUCTURE_PIECE_MAIN = "main";
+    private static final String STRUCTURE_PIECE_MAIN = "main";
 
     public final IStructureProvider<MTE> provider;
 
@@ -31,12 +36,11 @@ public class StructureWrapper<MTE extends MTEEnhancedMultiBlockBase<?>> {
     public IStructureDefinition<MTE> structureDefinition;
 
     public Vector3i offset, size;
-    public Char2IntArrayMap definitionCasingCounts, actualCasingCounts;
+    public Char2IntArrayMap definitionCasingCounts, maxHatches;
+    public Char2ObjectArrayMap<ICasing> casings;
 
     public StructureWrapper(IStructureProvider<MTE> provider) {
         this.provider = provider;
-
-        loadStructure();
     }
 
     public void loadStructure() {
@@ -45,6 +49,8 @@ public class StructureWrapper<MTE extends MTEEnhancedMultiBlockBase<?>> {
         try {
             definitionText = provider.getDefinition();
             definitionCasingCounts = new Char2IntArrayMap();
+            maxHatches = new Char2IntArrayMap();
+            casings = new Char2ObjectArrayMap<>();
     
             int width = 0;
             int height = 0;
@@ -81,7 +87,7 @@ public class StructureWrapper<MTE extends MTEEnhancedMultiBlockBase<?>> {
     }
 
     public boolean checkStructure(MTE instance) {
-        actualCasingCounts = new Char2IntArrayMap();
+        loadStructure();
 
         if (NewHorizonsCoreMod.isModLoaded()) {
             return checkStructureImpl(instance);
@@ -191,17 +197,14 @@ public class StructureWrapper<MTE extends MTEEnhancedMultiBlockBase<?>> {
         return built;
     }
 
-    public Consumer<MTE> getCasingAdder(char c) {
+    public IStructureElement<MTE> getCasingAdder(char c, ICasing casing, int maxHatches) {
         final IntBinaryOperator sum = Integer::sum;
 
-        return ignored -> {
-            actualCasingCounts.mergeInt(c, 1, sum);
-        };
-    }
+        this.maxHatches.put(c, maxHatches);
+        casings.put(c, casing);
 
-    public static interface IStructureProvider<MTE> {
-        public String[][] getDefinition();
-
-        public IStructureDefinition<MTE> compile(String[][] definition);
+        return onElementPass(instance -> {
+            instance.getWrapperInstanceInfo().actualCasingCounts.mergeInt(c, 1, sum);
+        }, casing.asElement());
     }
 }
