@@ -92,7 +92,7 @@ public class MTEHatchBEC extends MTEBaseFactoryHatch implements BECFactoryElemen
             }
         }
 
-        if (controller != null) {
+        if (controller != null && controller.getNetwork() != null) {
             neighbours.add(controller);
         }
     }

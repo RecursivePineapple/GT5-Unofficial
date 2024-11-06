@@ -2,35 +2,31 @@ package tectech.thing.metaTileEntity.multi;
 
 import static com.gtnewhorizon.structurelib.structure.StructureUtility.lazy;
 import static com.gtnewhorizon.structurelib.structure.StructureUtility.ofBlock;
+import static com.gtnewhorizon.structurelib.structure.StructureUtility.ofChain;
+import static gregtech.api.casing.Casings.AdvancedFusionCoilII;
 import static gregtech.api.casing.Casings.AdvancedMolecularCasing;
-import static gregtech.api.casing.Casings.ContainmentFieldGenerator;
 import static gregtech.api.casing.Casings.MolecularCasing;
 import static gregtech.api.enums.HatchElement.Energy;
 import static gregtech.api.enums.HatchElement.ExoticEnergy;
+import static gregtech.api.enums.HatchElement.InputBus;
+import static gregtech.api.enums.HatchElement.OutputHatch;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
-
-import javax.annotation.Nonnull;
 
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import com.gtnewhorizon.structurelib.alignment.constructable.ISurvivalConstructable;
 import com.gtnewhorizon.structurelib.structure.IStructureDefinition;
 import com.gtnewhorizon.structurelib.structure.ISurvivalBuildEnvironment;
 import com.gtnewhorizon.structurelib.structure.StructureDefinition;
-import com.gtnewhorizons.modularui.api.math.Alignment;
-import com.gtnewhorizons.modularui.common.widget.DynamicPositionedColumn;
-import com.gtnewhorizons.modularui.common.widget.SlotWidget;
-import com.gtnewhorizons.modularui.common.widget.TextWidget;
 
+import gregtech.api.GregTechAPI;
 import gregtech.api.enums.GTValues;
-import gregtech.api.enums.Materials;
+import gregtech.api.enums.MetaTileEntityIDs;
 import gregtech.api.interfaces.IHatchElement;
 import gregtech.api.interfaces.ITexture;
 import gregtech.api.interfaces.metatileentity.IMetaTileEntity;
@@ -41,71 +37,63 @@ import gregtech.api.render.TextureFactory;
 import gregtech.api.util.HatchElementBuilder;
 import gregtech.api.util.IGTHatchAdder;
 import gregtech.api.util.MultiblockTooltipBuilder;
-import gregtech.api.util.shutdown.ShutDownReason;
 import gtPlusPlus.xmod.gregtech.common.blocks.textures.TexturesGtBlock;
-import it.unimi.dsi.fastutil.Pair;
-import it.unimi.dsi.fastutil.objects.Object2LongOpenHashMap;
 import mcp.mobius.waila.api.IWailaConfigHandler;
 import mcp.mobius.waila.api.IWailaDataAccessor;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.world.World;
 import net.minecraftforge.common.util.ForgeDirection;
 import tectech.mechanics.boseEinsteinCondensate.BECFactoryElement;
 import tectech.mechanics.boseEinsteinCondensate.BECFactoryGrid;
 import tectech.mechanics.boseEinsteinCondensate.BECFactoryNetwork;
-import tectech.mechanics.boseEinsteinCondensate.BECInventory;
-import tectech.mechanics.boseEinsteinCondensate.CondensateStack;
-import tectech.thing.block.BlockQuantumGlass;
 import tectech.thing.metaTileEntity.hatch.MTEHatchBEC;
 import tectech.thing.metaTileEntity.multi.base.TTMultiblockBase;
 import tectech.thing.metaTileEntity.multi.structures.BECGeneratorStructureDef;
 
-public class MTEBECStorage extends TTMultiblockBase implements ISurvivalConstructable, BECFactoryElement, BECInventory {
+public class MTEBECLiquifier extends TTMultiblockBase implements ISurvivalConstructable, BECFactoryElement {
     
     private static final String STRUCTURE_PIECE_MAIN = "main";
 
     private final List<BECFactoryElement> mBECHatches = new ArrayList<>();
 
-    private final Object2LongOpenHashMap<Materials> mStoredCondensate = new Object2LongOpenHashMap<>();
-
     private BECFactoryNetwork network;
 
-    public MTEBECStorage(int aID, String aName, String aNameRegional) {
+    public MTEBECLiquifier(int aID, String aName, String aNameRegional) {
         super(aID, aName, aNameRegional);
     }
 
-    public MTEBECStorage(String aName) {
+    public MTEBECLiquifier(String aName) {
         super(aName);
     }
 
     //#region Structure
 
     // spotless:off
-    private static final IStructureDefinition<MTEBECStorage> STRUCTURE_DEFINITION = StructureDefinition
-        .<MTEBECStorage>builder()
-        .addShape(STRUCTURE_PIECE_MAIN, BECGeneratorStructureDef.BEC_CONTAINMENT_FIELD)
+    private static final IStructureDefinition<MTEBECLiquifier> STRUCTURE_DEFINITION = StructureDefinition
+        .<MTEBECLiquifier>builder()
+        .addShape(STRUCTURE_PIECE_MAIN, BECGeneratorStructureDef.BEC_LIQUIFIER)
         .addElement('A', MolecularCasing.asElement())
         .addElement('B', AdvancedMolecularCasing.asElement())
-        .addElement('C', ContainmentFieldGenerator.asElement())
-        .addElement('D', lazy(() -> ofBlock(BlockQuantumGlass.INSTANCE, 0)))
+        .addElement('C', AdvancedFusionCoilII.asElement())
+        .addElement('D', lazy(
+            () -> ofChain(
+                ofBlock(GregTechAPI.sBlockMachines, MetaTileEntityIDs.BoseEinsteinCondensatePipeBlock.ID),
+                AdvancedMolecularCasing.asElement())))
         .addElement('E', lazy(() -> 
-            HatchElementBuilder.<MTEBECStorage>builder()
+            HatchElementBuilder.<MTEBECLiquifier>builder()
                 .anyOf(BECHatches.Hatch)
-                .casingIndex(MolecularCasing.getTextureId())
+                .casingIndex(AdvancedFusionCoilII.getTextureId())
                 .dot(2)
-                .buildAndChain(MolecularCasing.asElement())
-        ))
+                .buildAndChain(MolecularCasing.asElement())))
         .addElement('1', lazy(() -> 
-            HatchElementBuilder.<MTEBECStorage>builder()
-                .anyOf(Energy, ExoticEnergy)
+            HatchElementBuilder.<MTEBECLiquifier>builder()
+                .anyOf(Energy, ExoticEnergy, OutputHatch, InputBus)
                 .casingIndex(MolecularCasing.getTextureId())
                 .dot(1)
-                .buildAndChain(MolecularCasing.asElement())
-        ))
+                .buildAndChain(MolecularCasing.asElement())))
         .build();
     // spotless:on
 
@@ -119,11 +107,11 @@ public class MTEBECStorage extends TTMultiblockBase implements ISurvivalConstruc
         return STRUCTURE_DEFINITION;
     }
 
-    private static enum BECHatches implements IHatchElement<MTEBECStorage> {
+    private static enum BECHatches implements IHatchElement<MTEBECLiquifier> {
 
         Hatch(MTEHatchBEC.class) {
             @Override
-            public long count(MTEBECStorage t) {
+            public long count(MTEBECLiquifier t) {
                 return t.mBECHatches.size();
             }
         };
@@ -141,12 +129,12 @@ public class MTEBECStorage extends TTMultiblockBase implements ISurvivalConstruc
         }
 
         @Override
-        public IGTHatchAdder<? super MTEBECStorage> adder() {
+        public IGTHatchAdder<? super MTEBECLiquifier> adder() {
             return (self, igtme, id) -> {
                 IMetaTileEntity imte = igtme.getMetaTileEntity();
 
                 if (imte instanceof MTEHatchBEC hatch) {
-                    hatch.updateTexture(MolecularCasing.getTextureId());
+                    hatch.updateTexture(id);
                     hatch.updateCraftingIcon(self.getMachineCraftingIcon());
                     self.mBECHatches.add(hatch);
                     hatch.setController(self);
@@ -167,18 +155,27 @@ public class MTEBECStorage extends TTMultiblockBase implements ISurvivalConstruc
 
     @Override
     public void construct(ItemStack stackSize, boolean hintsOnly) {
-        structureBuild_EM(STRUCTURE_PIECE_MAIN, 9, 2, 0, stackSize, hintsOnly);
+        structureBuild_EM(STRUCTURE_PIECE_MAIN, 11, 22, 5, stackSize, hintsOnly);
     }
 
     @Override
     public int survivalConstruct(ItemStack stackSize, int elementBudget, ISurvivalBuildEnvironment env) {
         if (mMachine) return -1;
-        return survivialBuildPiece(STRUCTURE_PIECE_MAIN, stackSize, 9, 2, 0, elementBudget, env, false, true);
+        return survivialBuildPiece(
+            STRUCTURE_PIECE_MAIN,
+            stackSize,
+            11,
+            22,
+            5,
+            elementBudget,
+            env,
+            false,
+            true);
     }
 
     @Override
     public boolean checkMachine_EM(IGregTechTileEntity iGregTechTileEntity, ItemStack itemStack) {
-        if (!structureCheck_EM(STRUCTURE_PIECE_MAIN, 9, 2, 0)) {
+        if (!structureCheck_EM(STRUCTURE_PIECE_MAIN, 11, 22, 5)) {
             return false;
         }
 
@@ -206,7 +203,7 @@ public class MTEBECStorage extends TTMultiblockBase implements ISurvivalConstruc
 
     @Override
     public IMetaTileEntity newMetaEntity(IGregTechTileEntity aTileEntity) {
-        return new MTEBECStorage(mName);
+        return new MTEBECLiquifier(mName);
     }
 
     @Override
@@ -253,88 +250,24 @@ public class MTEBECStorage extends TTMultiblockBase implements ISurvivalConstruc
     }
 
     @Override
-    protected void drawTexts(DynamicPositionedColumn screenElements, SlotWidget inventorySlot) {
-        super.drawTexts(screenElements, inventorySlot);
-
-        screenElements.widget(
-            TextWidget.dynamicString(this::generateStoredCondensateText)
-                .setTextAlignment(Alignment.CenterLeft));
-    }
-
-    protected String generateStoredCondensateText() {
-        StringBuffer ret = new StringBuffer();
-
-        numberFormat.setMinimumFractionDigits(0);
-        numberFormat.setMaximumFractionDigits(2);
-
-        for (var e : mStoredCondensate.object2LongEntrySet()) {
-            ret.append(EnumChatFormatting.AQUA)
-                .append(e.getKey().mLocalizedName)
-                .append(" Condensate")
-                .append(EnumChatFormatting.WHITE)
-                .append(" x ")
-                .append(EnumChatFormatting.GOLD);
-            numberFormat.format(e.getLongValue(), ret);
-            ret.append(" L")
-                .append(EnumChatFormatting.WHITE);
-            ret.append('\n');
-        }
-
-        return ret.toString();
-    }
-
-    @Override
     public void saveNBTData(NBTTagCompound aNBT) {
         super.saveNBTData(aNBT);
-
-        aNBT.setInteger("mCondCount", mStoredCondensate.size());
-
-        int cursor = 0;
-
-        for (var e : mStoredCondensate.object2LongEntrySet()) {
-            aNBT.setString("mCondName." + cursor, e.getKey().mName);
-            aNBT.setLong("mCondAmount." + cursor, e.getLongValue());
-            cursor++;
-        }
     }
 
     @Override
     public void loadNBTData(NBTTagCompound aNBT) {
         super.loadNBTData(aNBT);
-
-        mStoredCondensate.clear();
-
-        int count = aNBT.getInteger("mCondCount");
-
-        for(int i = 0; i < count; i++) {
-            Materials material = Materials.get(aNBT.getString("mCondName." + i));
-            long amount = aNBT.getLong("mCondAmount." + i);
-
-            if (material != null && material != Materials._NULL && amount > 0) {
-                mStoredCondensate.put(material, amount);
-            }
-        }
     }
 
     @Override
     protected @NotNull CheckRecipeResult checkProcessing_EM() {
         mMaxProgresstime = 20;
         mEfficiency = 10_000;
-
+        
         useLongPower = true;
         lEUt = 0;
 
-        if (network == null) {
-            BECFactoryGrid.INSTANCE.addElement(this);
-        }
-
         return CheckRecipeResultRegistry.SUCCESSFUL;
-    }
-
-    @Override
-    public void stopMachine(@Nonnull ShutDownReason reason) {
-        super.stopMachine(reason);
-        BECFactoryGrid.INSTANCE.removeElement(this);
     }
 
     @Override
@@ -376,37 +309,17 @@ public class MTEBECStorage extends TTMultiblockBase implements ISurvivalConstruc
     }
 
     @Override
+    public void onFirstTick_EM(IGregTechTileEntity aBaseMetaTileEntity) {
+        super.onFirstTick_EM(aBaseMetaTileEntity);
+
+        BECFactoryGrid.INSTANCE.addElement(this);
+    }
+
+    @Override
     public void onRemoval() {
         super.onRemoval();
 
         BECFactoryGrid.INSTANCE.removeElement(this);
     }
 
-    @Override
-    public List<Pair<Class<?>, Object>> getComponents() {
-        return Arrays.asList(
-            Pair.of(BECInventory.class, this)
-        );
-    }
-
-    @Override
-    public @Nullable List<CondensateStack> getContents() {
-        return mStoredCondensate.object2LongEntrySet()
-            .stream()
-            .map(e -> new CondensateStack(e.getKey(), e.getLongValue()))
-            .collect(Collectors.toList());
-    }
-
-    @Override
-    public void addCondensate(Collection<CondensateStack> stacks) {
-        for (CondensateStack stack : stacks) {
-            mStoredCondensate.merge(stack.material, stack.amount, Long::sum);
-            stack.amount = 0;
-        }
-    }
-
-    @Override
-    public boolean removeCondensate(Collection<CondensateStack> stacks) {
-        return false; // todo
-    }
 }

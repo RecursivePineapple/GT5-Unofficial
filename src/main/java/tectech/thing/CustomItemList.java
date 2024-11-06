@@ -73,6 +73,7 @@ public enum CustomItemList implements IItemContainer {
     TestHatch,
     Machine_Multi_BECGenerator,
     Machine_Multi_BECStorage,
+    Machine_Multi_BECLiquifier,
     rack_Hatch,
     holder_Hatch,
     capacitor_Hatch,
@@ -426,6 +427,7 @@ public enum CustomItemList implements IItemContainer {
     Machine_TeslaCoil_4by4_IV,
     DATApipeBlock,
     LASERpipeBlock,
+    BECpipeBlock,
     LASERpipeSmart,
 
     SpacetimeCompressionFieldGeneratorTier0,
