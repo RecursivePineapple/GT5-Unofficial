@@ -60,6 +60,12 @@ public class TestFactoryGrid implements IFactoryGrid<TestFactoryGrid, TestFactor
     }
 
     @Override
+    public void addElementQuietly(TestFactoryNetwork network, TestFactoryElement element) {
+        network.addElement(element);
+        this.networks.set(element, network);
+    }
+
+    @Override
     public void removeElement(TestFactoryElement element) {
         TestFactoryNetwork network = networks.get(element);
 
@@ -113,6 +119,16 @@ public class TestFactoryGrid implements IFactoryGrid<TestFactoryGrid, TestFactor
                 }
             }
         }
+    }
+
+    @Override
+    public void removeElementQuietly(TestFactoryElement element) {
+        TestFactoryNetwork network = networks.get(element);
+
+        if (network == null) return;
+
+        network.removeElement(element);
+        networks.remove(element);
     }
 
     private void walkAdjacency(TestFactoryElement start, HashSet<TestFactoryElement> discovered, HashSet<TestFactoryNetwork> networks, boolean includeNetworked) {

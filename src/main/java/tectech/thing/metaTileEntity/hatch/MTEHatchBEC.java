@@ -3,13 +3,10 @@ package tectech.thing.metaTileEntity.hatch;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 
-import gregtech.api.factory.test.TestFactoryHatch;
 import gregtech.api.interfaces.tileentity.IGregTechTileEntity;
 import gregtech.api.metatileentity.MetaTileEntity;
-import it.unimi.dsi.fastutil.Pair;
 import mcp.mobius.waila.api.IWailaConfigHandler;
 import mcp.mobius.waila.api.IWailaDataAccessor;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -23,20 +20,23 @@ import tectech.mechanics.boseEinsteinCondensate.BECFactoryGrid;
 import tectech.mechanics.boseEinsteinCondensate.BECFactoryNetwork;
 import tectech.mechanics.boseEinsteinCondensate.BECInventory;
 
-public class MTEHatchBECInput extends MTEBaseFactoryHatch implements BECFactoryElement {
+public class MTEHatchBEC extends MTEBaseFactoryHatch implements BECFactoryElement {
 
     private BECFactoryNetwork network;
-    protected MTEHatchBECInput(MTEHatchBECInput prototype) {
+
+    private BECFactoryElement controller;
+
+    protected MTEHatchBEC(MTEHatchBEC prototype) {
         super(prototype);
     }
 
-    public MTEHatchBECInput(int aID, String aName, String aNameRegional, int aTier) {
+    public MTEHatchBEC(int aID, String aName, String aNameRegional, int aTier) {
         super(aID, aName, aNameRegional, aTier, null);
     }
 
     @Override
     public MetaTileEntity newMetaEntity(IGregTechTileEntity igte) {
-        return new MTEHatchBECInput(this);
+        return new MTEHatchBEC(this);
     }
 
     @Override
@@ -66,18 +66,11 @@ public class MTEHatchBECInput extends MTEBaseFactoryHatch implements BECFactoryE
             data.add("No network");
         } else {
             for (BECInventory inv : network.getComponents(BECInventory.class)) {
-                IGregTechTileEntity base = inv.getBaseMetaTileEntity();
-
-                data.add(base.getXCoord() + ", " + base.getYCoord() + ", " + base.getZCoord() + ": " + inv.getContents().toString());
+                data.add(inv.getContents().toString());
             }
         }
 
         return data.toArray(new String[data.size()]);
-    }
-
-    @Override
-    public List<Pair<Class<?>, Object>> getComponents() {
-        return Collections.singletonList(Pair.of(TestFactoryHatch.class, this));
     }
 
     @Override
@@ -89,12 +82,18 @@ public class MTEHatchBECInput extends MTEBaseFactoryHatch implements BECFactoryE
     public void getNeighbours(Collection<BECFactoryElement> neighbours) {
         IGregTechTileEntity base = getBaseMetaTileEntity();
 
+        if (base == null || base.isDead()) return;
+
         if (base.getTileEntityAtSide(base.getFrontFacing()) instanceof IGregTechTileEntity igte) {
             if (igte.getColorization() == base.getColorization()) {
                 if (igte.getMetaTileEntity() instanceof BECFactoryElement element) {
                     neighbours.add(element);
                 }
             }
+        }
+
+        if (controller != null) {
+            neighbours.add(controller);
         }
     }
 
@@ -132,5 +131,12 @@ public class MTEHatchBECInput extends MTEBaseFactoryHatch implements BECFactoryE
     @Override
     public void onColorChangeServer(byte aColor) {
         BECFactoryGrid.INSTANCE.addElement(this);
+    }
+
+    public void setController(BECFactoryElement controller) {
+        if (controller != this.controller) {
+            this.controller = controller;
+            BECFactoryGrid.INSTANCE.addElement(this);
+        }
     }
 }

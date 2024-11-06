@@ -686,9 +686,9 @@ public class BECGeneratorStructureDef {
 
     public static final String[][] BEC_CONTAINMENT_FIELD = {{
         "                   ",
-        "      AABBBAA      ",
-        "      BDB~BDB      ",
-        "      AABBBAA      ",
+        "      AA111AA      ",
+        "      BD1~1DB      ",
+        "      AA111AA      ",
         "                   "
     },{
         "      AAAAAAA      ",

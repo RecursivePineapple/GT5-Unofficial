@@ -12,8 +12,7 @@ import gregtech.api.enums.GTValues;
 import gregtech.api.enums.MetaTileEntityIDs;
 import gregtech.api.factory.test.TestFactoryHatch;
 import gregtech.api.factory.test.TestFactoryPipe;
-import tectech.thing.metaTileEntity.hatch.MTEHatchBECInput;
-import tectech.thing.metaTileEntity.hatch.MTEHatchBECOutput;
+import tectech.thing.metaTileEntity.hatch.MTEHatchBEC;
 import tectech.thing.metaTileEntity.hatch.MTEHatchCapacitor;
 import tectech.thing.metaTileEntity.hatch.MTEHatchCreativeData;
 import tectech.thing.metaTileEntity.hatch.MTEHatchCreativeMaintenance;
@@ -38,6 +37,7 @@ import tectech.thing.metaTileEntity.hatch.MTEHatchWirelessDataItemsOutput;
 import tectech.thing.metaTileEntity.hatch.MTEHatchWirelessMulti;
 import tectech.thing.metaTileEntity.multi.MTEActiveTransformer;
 import tectech.thing.metaTileEntity.multi.MTEBECGenerator;
+import tectech.thing.metaTileEntity.multi.MTEBECStorage;
 import tectech.thing.metaTileEntity.multi.MTEDataBank;
 import tectech.thing.metaTileEntity.multi.MTEEnergyInfuser;
 import tectech.thing.metaTileEntity.multi.MTEEyeOfHarmony;
@@ -1657,6 +1657,11 @@ public class MachineLoader implements Runnable {
             "multimachine.em.becgenerator",
             "Bose-Einstein Condensate Generation Apparatus"
             ).getStackForm(1L));
+        Machine_Multi_BECStorage.set(new MTEBECStorage(
+            BoseEinsteinCondensateStorage.ID,
+            "multimachine.em.becstorage",
+            "Bose-Einstein Condensate Containment Field"
+            ).getStackForm(1L));
 
         // ===================================================================================================
         // Hatches
@@ -1742,17 +1747,10 @@ public class MachineLoader implements Runnable {
             new MTEHatchCapacitor(CapacitorHatch.ID, "hatch.capacitor.tier.03", "Capacitor Hatch", 3).getStackForm(1L));
 
         becIn_Hatch.set(
-            new MTEHatchBECInput(
-                BoseEinsteinCondensateInputHatch.ID,
-                "hatch.becin",
-                "Bose-Einstein Condensate Input Hatch",
-                10).getStackForm(1L));
-
-        becOut_Hatch.set(
-            new MTEHatchBECOutput(
-                BoseEinsteinCondensateOutputHatch.ID,
-                "hatch.becout",
-                "Bose-Einstein Condensate Output Hatch",
+            new MTEHatchBEC(
+                BoseEinsteinCondensateHatch.ID,
+                "hatch.bec",
+                "Bose-Einstein Condensate Hatch",
                 10).getStackForm(1L));
     
         // ===================================================================================================

@@ -1,9 +1,19 @@
 package tectech.thing.metaTileEntity.pipe;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 
 import gregtech.api.interfaces.metatileentity.IMetaTileEntity;
 import gregtech.api.interfaces.tileentity.IGregTechTileEntity;
+import mcp.mobius.waila.api.IWailaConfigHandler;
+import mcp.mobius.waila.api.IWailaDataAccessor;
+import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.tileentity.TileEntity;
+import net.minecraft.world.World;
 import net.minecraftforge.common.util.ForgeDirection;
 import tectech.mechanics.boseEinsteinCondensate.BECFactoryElement;
 import tectech.mechanics.boseEinsteinCondensate.BECFactoryGrid;
@@ -29,7 +39,7 @@ public class MTEPipeBEC extends MTEBaseFactoryPipe implements BECFactoryElement 
 
     @Override
     protected void checkActive() {
-        mIsActive = network.getComponents(BECInventory.class).size() > 0;
+        mIsActive = network != null && network.getComponents(BECInventory.class).size() > 0;
     }
 
     @Override
@@ -80,6 +90,40 @@ public class MTEPipeBEC extends MTEBaseFactoryPipe implements BECFactoryElement 
                 }
             }
         }
+    }
+
+    @Override
+    public void getWailaNBTData(EntityPlayerMP player, TileEntity tile, NBTTagCompound tag, World world, int x, int y,
+            int z) {
+        super.getWailaNBTData(player, tile, tag, world, x, y, z);
+        tag.setString("network", network == null ? "null" : network.toString());
+    }
+
+    @Override
+    public void getWailaBody(ItemStack itemStack, List<String> currenttip, IWailaDataAccessor accessor,
+            IWailaConfigHandler config) {
+        super.getWailaBody(itemStack, currenttip, accessor, config);
+        currenttip.add("Network: " + accessor.getNBTData().getString("network"));
+    }
+
+    @Override
+    public boolean isGivingInformation() {
+        return true;
+    }
+
+    @Override
+    public String[] getInfoData() {
+        List<String> data = new ArrayList<>(Arrays.asList(super.getInfoData()));
+
+        if (network == null) {
+            data.add("No network");
+        } else {
+            for (BECInventory inv : network.getComponents(BECInventory.class)) {
+                data.add(inv.getContents().toString());
+            }
+        }
+
+        return data.toArray(new String[data.size()]);
     }
 
     @Override

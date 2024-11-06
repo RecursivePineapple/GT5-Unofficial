@@ -72,6 +72,7 @@ public enum CustomItemList implements IItemContainer {
     TestPipe,
     TestHatch,
     Machine_Multi_BECGenerator,
+    Machine_Multi_BECStorage,
     rack_Hatch,
     holder_Hatch,
     capacitor_Hatch,

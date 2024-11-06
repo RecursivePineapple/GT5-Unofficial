@@ -128,22 +128,22 @@ public abstract class MTEBaseFactoryPipe extends MetaPipeEntity implements IActi
             tSide1 = tSide3 = tSide5 = 1;
         }
 
-        if ((mConnections & 1 << ForgeDirection.DOWN.ordinal()) != 0) {
+        if ((mConnections & ForgeDirection.DOWN.flag) != 0) {
             tSide0 = 0f;
         }
-        if ((mConnections & 1 << ForgeDirection.UP.ordinal()) != 0) {
+        if ((mConnections & ForgeDirection.UP.flag) != 0) {
             tSide1 = 1f;
         }
-        if ((mConnections & 1 << ForgeDirection.NORTH.ordinal()) != 0) {
+        if ((mConnections & ForgeDirection.NORTH.flag) != 0) {
             tSide2 = 0f;
         }
-        if ((mConnections & 1 << ForgeDirection.SOUTH.ordinal()) != 0) {
+        if ((mConnections & ForgeDirection.SOUTH.flag) != 0) {
             tSide3 = 1f;
         }
-        if ((mConnections & 1 << ForgeDirection.WEST.ordinal()) != 0) {
+        if ((mConnections & ForgeDirection.WEST.flag) != 0) {
             tSide4 = 0f;
         }
-        if ((mConnections & 1 << ForgeDirection.EAST.ordinal()) != 0) {
+        if ((mConnections & ForgeDirection.EAST.flag) != 0) {
             tSide5 = 1f;
         }
 
@@ -213,9 +213,8 @@ public abstract class MTEBaseFactoryPipe extends MetaPipeEntity implements IActi
         }
     }
 
-    @SideOnly(Side.SERVER)
     protected void checkActive() {
-        mIsActive = false;
+        mIsActive = true;
     }
 
     @Override

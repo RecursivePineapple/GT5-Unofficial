@@ -2,14 +2,11 @@ package tectech.thing.metaTileEntity.multi;
 
 import static com.gtnewhorizon.structurelib.structure.StructureUtility.lazy;
 import static com.gtnewhorizon.structurelib.structure.StructureUtility.ofBlock;
-import static gregtech.api.enums.GTValues.L;
-import static gregtech.api.enums.GTValues.M;
 import static gregtech.api.enums.GTValues.V;
 import static gregtech.api.enums.HatchElement.Energy;
 import static gregtech.api.enums.HatchElement.ExoticEnergy;
 import static gregtech.api.enums.HatchElement.InputBus;
 import static gregtech.api.enums.HatchElement.InputHatch;
-import static gregtech.api.enums.HatchElement.Maintenance;
 import static gregtech.api.enums.Textures.BlockIcons.getCasingTextureForId;
 import static gregtech.api.util.GTRecipeBuilder.SECONDS;
 import static gregtech.api.util.GTUtility.filterValidMTEs;
@@ -19,8 +16,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Optional;
-import java.util.function.LongConsumer;
+import java.util.stream.Collectors;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -28,15 +24,13 @@ import com.gtnewhorizon.structurelib.alignment.constructable.ISurvivalConstructa
 import com.gtnewhorizon.structurelib.structure.IStructureDefinition;
 import com.gtnewhorizon.structurelib.structure.ISurvivalBuildEnvironment;
 import com.gtnewhorizon.structurelib.structure.StructureDefinition;
+import com.gtnewhorizon.structurelib.util.Vec3Impl;
 import com.gtnewhorizons.modularui.api.math.Alignment;
 import com.gtnewhorizons.modularui.common.widget.DynamicPositionedColumn;
-import com.gtnewhorizons.modularui.common.widget.FakeSyncWidget;
 import com.gtnewhorizons.modularui.common.widget.SlotWidget;
 import com.gtnewhorizons.modularui.common.widget.TextWidget;
 
-import cpw.mods.fml.common.event.FMLLoadCompleteEvent;
-import cpw.mods.fml.common.eventhandler.SubscribeEvent;
-import cpw.mods.fml.common.network.ByteBufUtils;
+import gregtech.api.enums.GTValues;
 import gregtech.api.enums.Materials;
 import gregtech.api.enums.SoundResource;
 import gregtech.api.interfaces.IHatchElement;
@@ -47,18 +41,19 @@ import gregtech.api.metatileentity.implementations.MTEHatch;
 import gregtech.api.metatileentity.implementations.MTEHatchInput;
 import gregtech.api.metatileentity.implementations.MTEHatchInputBus;
 import gregtech.api.metatileentity.implementations.MTEHatchMultiInput;
-import gregtech.api.objects.ItemData;
-import gregtech.api.objects.MaterialStack;
+import gregtech.api.recipe.RecipeMap;
 import gregtech.api.recipe.RecipeMaps;
 import gregtech.api.recipe.check.CheckRecipeResult;
 import gregtech.api.recipe.check.CheckRecipeResultRegistry;
 import gregtech.api.render.TextureFactory;
-import gregtech.api.util.GTOreDictUnificator;
 import gregtech.api.util.GTRecipe;
-import gregtech.api.util.GTUtility.ItemId;
+import gregtech.api.util.GTRecipeConstants;
+import gregtech.api.util.GTUtility;
 import gregtech.api.util.HatchElementBuilder;
 import gregtech.api.util.IGTHatchAdder;
 import gregtech.api.util.MultiblockTooltipBuilder;
+import gregtech.client.GTSoundLoop;
+import gregtech.client.ISoundLoopAware;
 import gregtech.common.tileentities.machines.MTEHatchInputME;
 import gtPlusPlus.core.block.ModBlocks;
 import gtPlusPlus.xmod.gregtech.common.blocks.textures.TexturesGtBlock;
@@ -68,11 +63,13 @@ import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.StatCollector;
 import net.minecraftforge.common.util.ForgeDirection;
 import net.minecraftforge.fluids.FluidStack;
+import tectech.mechanics.boseEinsteinCondensate.BECFactoryElement;
 import tectech.mechanics.boseEinsteinCondensate.BECInventory;
+import tectech.mechanics.boseEinsteinCondensate.CondensateStack;
 import tectech.thing.block.BlockQuantumGlass;
 import tectech.thing.casing.BlockGTCasingsTT;
 import tectech.thing.casing.TTCasingsContainer;
-import tectech.thing.metaTileEntity.hatch.MTEHatchBECOutput;
+import tectech.thing.metaTileEntity.hatch.MTEHatchBEC;
 import tectech.thing.metaTileEntity.hatch.MTEHatchEnergyMulti;
 import tectech.thing.metaTileEntity.multi.base.INameFunction;
 import tectech.thing.metaTileEntity.multi.base.IStatusFunction;
@@ -81,18 +78,15 @@ import tectech.thing.metaTileEntity.multi.base.Parameters;
 import tectech.thing.metaTileEntity.multi.base.TTMultiblockBase;
 import tectech.thing.metaTileEntity.multi.structures.BECGeneratorStructureDef;
 
-public class MTEBECGenerator extends TTMultiblockBase implements ISurvivalConstructable {
+public class MTEBECGenerator extends TTMultiblockBase implements ISurvivalConstructable, ISoundLoopAware {
     
     private static final String STRUCTURE_PIECE_MAIN = "main";
 
-    private static final int EU_COST_PER_UNIT = 524_288;
-
     private static final int MOL_CASING_TEX_OFFSET = BlockGTCasingsTT.textureOffset + 4;
 
-    private final List<BECInventory> mBECOutputs = new ArrayList<>();
-    private final HashMap<ItemId, Optional<MaterialInfo>> itemMaterialCache = new HashMap<>();
+    private BECFactoryElement mBECOutput;
 
-    private MaterialStack[] mOutputMaterials;
+    private List<CondensateStack> mOutputCondensate;
 
     public MTEBECGenerator(int aID, String aName, String aNameRegional) {
         super(aID, aName, aNameRegional);
@@ -114,14 +108,14 @@ public class MTEBECGenerator extends TTMultiblockBase implements ISurvivalConstr
         .addElement('D', lazy(() -> ofBlock(BlockQuantumGlass.INSTANCE, 0)))
         .addElement('O', lazy(() -> 
             HatchElementBuilder.<MTEBECGenerator>builder()
-                .anyOf(BECHatches.Output)
+                .anyOf(BECHatches.Hatch)
                 .casingIndex(MOL_CASING_TEX_OFFSET)
                 .dot(2)
                 .build()
         ))
         .addElement('1', lazy(() -> 
             HatchElementBuilder.<MTEBECGenerator>builder()
-                .anyOf(InputBus, InputHatch, Maintenance, Energy, ExoticEnergy)
+                .anyOf(InputBus, InputHatch, Energy, ExoticEnergy)
                 .casingIndex(MOL_CASING_TEX_OFFSET)
                 .dot(1)
                 .buildAndChain(ofBlock(TTCasingsContainer.sBlockCasingsTT, 4))
@@ -141,10 +135,10 @@ public class MTEBECGenerator extends TTMultiblockBase implements ISurvivalConstr
 
     private static enum BECHatches implements IHatchElement<MTEBECGenerator> {
 
-        Output(MTEHatchBECOutput.class) {
+        Hatch(MTEHatchBEC.class) {
             @Override
             public long count(MTEBECGenerator t) {
-                return t.mBECOutputs.size();
+                return t.mBECOutput != null ? 1 : 0;
             }
         };
 
@@ -165,10 +159,10 @@ public class MTEBECGenerator extends TTMultiblockBase implements ISurvivalConstr
             return (self, igtme, id) -> {
                 IMetaTileEntity imte = igtme.getMetaTileEntity();
 
-                if (imte instanceof MTEHatch hatch && imte instanceof BECInventory becInv) {
+                if (imte instanceof MTEHatchBEC hatch) {
                     hatch.updateTexture(MOL_CASING_TEX_OFFSET);
                     hatch.updateCraftingIcon(self.getMachineCraftingIcon());
-                    self.mBECOutputs.add(becInv);
+                    self.mBECOutput = hatch;
                     return true;
                 } else {
                     return false;
@@ -181,7 +175,7 @@ public class MTEBECGenerator extends TTMultiblockBase implements ISurvivalConstr
     protected void clearHatches_EM() {
         super.clearHatches_EM();
 
-        mBECOutputs.clear();
+        mBECOutput = null;
     }
 
     @Override
@@ -210,6 +204,11 @@ public class MTEBECGenerator extends TTMultiblockBase implements ISurvivalConstr
         return false;
     }
 
+    @Override
+    public boolean shouldCheckMaintenance() {
+        return false;
+    }
+    
     //#endregion
 
     //#region Misc TE Code
@@ -239,18 +238,13 @@ public class MTEBECGenerator extends TTMultiblockBase implements ISurvivalConstr
     }
 
     @Override
-    protected SoundResource getProcessStartSound() {
-        return SoundResource.GT_MACHINES_FUSION_LOOP;
-    }
-
-    @Override
     protected MultiblockTooltipBuilder createTooltip() {
         MultiblockTooltipBuilder tt = new MultiblockTooltipBuilder();
 
         // spotless:off
         tt.addMachineType("Bose-Einstein Condensate Generator")
             .addInfo("Does stuff with atoms")
-            .toolTipFinisher("TecTech");
+            .toolTipFinisher(GTValues.AuthorPineapple);
         // spotless:on
 
         return tt;
@@ -261,18 +255,15 @@ public class MTEBECGenerator extends TTMultiblockBase implements ISurvivalConstr
         return 10_000;
     }
 
-    private static final INameFunction<MTEBECGenerator> BLOCKING_MODE_NAME = (base,
-        p) -> StatCollector.translateToLocal("gui.tooltips.appliedenergistics2.InterfaceBlockingMode"); // Blocking Mode
-
-    private static final IStatusFunction<MTEBECGenerator> BLOCKING_MODE_STATUS = (base, p) -> LedStatus
-        .fromLimitsInclusiveOuterBoundary(p.get(), 0, 0, 1, 1);
-
     protected Parameters.Group.ParameterIn blockingMode;
 
     @Override
     protected void parametersInstantiation_EM() {
+        INameFunction<MTEBECGenerator> blockingModeName = (base, p) -> StatCollector.translateToLocal("gui.tooltips.appliedenergistics2.InterfaceBlockingMode");
+        IStatusFunction<MTEBECGenerator> blockingModeStatus = (base, p) -> LedStatus.fromLimitsInclusiveOuterBoundary(p.get(), 0, 0, 1, 1);
+    
         Parameters.Group hatch_0 = parametrization.getGroup(0);
-        blockingMode = hatch_0.makeInParameter(0, 0, BLOCKING_MODE_NAME, BLOCKING_MODE_STATUS);
+        blockingMode = hatch_0.makeInParameter(0, 0, blockingModeName, blockingModeStatus);
     }
 
     @Override
@@ -290,27 +281,19 @@ public class MTEBECGenerator extends TTMultiblockBase implements ISurvivalConstr
         numberFormat.setMinimumFractionDigits(0);
         numberFormat.setMaximumFractionDigits(2);
 
-        int lines = 0;
-        int MAX_LINES = 5;
-        
-        if (mOutputMaterials != null) {
-            for (var mat : mOutputMaterials) {
+        if (mOutputCondensate != null) {
+            for (var mat : mOutputCondensate) {
                 if (mat == null) continue;
-                if (lines >= MAX_LINES) {
-                    ret.append("...");
-                    return ret.toString();
-                }
-                lines++;
                 ret.append(EnumChatFormatting.AQUA)
-                    .append(mat.mMaterial.mLocalizedName)
+                    .append(mat.material.mLocalizedName)
                     .append(" Condensate")
                     .append(EnumChatFormatting.WHITE)
                     .append(" x ")
                     .append(EnumChatFormatting.GOLD);
-                numberFormat.format(mat.mAmount * L / M, ret);
+                numberFormat.format(mat.amount, ret);
                 ret.append(" L")
                     .append(EnumChatFormatting.WHITE);
-                double processPerTick = (double) mat.mAmount * L / M / mMaxProgresstime * 20;
+                double processPerTick = (double) mat.amount / mMaxProgresstime * 20;
                 if (processPerTick > 1) {
                     ret.append(" (");
                     numberFormat.format(Math.round(processPerTick * 10) / 10.0, ret);
@@ -330,12 +313,12 @@ public class MTEBECGenerator extends TTMultiblockBase implements ISurvivalConstr
     public void saveNBTData(NBTTagCompound aNBT) {
         super.saveNBTData(aNBT);
 
-        if (mOutputMaterials != null) {
-            aNBT.setInteger("mOutMatCount", mOutputMaterials.length);
+        if (mOutputCondensate != null) {
+            aNBT.setInteger("mOutMatCount", mOutputCondensate.size());
 
-            for (int i = 0; i < mOutputMaterials.length; i++) {
-                aNBT.setString("mOutMatName." + i, mOutputMaterials[i].mMaterial.mName);
-                aNBT.setLong("mOutMatAmount." + i, mOutputMaterials[i].mAmount);
+            for (int i = 0; i < mOutputCondensate.size(); i++) {
+                aNBT.setString("mOutMatName." + i, mOutputCondensate.get(i).material.mName);
+                aNBT.setLong("mOutMatAmount." + i, mOutputCondensate.get(i).amount);
             }
         }
     }
@@ -347,97 +330,71 @@ public class MTEBECGenerator extends TTMultiblockBase implements ISurvivalConstr
         int count = aNBT.getInteger("mOutMatCount");
 
         if (count > 0) {
-            List<MaterialStack> outputMats = new ArrayList<>();
+            List<CondensateStack> outputMats = new ArrayList<>();
 
             for(int i = 0; i < count; i++) {
                 Materials material = Materials.get(aNBT.getString("mOutMatName." + i));
                 long amount = aNBT.getLong("mOutMatAmount." + i);
 
                 if (material != null && material != Materials._NULL && amount > 0) {
-                    outputMats.add(new MaterialStack(material, amount));
+                    outputMats.add(new CondensateStack(material, amount));
                 }
             }
 
-            mOutputMaterials = outputMats.toArray(new MaterialStack[0]);
+            mOutputCondensate = outputMats;
         } else {
-            mOutputMaterials = null;
+            mOutputCondensate = null;
         }
     }
 
     //#endregion
 
-    @SubscribeEvent
-    public void onLoadComplete(FMLLoadCompleteEvent event) {
-
-    }
-
-    private static class MaterialInfo {
-        public final MaterialStack stack;
-        public final int voltage;
-
-        public MaterialInfo(MaterialStack stack, int voltage) {
-            this.stack = stack;
-            this.voltage = voltage;
-        }
-    }
-
-    private Optional<MaterialInfo> getMaterialForStack(ItemStack itemStack) {
-        return itemMaterialCache.computeIfAbsent(ItemId.create(itemStack), i -> {
-
-            GTRecipe recipe = RecipeMaps.fluidExtractionRecipes.findRecipeQuery()
-                .items(itemStack)
-                .voltage(EU_COST_PER_UNIT)
-                .find();
-
-            if (recipe != null && recipe.mOutputs.length == 0) {
-                Materials material = Materials.FLUID_MAP.get(recipe.mFluidOutputs[0].getFluid());
-
-                if (material != null) {
-                    return Optional.of(new MaterialInfo(new MaterialStack(material, recipe.mFluidOutputs[0].amount * M / L), EU_COST_PER_UNIT));
-                }
-            }
-
-            recipe = RecipeMaps.arcFurnaceRecipes.findRecipeQuery()
-                .fluids(new FluidStack(Materials.Oxygen.mFluid, Integer.MAX_VALUE))
-                .items(itemStack)
-                .voltage(EU_COST_PER_UNIT)
-                .find();
-
-            if (recipe != null && recipe.mOutputs.length == 1) {
-                ItemData data = GTOreDictUnificator.getItemData(recipe.mOutputs[0]);
-
-                if (data != null) {
-                    return Optional.of(new MaterialInfo(data.mMaterial, EU_COST_PER_UNIT));
-                }
-            }
-
-            return Optional.empty();
-        });
-    }
-
     private boolean hasOutputSpace() {
-        return blockingMode.get() == 0 || mBECOutputs.stream().anyMatch(o -> o.isEmpty());
+        return true;
+        // return blockingMode.get() == 0 || mBECOutput.getNetwork().get;
     }
 
     @Override
     public void outputAfterRecipe_EM() {
-        if (mOutputMaterials != null) {
-            if (!mBECOutputs.isEmpty()) {
-                mBECOutputs.get(0).addCondensate(mOutputMaterials);
+        if (mOutputCondensate != null) {
+            if (mBECOutput != null && mBECOutput.getNetwork() != null) {
+                for (BECInventory inv : mBECOutput.getNetwork().getComponents(BECInventory.class)) {
+                    inv.addCondensate(mOutputCondensate);
+                }
             }
 
-            mOutputMaterials = null;
+            mOutputCondensate = null;
         }
     }
 
     @Override
-    protected void startRecipeProcessing() {
-        super.startRecipeProcessing();
-
-        itemMaterialCache.clear();
+    public RecipeMap<?> getRecipeMap() {
+        return RecipeMaps.condensateCreationRecipes;
     }
 
-    private static final int PROCESS_TIME = 1 * SECONDS;
+    private int getProcessingTime() {
+        return 1 * SECONDS;
+    }
+
+    @Override
+    protected SoundResource getActivitySoundLoop() {
+        return SoundResource.GT_MACHINES_BEC_GENERATOR;
+    }
+
+    @Override
+    public void modifySoundLoop(GTSoundLoop loop) {
+        Vec3Impl pos = getExtendedFacing().getWorldOffset(new Vec3Impl(0, 0, 10));
+
+        IGregTechTileEntity igte = getBaseMetaTileEntity();
+
+        loop.setPosition(pos.get0() + igte.getXCoord(), pos.get1() + igte.getYCoord(), pos.get2() + igte.getZCoord());
+        loop.setVolume(2);
+    }
+
+    @Override
+    public void onSoundLoopTicked(GTSoundLoop loop) {
+        modifySoundLoop(loop);
+    }
 
     @Override
     protected @NotNull CheckRecipeResult checkProcessing_EM() {
@@ -447,9 +404,11 @@ public class MTEBECGenerator extends TTMultiblockBase implements ISurvivalConstr
 
         long euQuota = 0;
 
+        int baseProcessingTime = getProcessingTime();
+
         for(MTEHatch hatch : filterValidMTEs(getExoticAndNormalEnergyHatchList())) {
             if (hatch instanceof MTEHatchEnergyMulti multi) {
-                euQuota += V[multi.mTier] * multi.Amperes * PROCESS_TIME;
+                euQuota += V[multi.mTier] * multi.Amperes * baseProcessingTime;
             }
         }
 
@@ -462,10 +421,18 @@ public class MTEBECGenerator extends TTMultiblockBase implements ISurvivalConstr
                 ItemStack slot = inputBus.getStackInSlot(i);
 
                 if (slot != null) {
-                    Optional<MaterialInfo> matInfo = getMaterialForStack(slot);
-                    
-                    if (matInfo.isPresent()) {
-                        long quotaRemaining = euQuota / EU_COST_PER_UNIT;
+                    GTRecipe recipe = RecipeMaps.condensateCreationRecipes.findRecipeQuery()
+                        .items(slot)
+                        .find();
+
+                    if (recipe != null) {
+                        CondensateStack output = recipe.getMetadata(GTRecipeConstants.CONDENSATE_OUTPUT);
+
+                        if (output == null) {
+                            continue;
+                        }
+
+                        long quotaRemaining = euQuota / recipe.mEUt;
                         long toRemove = Math.min(Math.min(quotaRemaining, slot.stackSize), Integer.MAX_VALUE);
                         
                         if (toRemove == 0) {
@@ -474,12 +441,10 @@ public class MTEBECGenerator extends TTMultiblockBase implements ISurvivalConstr
 
                         inputBus.decrStackSize(i, (int) toRemove);
 
-                        euQuota -= EU_COST_PER_UNIT * toRemove;
+                        euQuota -= recipe.mEUt * toRemove;
 
-                        MaterialStack stack = matInfo.get().stack;
-                        
-                        long toAdd = toRemove * stack.mAmount;
-                        outputMaterials.merge(stack.mMaterial, toAdd, (a, b) -> a + b);
+                        long toAdd = toRemove * output.amount;
+                        outputMaterials.merge(output.material, toAdd, Long::sum);
                     }
                 }
             }
@@ -489,30 +454,30 @@ public class MTEBECGenerator extends TTMultiblockBase implements ISurvivalConstr
             if (inputHatch instanceof MTEHatchMultiInput multiInputHatch) {
                 for (FluidStack tFluid : multiInputHatch.getStoredFluid()) {
                     if (tFluid != null && tFluid.amount > 0) {
-                        euQuota -= tryDrainFluid(outputMaterials, euQuota, inputHatch, tFluid);
+                        euQuota = tryDrainFluid(outputMaterials, euQuota, inputHatch, tFluid);
                     }
                 }
             } else if (inputHatch instanceof MTEHatchInputME meHatch) {
                 for (FluidStack fluidStack : meHatch.getStoredFluids()) {
                     if (fluidStack != null && fluidStack.amount > 0) {
-                        euQuota -= tryDrainFluid(outputMaterials, euQuota, inputHatch, fluidStack);
+                        euQuota = tryDrainFluid(outputMaterials, euQuota, inputHatch, fluidStack);
                     }
                 }
             } else {
                 if (inputHatch.getFillableStack() != null && inputHatch.getFillableStack().amount > 0) {
-                    euQuota -= tryDrainFluid(outputMaterials, euQuota, inputHatch, inputHatch.getFillableStack());
+                    euQuota = tryDrainFluid(outputMaterials, euQuota, inputHatch, inputHatch.getFillableStack());
                 }
             }
         }
 
         if (outputMaterials.isEmpty()) {
             mMaxProgresstime = 0;
-            mOutputMaterials = null;
+            mOutputCondensate = null;
 
             return CheckRecipeResultRegistry.NO_RECIPE;
         } else {
-            mOutputMaterials = outputMaterials.isEmpty() ? null : outputMaterials.entrySet().stream().map(e -> new MaterialStack(e.getKey(), e.getValue())).toArray(MaterialStack[]::new);
-            mMaxProgresstime = PROCESS_TIME;
+            mOutputCondensate = outputMaterials.isEmpty() ? null : outputMaterials.entrySet().stream().map(e -> new CondensateStack(e.getKey(), e.getValue())).collect(Collectors.toList());
+            mMaxProgresstime = baseProcessingTime;
             mEfficiency = 10_000;
 
             useLongPower = true;
@@ -523,25 +488,34 @@ public class MTEBECGenerator extends TTMultiblockBase implements ISurvivalConstr
     }
 
     private long tryDrainFluid(HashMap<Materials, Long> outputMaterials, long euQuota, MTEHatchInput inputHatch, FluidStack fluidStack) {
-        Materials material = Materials.FLUID_MAP.get(fluidStack.getFluid());
-
-        if (material != null) {
-            long quotaRemaining = euQuota / EU_COST_PER_UNIT;
-            long toRemove = Math.min(quotaRemaining, Math.max(1, fluidStack.amount / L));
-
-            if (toRemove > 0) {
-                long toDrain = Math.min(Math.min(fluidStack.amount, toRemove * L), Integer.MAX_VALUE);
-
-                FluidStack drained = inputHatch.drain(ForgeDirection.UNKNOWN, new FluidStack(fluidStack, (int) toDrain), true);
-
-                int removedUnits = Math.max(1, (int) (drained.amount / L));
-
-                outputMaterials.merge(material, (long) drained.amount, (a, b) -> a + b);
-
-                return removedUnits * EU_COST_PER_UNIT;
-            }
+        GTRecipe recipe = RecipeMaps.condensateCreationRecipes.findRecipeQuery()
+            .fluids(new FluidStack(fluidStack.getFluid(), 1000))
+            .find();
+        
+        if (recipe == null) {
+            return 0;
         }
 
-        return 0;
+        CondensateStack output = recipe.getMetadata(GTRecipeConstants.CONDENSATE_OUTPUT);
+
+        if (output == null) {
+            return 0;
+        }
+
+        long availableQuota = euQuota * 1000 / recipe.mEUt;
+        long toRemove = GTUtility.clamp(fluidStack.amount, 0, availableQuota);
+
+        if (toRemove <= 0) {
+            return 0;
+        }
+
+        euQuota -= GTUtility.ceilDiv(toRemove * recipe.mEUt, 1000);
+
+        long toDrain = GTUtility.min(fluidStack.amount, toRemove, Integer.MAX_VALUE);
+
+        FluidStack drained = inputHatch.drain(ForgeDirection.UNKNOWN, new FluidStack(fluidStack, (int) toDrain), true);
+        outputMaterials.merge(output.material, (long) drained.amount, (a, b) -> a + b);
+
+        return euQuota;
     }
 }

@@ -96,6 +96,7 @@ import gregtech.common.tileentities.machines.MTEHatchCraftingInputME;
 import gregtech.common.tileentities.storage.MTEDigitalChestBase;
 import gregtech.crossmod.holoinventory.HoloInventory;
 import gregtech.crossmod.waila.Waila;
+import gregtech.loaders.load.BECRecipeLoader;
 import gregtech.loaders.load.CoverBehaviorLoader;
 import gregtech.loaders.load.FuelLoader;
 import gregtech.loaders.load.GTItemIterator;
@@ -595,6 +596,7 @@ public class GTMod implements IGTMod {
 
     @Mod.EventHandler
     public void onLoadComplete(FMLLoadCompleteEvent aEvent) {
+        BECRecipeLoader.run();
         gregtechproxy.onLoadComplete();
         for (Runnable tRunnable : GregTechAPI.sGTCompleteLoad) {
             try {

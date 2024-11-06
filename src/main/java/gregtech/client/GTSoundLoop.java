@@ -17,30 +17,35 @@ public class GTSoundLoop extends MovingSound {
     private static final float VOLUME_RAMP = 0.0625f;
     private final boolean whileActive;
     private final boolean whileInactive;
-    private final int worldID;
+    private final int worldID, machineX, machineY, machineZ;
+    
     private boolean fadeMe = false;
+    private float targetVolume = 1;
 
     public GTSoundLoop(ResourceLocation p_i45104_1_, IGregTechTileEntity base, boolean stopWhenActive,
         boolean stopWhenInactive) {
         super(p_i45104_1_);
         this.whileActive = stopWhenActive;
         this.whileInactive = stopWhenInactive;
-        xPosF = base.getXCoord();
-        yPosF = base.getYCoord();
-        zPosF = base.getZCoord();
+        xPosF = machineX = base.getXCoord();
+        yPosF = machineY = base.getYCoord();
+        zPosF = machineZ = base.getZCoord();
         worldID = base.getWorld().provider.dimensionId;
         repeat = true;
         volume = VOLUME_RAMP;
+        if (base.getMetaTileEntity() instanceof ISoundLoopAware loopAware) {
+            loopAware.modifySoundLoop(this);
+        }
     }
 
-    public GTSoundLoop(ResourceLocation sound, MultiTileBasicMachine base, boolean stopWhenActive,
+    public GTSoundLoop(ResourceLocation sound, MultiTileBasicMachine<?> base, boolean stopWhenActive,
         boolean stopWhenInactive) {
         super(sound);
         this.whileActive = stopWhenActive;
         this.whileInactive = stopWhenInactive;
-        xPosF = base.getXCoord();
-        yPosF = base.getYCoord();
-        zPosF = base.getZCoord();
+        xPosF = machineX = base.getXCoord();
+        yPosF = machineY = base.getYCoord();
+        zPosF = machineZ = base.getZCoord();
         worldID = base.getWorld().provider.dimensionId;
         repeat = true;
         volume = VOLUME_RAMP;
@@ -52,29 +57,59 @@ public class GTSoundLoop extends MovingSound {
             return;
         }
         if (fadeMe) {
-            volume -= VOLUME_RAMP;
+            volume -= VOLUME_RAMP * targetVolume;
             if (volume <= 0) {
                 volume = 0;
                 donePlaying = true;
             }
-        } else if (volume < 1) {
-            volume += VOLUME_RAMP;
+        } else if (volume < targetVolume) {
+            volume += VOLUME_RAMP * targetVolume;
         }
         World world = Minecraft.getMinecraft().thePlayer.worldObj;
         donePlaying = world.provider.dimensionId != worldID
-            || !world.checkChunksExist((int) xPosF, (int) yPosF, (int) zPosF, (int) xPosF, (int) yPosF, (int) zPosF);
+            || !world.checkChunksExist(machineX, machineY, machineZ, machineX, machineY, machineZ);
         if (donePlaying) return;
-        TileEntity tile = world.getTileEntity((int) xPosF, (int) yPosF, (int) zPosF);
-        if ((tile instanceof IGregTechTileEntity)) {
-            fadeMe |= ((IGregTechTileEntity) tile).isActive() ? whileActive : whileInactive;
+        TileEntity tile = world.getTileEntity(machineX, machineY, machineZ);
+        if (tile instanceof IGregTechTileEntity igte) {
+            fadeMe |= igte.isActive() ? whileActive : whileInactive;
+
+            if (igte.getMetaTileEntity() instanceof ISoundLoopAware loopAware) {
+                loopAware.onSoundLoopTicked(this);
+            }
             return;
         }
 
-        if ((tile instanceof MultiTileBasicMachine)) {
-            fadeMe |= ((MultiTileBasicMachine) tile).isActive() ? whileActive : whileInactive;
+        if (tile instanceof MultiTileBasicMachine<?> mute) {
+            fadeMe |= mute.isActive() ? whileActive : whileInactive;
             return;
         }
 
         donePlaying = true;
+    }
+
+    public void setPosition(float x, float y, float z) {
+        xPosF = x;
+        yPosF = y;
+        zPosF = z;
+    }
+
+    public boolean isFading() {
+        return fadeMe;
+    }
+
+    public void setVolume(float volume) {
+        if (isFading()) {
+            targetVolume = volume;
+        } else {
+            this.volume = volume;
+        }
+    }
+
+    public boolean isDonePlaying() {
+        return donePlaying;
+    }
+
+    public void setDonePlaying(boolean isDone) {
+        donePlaying = isDone;
     }
 }

@@ -114,10 +114,8 @@ public class StandardFactoryNetwork<TSelf extends IFactoryNetwork<TSelf, TElemen
         while (iter.hasNext()) {
             TElement element = iter.next();
 
-            grid.removeElement(element);
-
+            grid.removeElementQuietly(element);
             grid.addElementQuietly((TSelf) this, element);
-            addElement(element);
 
             iter.remove();
         }

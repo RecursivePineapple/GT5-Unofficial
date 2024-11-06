@@ -1,16 +1,15 @@
 package tectech.mechanics.boseEinsteinCondensate;
 
+import java.util.Collection;
 import java.util.List;
 
 import org.jetbrains.annotations.Nullable;
 
-import gregtech.api.objects.MaterialStack;
+public interface BECInventory {
 
-public interface BECInventory extends BECFactoryElement {
+    @Nullable List<CondensateStack> getContents();
 
-    @Nullable List<MaterialStack> getContents();
+    void addCondensate(Collection<CondensateStack> stacks);
 
-    void addCondensate(MaterialStack... stacks);
-
-    void consumeCondensate(MaterialStack... stacks);
+    boolean removeCondensate(Collection<CondensateStack> stacks);
 }

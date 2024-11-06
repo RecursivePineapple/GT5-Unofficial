@@ -13,7 +13,7 @@ import java.util.Optional;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.fluids.FluidStack;
-
+import tectech.mechanics.boseEinsteinCondensate.CondensateStack;
 import cpw.mods.fml.common.registry.GameRegistry;
 import gregtech.api.enums.GTValues;
 import gregtech.api.enums.ItemList;
@@ -224,6 +224,12 @@ public class GTRecipeConstants {
 
     public static final RecipeMetadataKey<Integer> EU_MULTIPLIER = SimpleRecipeMetadataKey
         .create(Integer.class, "eu_multiplier");
+
+    public static final RecipeMetadataKey<CondensateStack> CONDENSATE_INPUT = SimpleRecipeMetadataKey
+        .create(CondensateStack.class, "condensate_input");
+
+    public static final RecipeMetadataKey<CondensateStack> CONDENSATE_OUTPUT = SimpleRecipeMetadataKey
+        .create(CondensateStack.class, "condensate_output");
 
     /**
      * Add a arc furnace recipe. Adds to both normal arc furnace and plasma arc furnace.

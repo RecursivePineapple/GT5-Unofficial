@@ -105,6 +105,7 @@ public enum SoundResource {
     TECTECH_MACHINES_FX_HIGH_FREQ(268, TecTech.ID, "fx_hi_freq"),
     TECTECH_MACHINES_NOISE(269, TecTech.ID, "fx_noise"),
     TECTECH_MACHINES_FX_WHOOUM(270, TecTech.ID, "fx_whooum"),
+    GT_MACHINES_BEC_GENERATOR(271, GregTech.ID, "machines.MTEBECGenerator"),
 
     GUI_BUTTON_DOWN(-1, GregTech.ID, "gui.buttonDown"),
     GUI_BUTTON_UP(-1, GregTech.ID, "gui.buttonUp"),

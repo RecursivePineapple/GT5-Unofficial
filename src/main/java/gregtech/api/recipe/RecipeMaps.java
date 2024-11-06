@@ -1211,6 +1211,14 @@ public final class RecipeMaps {
         .neiRecipeBackgroundSize(170, 60)
         .neiHandlerInfo(builder -> builder.setDisplayStack(GTModHandler.getIC2Item("nuclearReactor", 1, null)))
         .build();
+    public static final RecipeMap<RecipeMapBackend> condensateCreationRecipes = RecipeMapBuilder.of("gt.recipe.create-condensate")
+        .maxIO(1, 1, 1, 0)
+        .disableOptimize()
+        .logo(GTUITextures.PICTURE_RADIATION_WARNING)
+        .logoPos(152, 41)
+        .neiRecipeBackgroundSize(170, 60)
+        .neiHandlerInfo(builder -> builder.setDisplayStack(GTModHandler.getIC2Item("nuclearReactor", 1, null)))
+        .build();
 
     static {
         RecipeMaps.dieselFuels.addDownstream(
