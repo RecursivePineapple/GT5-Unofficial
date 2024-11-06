@@ -11,15 +11,13 @@ import com.gtnewhorizon.structurelib.structure.ISurvivalBuildEnvironment;
 
 import gregtech.GTMod;
 import gregtech.api.casing.ICasing;
-import gregtech.api.interfaces.IHatchElement;
 import gregtech.api.interfaces.tileentity.IGregTechTileEntity;
 import gregtech.api.metatileentity.implementations.MTEEnhancedMultiBlockBase;
-import gregtech.api.util.HatchElementBuilder;
+import gregtech.api.util.MultiblockTooltipBuilder;
 import it.unimi.dsi.fastutil.chars.Char2IntArrayMap;
 import it.unimi.dsi.fastutil.chars.Char2ObjectArrayMap;
 import it.unimi.dsi.fastutil.ints.IntBinaryOperator;
 import net.minecraft.item.ItemStack;
-import tectech.thing.metaTileEntity.multi.base.MTEBECMultiblockBase.BECHatches;
 
 /**
  * A wrapper for structure checking.
@@ -79,7 +77,11 @@ public class StructureWrapper<MTE extends MTEEnhancedMultiBlockBase<?> & IStruct
             }
 
             size = new Vector3i(width, height, length);
-    
+
+            if (offset == null) {
+                throw new IllegalStateException("Structure definition for " + provider + " did not contain a tilde! This is required so that the wrapper knows where the controller is.");
+            }
+
             structureDefinition = provider.compile(definitionText);
         } catch (Throwable t) {
             GTMod.GT_FML_LOGGER.error("Could not compile structure", t);
@@ -201,10 +203,64 @@ public class StructureWrapper<MTE extends MTEEnhancedMultiBlockBase<?> & IStruct
         final IntBinaryOperator sum = Integer::sum;
 
         this.maxHatches.put(c, maxHatches);
-        casings.put(c, casing);
+        this.casings.put(c, casing);
 
         return onElementPass(instance -> {
             instance.getWrapperInstanceInfo().actualCasingCounts.mergeInt(c, 1, sum);
         }, casing.asElement());
+    }
+
+    public int getCasingMin(char c) {
+        return definitionCasingCounts.get(c) - maxHatches.get(c);
+    }
+
+    public int getCasingMin(ICasing casing) {
+        int sum = 0;
+
+        for (var e : casings.char2ObjectEntrySet()) {
+            if (e.getValue() == casing) {
+                sum += getCasingMin(e.getCharKey());
+            }
+        }
+
+        return sum;
+    }
+
+    public int getCasingMax(char c) {
+        return definitionCasingCounts.get(c);
+    }
+
+    public int getCasingMax(ICasing casing) {
+        int sum = 0;
+
+        for (var e : casings.char2ObjectEntrySet()) {
+            if (e.getValue() == casing) {
+                sum += getCasingMax(e.getCharKey());
+            }
+        }
+
+        return sum;
+    }
+
+    public StructureWrapper<MTE> addCasing(char c, ICasing casing) {
+        casings.put(c, casing);
+        return this;
+    }
+
+    public StructureWrapper<MTE> addCasingInfoExact(MultiblockTooltipBuilder tt, ICasing casing) {
+        tt.addCasingInfoExactly(
+            casing.getLocalizedName(),
+            getCasingMax(casing),
+            false);
+        return this;
+    }
+
+    public StructureWrapper<MTE> addCasingInfoRange(MultiblockTooltipBuilder tt, ICasing casing) {
+        tt.addCasingInfoRange(
+            casing.getLocalizedName(),
+            getCasingMin(casing),
+            getCasingMax(casing),
+            false);
+        return this;
     }
 }

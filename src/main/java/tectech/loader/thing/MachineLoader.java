@@ -1753,7 +1753,7 @@ public class MachineLoader implements Runnable {
         capacitor_Hatch.set(
             new MTEHatchCapacitor(CapacitorHatch.ID, "hatch.capacitor.tier.03", "Capacitor Hatch", 3).getStackForm(1L));
 
-        becIn_Hatch.set(
+        becConnectorHatch.set(
             new MTEHatchBEC(
                 BoseEinsteinCondensateHatch.ID,
                 "hatch.bec",

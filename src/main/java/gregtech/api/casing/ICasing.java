@@ -20,6 +20,10 @@ public interface ICasing {
         return new ItemStack(getBlock(), amount, getMeta());
     }
 
+    public default String getLocalizedName() {
+        return new ItemStack(getBlock(), 1, getMeta()).getDisplayName();
+    }
+
     public default <T> IStructureElement<T> asElement() {
         return lazy(() -> ofBlock(getBlock(), getMeta()));
     }

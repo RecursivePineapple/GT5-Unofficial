@@ -1,6 +1,6 @@
 package tectech.thing.metaTileEntity.multi.structures;
 
-public class BECGeneratorStructureDef {
+public class BECStructureDefinitions {
 
     public static final String[][] BEC_GENERATOR = new String[][]{{
         "                   ",
@@ -12,7 +12,7 @@ public class BECGeneratorStructureDef {
         "      D11B11D      ",
         "     D11BBB11D     ",
         "     11B111B11     ",
-        "     BBB1 1BBB     ",
+        "     BBB1~1BBB     ",
         "     11B111B11     ",
         "     D11BBB11D     ",
         "      D11B11D      ",

@@ -1,28 +1,25 @@
 package tectech.thing.metaTileEntity.multi;
 
-import static com.gtnewhorizon.structurelib.structure.StructureUtility.lazy;
-import static com.gtnewhorizon.structurelib.structure.StructureUtility.ofBlock;
+import static gregtech.api.casing.Casings.AdvancedFusionCoilII;
+import static gregtech.api.casing.Casings.AdvancedMolecularCasing;
+import static gregtech.api.casing.Casings.MolecularCasing;
+import static gregtech.api.casing.Casings.QuantumGlass;
 import static gregtech.api.enums.GTValues.V;
 import static gregtech.api.enums.HatchElement.Energy;
 import static gregtech.api.enums.HatchElement.ExoticEnergy;
 import static gregtech.api.enums.HatchElement.InputBus;
 import static gregtech.api.enums.HatchElement.InputHatch;
-import static gregtech.api.enums.Textures.BlockIcons.getCasingTextureForId;
 import static gregtech.api.util.GTRecipeBuilder.SECONDS;
 import static gregtech.api.util.GTUtility.filterValidMTEs;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import org.jetbrains.annotations.NotNull;
 
-import com.gtnewhorizon.structurelib.alignment.constructable.ISurvivalConstructable;
 import com.gtnewhorizon.structurelib.structure.IStructureDefinition;
-import com.gtnewhorizon.structurelib.structure.ISurvivalBuildEnvironment;
 import com.gtnewhorizon.structurelib.structure.StructureDefinition;
 import com.gtnewhorizon.structurelib.util.Vec3Impl;
 import com.gtnewhorizons.modularui.api.math.Alignment;
@@ -33,8 +30,6 @@ import com.gtnewhorizons.modularui.common.widget.TextWidget;
 import gregtech.api.enums.GTValues;
 import gregtech.api.enums.Materials;
 import gregtech.api.enums.SoundResource;
-import gregtech.api.interfaces.IHatchElement;
-import gregtech.api.interfaces.ITexture;
 import gregtech.api.interfaces.metatileentity.IMetaTileEntity;
 import gregtech.api.interfaces.tileentity.IGregTechTileEntity;
 import gregtech.api.metatileentity.implementations.MTEHatch;
@@ -45,196 +40,79 @@ import gregtech.api.recipe.RecipeMap;
 import gregtech.api.recipe.RecipeMaps;
 import gregtech.api.recipe.check.CheckRecipeResult;
 import gregtech.api.recipe.check.CheckRecipeResultRegistry;
-import gregtech.api.render.TextureFactory;
 import gregtech.api.util.GTRecipe;
 import gregtech.api.util.GTRecipeConstants;
 import gregtech.api.util.GTUtility;
 import gregtech.api.util.HatchElementBuilder;
-import gregtech.api.util.IGTHatchAdder;
 import gregtech.api.util.MultiblockTooltipBuilder;
 import gregtech.client.GTSoundLoop;
 import gregtech.client.ISoundLoopAware;
 import gregtech.common.tileentities.machines.MTEHatchInputME;
-import gtPlusPlus.core.block.ModBlocks;
-import gtPlusPlus.xmod.gregtech.common.blocks.textures.TexturesGtBlock;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.StatCollector;
 import net.minecraftforge.common.util.ForgeDirection;
 import net.minecraftforge.fluids.FluidStack;
-import tectech.mechanics.boseEinsteinCondensate.BECFactoryElement;
+import tectech.mechanics.boseEinsteinCondensate.BECFactoryGrid;
 import tectech.mechanics.boseEinsteinCondensate.BECInventory;
 import tectech.mechanics.boseEinsteinCondensate.CondensateStack;
-import tectech.thing.block.BlockQuantumGlass;
-import tectech.thing.casing.BlockGTCasingsTT;
-import tectech.thing.casing.TTCasingsContainer;
-import tectech.thing.metaTileEntity.hatch.MTEHatchBEC;
+import tectech.thing.CustomItemList;
 import tectech.thing.metaTileEntity.hatch.MTEHatchEnergyMulti;
 import tectech.thing.metaTileEntity.multi.base.INameFunction;
 import tectech.thing.metaTileEntity.multi.base.IStatusFunction;
 import tectech.thing.metaTileEntity.multi.base.LedStatus;
+import tectech.thing.metaTileEntity.multi.base.MTEBECMultiblockBase;
 import tectech.thing.metaTileEntity.multi.base.Parameters;
-import tectech.thing.metaTileEntity.multi.base.TTMultiblockBase;
-import tectech.thing.metaTileEntity.multi.structures.BECGeneratorStructureDef;
+import tectech.thing.metaTileEntity.multi.structures.BECStructureDefinitions;
 
-public class MTEBECGenerator extends TTMultiblockBase implements ISurvivalConstructable, ISoundLoopAware {
+public class MTEBECGenerator extends MTEBECMultiblockBase<MTEBECGenerator> implements ISoundLoopAware {
     
-    private static final String STRUCTURE_PIECE_MAIN = "main";
-
-    private static final int MOL_CASING_TEX_OFFSET = BlockGTCasingsTT.textureOffset + 4;
-
-    private BECFactoryElement mBECOutput;
-
     private List<CondensateStack> mOutputCondensate;
 
     public MTEBECGenerator(int aID, String aName, String aNameRegional) {
         super(aID, aName, aNameRegional);
     }
 
-    public MTEBECGenerator(String aName) {
-        super(aName);
+    protected MTEBECGenerator(MTEBECGenerator prototype) {
+        super(prototype);
     }
-
-    //#region Structure
-
-    // spotless:off
-    private static final IStructureDefinition<MTEBECGenerator> STRUCTURE_DEFINITION = StructureDefinition
-        .<MTEBECGenerator>builder()
-        .addShape(STRUCTURE_PIECE_MAIN, BECGeneratorStructureDef.BEC_GENERATOR)
-        .addElement('A', lazy(() -> ofBlock(TTCasingsContainer.sBlockCasingsTT, 4)))
-        .addElement('B', lazy(() -> ofBlock(TTCasingsContainer.sBlockCasingsTT, 5)))
-        .addElement('C', lazy(() -> ofBlock(ModBlocks.blockCasings6Misc, 1)))
-        .addElement('D', lazy(() -> ofBlock(BlockQuantumGlass.INSTANCE, 0)))
-        .addElement('O', lazy(() -> 
-            HatchElementBuilder.<MTEBECGenerator>builder()
-                .anyOf(BECHatches.Hatch)
-                .casingIndex(MOL_CASING_TEX_OFFSET)
-                .dot(2)
-                .build()
-        ))
-        .addElement('1', lazy(() -> 
-            HatchElementBuilder.<MTEBECGenerator>builder()
-                .anyOf(InputBus, InputHatch, Energy, ExoticEnergy)
-                .casingIndex(MOL_CASING_TEX_OFFSET)
-                .dot(1)
-                .buildAndChain(ofBlock(TTCasingsContainer.sBlockCasingsTT, 4))
-        ))
-        .build();
-    // spotless:on
-
-    @Override
-    public boolean isCorrectMachinePart(ItemStack aStack) {
-        return true;
-    }
-
-    @Override
-    public IStructureDefinition<? extends TTMultiblockBase> getStructure_EM() {
-        return STRUCTURE_DEFINITION;
-    }
-
-    private static enum BECHatches implements IHatchElement<MTEBECGenerator> {
-
-        Hatch(MTEHatchBEC.class) {
-            @Override
-            public long count(MTEBECGenerator t) {
-                return t.mBECOutput != null ? 1 : 0;
-            }
-        };
-
-        private final List<? extends Class<? extends IMetaTileEntity>> mteClasses;
-
-        @SafeVarargs
-        BECHatches(Class<? extends IMetaTileEntity>... mteClasses) {
-            this.mteClasses = Collections.unmodifiableList(Arrays.asList(mteClasses));
-        }
-
-        @Override
-        public List<? extends Class<? extends IMetaTileEntity>> mteClasses() {
-            return mteClasses;
-        }
-
-        @Override
-        public IGTHatchAdder<? super MTEBECGenerator> adder() {
-            return (self, igtme, id) -> {
-                IMetaTileEntity imte = igtme.getMetaTileEntity();
-
-                if (imte instanceof MTEHatchBEC hatch) {
-                    hatch.updateTexture(MOL_CASING_TEX_OFFSET);
-                    hatch.updateCraftingIcon(self.getMachineCraftingIcon());
-                    self.mBECOutput = hatch;
-                    return true;
-                } else {
-                    return false;
-                }
-            };
-        }
-    }
-
-    @Override
-    protected void clearHatches_EM() {
-        super.clearHatches_EM();
-
-        mBECOutput = null;
-    }
-
-    @Override
-    public void construct(ItemStack stackSize, boolean hintsOnly) {
-        structureBuild_EM(STRUCTURE_PIECE_MAIN, 9, 9, 0, stackSize, hintsOnly);
-    }
-
-    @Override
-    public int survivalConstruct(ItemStack stackSize, int elementBudget, ISurvivalBuildEnvironment env) {
-        if (mMachine) return -1;
-        return survivialBuildPiece(STRUCTURE_PIECE_MAIN, stackSize, 9, 9, 0, elementBudget, env, false, true);
-    }
-
-    @Override
-    public boolean checkMachine_EM(IGregTechTileEntity iGregTechTileEntity, ItemStack itemStack) {
-        return structureCheck_EM(STRUCTURE_PIECE_MAIN, 9, 9, 0);
-    }
-
-    @Override
-    public int getDamageToComponent(ItemStack aStack) {
-        return 0;
-    }
-
-    @Override
-    public boolean explodesOnComponentBreak(ItemStack aStack) {
-        return false;
-    }
-
-    @Override
-    public boolean shouldCheckMaintenance() {
-        return false;
-    }
-    
-    //#endregion
-
-    //#region Misc TE Code
 
     @Override
     public IMetaTileEntity newMetaEntity(IGregTechTileEntity aTileEntity) {
-        return new MTEBECGenerator(mName);
+        return new MTEBECGenerator(this);
     }
 
     @Override
-    public ITexture[] getTexture(IGregTechTileEntity baseMetaTileEntity, ForgeDirection side, ForgeDirection facing,
-        int colorIndex, boolean active, boolean redstoneLevel) {
-        if (side == facing) {
-            if (active) {
-                return new ITexture[] { getCasingTextureForId(MOL_CASING_TEX_OFFSET), TextureFactory.builder()
-                    .addIcon(TexturesGtBlock.Overlay_Machine_Controller_Advanced_Active)
-                    .extFacing()
-                    .build() };
-            } else {
-                return new ITexture[] { getCasingTextureForId(MOL_CASING_TEX_OFFSET), TextureFactory.builder()
-                    .addIcon(TexturesGtBlock.Overlay_Machine_Controller_Advanced)
-                    .extFacing()
-                    .build() };
-            }
-        }
-        return new ITexture[] { getCasingTextureForId(MOL_CASING_TEX_OFFSET) };
+    public String[][] getDefinition() {
+        return BECStructureDefinitions.BEC_GENERATOR;
+    }
+
+    // spotless:off
+    @Override
+    public IStructureDefinition<MTEBECGenerator> compile(String[][] definition) {
+        structure.addCasing('A', MolecularCasing);
+        structure.addCasing('B', AdvancedMolecularCasing);
+        structure.addCasing('C', AdvancedFusionCoilII);
+        structure.addCasing('D', QuantumGlass);
+
+        return StructureDefinition.<MTEBECGenerator>builder()
+            .addShape(STRUCTURE_PIECE_MAIN, definition)
+            .addElement('A', MolecularCasing.asElement())
+            .addElement('B', AdvancedMolecularCasing.asElement())
+            .addElement('C', AdvancedFusionCoilII.asElement())
+            .addElement('D', QuantumGlass.asElement())
+            .addElement('O', HatchElementBuilder.<MTEBECGenerator>builder()
+                    .anyOf(BECHatches.Hatch)
+                    .casingIndex(MolecularCasing.getTextureId())
+                    .dot(2)
+                    .build())
+            .addElement('1', HatchElementBuilder.<MTEBECGenerator>builder()
+                    .anyOf(InputBus, InputHatch, Energy, ExoticEnergy)
+                    .casingIndex(MolecularCasing.getTextureId())
+                    .dot(1)
+                    .buildAndChain(structure.getCasingAdder('1', MolecularCasing, 16)))
+            .build();
     }
 
     @Override
@@ -243,16 +121,23 @@ public class MTEBECGenerator extends TTMultiblockBase implements ISurvivalConstr
 
         // spotless:off
         tt.addMachineType("Bose-Einstein Condensate Generator")
-            .addInfo("Does stuff with atoms")
+            .addInfo("Makes fancy atoms")
+            .beginStructureBlock(structure.size.x, structure.size.y, structure.size.z, false)
+            .addController("Front Center")
+            .pipe(tt2 -> {
+                structure.addCasingInfoRange(tt2, MolecularCasing);
+                structure.addCasingInfoExact(tt2, AdvancedMolecularCasing);
+                structure.addCasingInfoExact(tt2, AdvancedFusionCoilII);
+                structure.addCasingInfoExact(tt2, QuantumGlass);
+            })
+            .addInputBus("Any " + MolecularCasing.getLocalizedName() + " in the first slice", 1)
+            .addInputHatch("Any " + MolecularCasing.getLocalizedName() + " in the first slice", 1)
+            .addEnergyHatch("Any " + MolecularCasing.getLocalizedName() + " in the first slice", 1)
+            .addOtherStructurePart(CustomItemList.becConnectorHatch.get(1).getDisplayName(), "The centre casing in the last slice", 2)
             .toolTipFinisher(GTValues.AuthorPineapple);
         // spotless:on
 
         return tt;
-    }
-
-    @Override
-    public int getMaxEfficiency(ItemStack aStack) {
-        return 10_000;
     }
 
     protected Parameters.Group.ParameterIn blockingMode;
@@ -357,14 +242,28 @@ public class MTEBECGenerator extends TTMultiblockBase implements ISurvivalConstr
     @Override
     public void outputAfterRecipe_EM() {
         if (mOutputCondensate != null) {
-            if (mBECOutput != null && mBECOutput.getNetwork() != null) {
-                for (BECInventory inv : mBECOutput.getNetwork().getComponents(BECInventory.class)) {
+            if (network != null) {
+                for (BECInventory inv : network.getComponents(BECInventory.class)) {
                     inv.addCondensate(mOutputCondensate);
                 }
             }
 
             mOutputCondensate = null;
         }
+    }
+
+    @Override
+    public void onFirstTick_EM(IGregTechTileEntity aBaseMetaTileEntity) {
+        super.onFirstTick_EM(aBaseMetaTileEntity);
+
+        BECFactoryGrid.INSTANCE.addElement(this);
+    }
+
+    @Override
+    public void onRemoval() {
+        super.onRemoval();
+
+        BECFactoryGrid.INSTANCE.removeElement(this);
     }
 
     @Override

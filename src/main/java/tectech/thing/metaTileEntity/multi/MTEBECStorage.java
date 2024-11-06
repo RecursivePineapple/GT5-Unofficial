@@ -1,10 +1,9 @@
 package tectech.thing.metaTileEntity.multi;
 
-import static com.gtnewhorizon.structurelib.structure.StructureUtility.lazy;
-import static com.gtnewhorizon.structurelib.structure.StructureUtility.ofBlock;
 import static gregtech.api.casing.Casings.AdvancedMolecularCasing;
 import static gregtech.api.casing.Casings.ContainmentFieldGenerator;
 import static gregtech.api.casing.Casings.MolecularCasing;
+import static gregtech.api.casing.Casings.QuantumGlass;
 import static gregtech.api.enums.HatchElement.Energy;
 import static gregtech.api.enums.HatchElement.ExoticEnergy;
 
@@ -41,9 +40,9 @@ import net.minecraft.util.EnumChatFormatting;
 import tectech.mechanics.boseEinsteinCondensate.BECFactoryGrid;
 import tectech.mechanics.boseEinsteinCondensate.BECInventory;
 import tectech.mechanics.boseEinsteinCondensate.CondensateStack;
-import tectech.thing.block.BlockQuantumGlass;
+import tectech.thing.CustomItemList;
 import tectech.thing.metaTileEntity.multi.base.MTEBECMultiblockBase;
-import tectech.thing.metaTileEntity.multi.structures.BECGeneratorStructureDef;
+import tectech.thing.metaTileEntity.multi.structures.BECStructureDefinitions;
 
 public class MTEBECStorage extends MTEBECMultiblockBase<MTEBECStorage> implements BECInventory {
     
@@ -64,31 +63,32 @@ public class MTEBECStorage extends MTEBECMultiblockBase<MTEBECStorage> implement
 
     @Override
     public String[][] getDefinition() {
-        return BECGeneratorStructureDef.BEC_CONTAINMENT_FIELD;
+        return BECStructureDefinitions.BEC_CONTAINMENT_FIELD;
     }
 
     @Override
     public IStructureDefinition<MTEBECStorage> compile(String[][] definition) {
+        structure.addCasing('A', MolecularCasing);
+        structure.addCasing('B', AdvancedMolecularCasing);
+        structure.addCasing('C', ContainmentFieldGenerator);
+        structure.addCasing('D', QuantumGlass);
+
         return StructureDefinition.<MTEBECStorage>builder()
             .addShape(STRUCTURE_PIECE_MAIN, definition)
             .addElement('A', MolecularCasing.asElement())
             .addElement('B', AdvancedMolecularCasing.asElement())
             .addElement('C', ContainmentFieldGenerator.asElement())
-            .addElement('D', lazy(() -> ofBlock(BlockQuantumGlass.INSTANCE, 0)))
-            .addElement('E', lazy(() -> 
-                HatchElementBuilder.<MTEBECStorage>builder()
+            .addElement('D', QuantumGlass.asElement())
+            .addElement('E', HatchElementBuilder.<MTEBECStorage>builder()
                     .anyOf(BECHatches.Hatch)
                     .casingIndex(MolecularCasing.getTextureId())
                     .dot(2)
-                    .buildAndChain(MolecularCasing.asElement())
-            ))
-            .addElement('1', lazy(() -> 
-                HatchElementBuilder.<MTEBECStorage>builder()
+                    .buildAndChain(structure.getCasingAdder('E', MolecularCasing, 6)))
+            .addElement('1', HatchElementBuilder.<MTEBECStorage>builder()
                     .anyOf(Energy, ExoticEnergy)
                     .casingIndex(MolecularCasing.getTextureId())
                     .dot(1)
-                    .buildAndChain(MolecularCasing.asElement())
-            ))
+                    .buildAndChain(structure.getCasingAdder('1', MolecularCasing, 8)))
             .build();
     }
 
@@ -99,6 +99,16 @@ public class MTEBECStorage extends MTEBECMultiblockBase<MTEBECStorage> implement
         // spotless:off
         tt.addMachineType("Bose-Einstein Condensate Storage")
             .addInfo("Stores fancy atoms")
+            .beginStructureBlock(structure.size.x, structure.size.y, structure.size.z, false)
+            .addController("Front Center (bottom layer)")
+            .pipe(tt2 -> {
+                structure.addCasingInfoRange(tt2, MolecularCasing);
+                structure.addCasingInfoExact(tt2, AdvancedMolecularCasing);
+                structure.addCasingInfoExact(tt2, ContainmentFieldGenerator);
+                structure.addCasingInfoExact(tt2, QuantumGlass);
+            })
+            .addEnergyHatch("Any " + MolecularCasing.getLocalizedName() + " on the front face", 1)
+            .addOtherStructurePart(CustomItemList.becConnectorHatch.get(1).getDisplayName(), "The marked locations (0 to 6)", 2)
             .toolTipFinisher(GTValues.AuthorPineapple);
         // spotless:on
 

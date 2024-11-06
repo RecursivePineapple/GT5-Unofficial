@@ -11,7 +11,6 @@ import com.gtnewhorizons.modularui.api.drawable.TextRenderer;
 
 import gregtech.api.metatileentity.implementations.MTEEnhancedMultiBlockBase;
 import it.unimi.dsi.fastutil.chars.Char2IntArrayMap;
-import net.minecraft.client.resources.I18n;
 import net.minecraft.item.ItemStack;
 
 public class StructureWrapperInstanceInfo<MTE extends MTEEnhancedMultiBlockBase<?> & IStructureProvider<MTE>> {
@@ -40,7 +39,7 @@ public class StructureWrapperInstanceInfo<MTE extends MTEEnhancedMultiBlockBase<
                 String error = String.format(
                     "%sNot enough %s: need %d, but have %d.%s",
                     DARK_RED,
-                    I18n.format(structure.casings.get(e.getCharKey()).toStack(1).getUnlocalizedName() + ".name"),
+                    structure.casings.get(e.getCharKey()).getLocalizedName(),
                     minCasings,
                     presentCasings,
                     RESET);
@@ -58,6 +57,10 @@ public class StructureWrapperInstanceInfo<MTE extends MTEEnhancedMultiBlockBase<
 
         if (!structure.checkStructure(instance)) {
             return false;
+        }
+
+        for (var e : structure.definitionCasingCounts.char2IntEntrySet()) {
+            actualCasingCounts.putIfAbsent(e.getCharKey(), e.getIntValue());
         }
 
         // this is fine :fire:

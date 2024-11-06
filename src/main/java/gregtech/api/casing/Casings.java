@@ -4,6 +4,7 @@ import java.util.function.Supplier;
 
 import gtPlusPlus.core.block.ModBlocks;
 import net.minecraft.block.Block;
+import tectech.thing.block.BlockQuantumGlass;
 import tectech.thing.casing.BlockGTCasingsTT;
 import tectech.thing.casing.TTCasingsContainer;
 
@@ -13,6 +14,9 @@ public enum Casings implements ICasing {
         (() -> ModBlocks.blockCasings6Misc, 0, 116),
     AdvancedFusionCoilII
         (() -> ModBlocks.blockCasings6Misc, 1, 116),
+
+    QuantumGlass
+        (() -> BlockQuantumGlass.INSTANCE, 0, -1),
 
     HighPowerCasing
         (() -> TTCasingsContainer.sBlockCasingsTT, 0, BlockGTCasingsTT.texturePage),
@@ -68,6 +72,10 @@ public enum Casings implements ICasing {
 
     @Override
     public int getTextureId() {
+        if (textureOffset == -1) {
+            throw new UnsupportedOperationException("Casing " + name() + " does not have a casing texture; The result of getTextureId() is undefined.");
+        }
+
         return textureOffset + meta;
     }
 }

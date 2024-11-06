@@ -3,6 +3,7 @@ package tectech.thing.metaTileEntity.multi;
 import static com.gtnewhorizon.structurelib.structure.StructureUtility.lazy;
 import static com.gtnewhorizon.structurelib.structure.StructureUtility.ofBlock;
 import static com.gtnewhorizon.structurelib.structure.StructureUtility.ofChain;
+import static com.gtnewhorizon.structurelib.structure.StructureUtility.ofHint;
 import static gregtech.api.casing.Casings.AdvancedFusionCoilII;
 import static gregtech.api.casing.Casings.AdvancedMolecularCasing;
 import static gregtech.api.casing.Casings.MolecularCasing;
@@ -27,8 +28,9 @@ import gregtech.api.util.HatchElementBuilder;
 import gregtech.api.util.MultiblockTooltipBuilder;
 import net.minecraft.nbt.NBTTagCompound;
 import tectech.mechanics.boseEinsteinCondensate.BECFactoryGrid;
+import tectech.thing.CustomItemList;
 import tectech.thing.metaTileEntity.multi.base.MTEBECMultiblockBase;
-import tectech.thing.metaTileEntity.multi.structures.BECGeneratorStructureDef;
+import tectech.thing.metaTileEntity.multi.structures.BECStructureDefinitions;
 
 public class MTEBECLiquifier extends MTEBECMultiblockBase<MTEBECLiquifier> {
     
@@ -47,19 +49,25 @@ public class MTEBECLiquifier extends MTEBECMultiblockBase<MTEBECLiquifier> {
 
     @Override
     public String[][] getDefinition() {
-        return BECGeneratorStructureDef.BEC_LIQUIFIER;
+        return BECStructureDefinitions.BEC_LIQUIFIER;
     }
 
     @Override
     public IStructureDefinition<MTEBECLiquifier> compile(String[][] definition) {
+        structure.addCasing('A', MolecularCasing);
+        structure.addCasing('B', AdvancedMolecularCasing);
+        structure.addCasing('C', AdvancedFusionCoilII);
+        structure.addCasing('D', AdvancedMolecularCasing);
+
         return StructureDefinition.<MTEBECLiquifier>builder()
             .addShape(STRUCTURE_PIECE_MAIN, definition)
             .addElement('A', MolecularCasing.asElement())
             .addElement('B', AdvancedMolecularCasing.asElement())
             .addElement('C', AdvancedFusionCoilII.asElement())
             .addElement('D', ofChain(
-                AdvancedMolecularCasing.asElement(),
-                lazy(() -> ofBlock(GregTechAPI.sBlockMachines, MetaTileEntityIDs.BoseEinsteinCondensatePipeBlock.ID))))
+                    ofHint(3),
+                    AdvancedMolecularCasing.asElement(),
+                    lazy(() -> ofBlock(GregTechAPI.sBlockMachines, MetaTileEntityIDs.BoseEinsteinCondensatePipeBlock.ID))))
             .addElement('E', HatchElementBuilder.<MTEBECLiquifier>builder()
                 .anyOf(BECHatches.Hatch)
                 .casingIndex(AdvancedFusionCoilII.getTextureId())
@@ -78,8 +86,20 @@ public class MTEBECLiquifier extends MTEBECMultiblockBase<MTEBECLiquifier> {
         MultiblockTooltipBuilder tt = new MultiblockTooltipBuilder();
 
         // spotless:off
-        tt.addMachineType("Bose-Einstein Condensate Storage")
+        tt.addMachineType("Bose-Einstein Condensate Liquification Array")
             .addInfo("Liquifies fancy atoms")
+            .beginStructureBlock(structure.size.x, structure.size.y, structure.size.z, false)
+            .addController("Front Center (bottom layer)")
+            .pipe(tt2 -> {
+                structure.addCasingInfoRange(tt2, MolecularCasing);
+                structure.addCasingInfoExact(tt2, AdvancedMolecularCasing);
+                structure.addCasingInfoExact(tt2, AdvancedFusionCoilII);
+            })
+            .addInputBus("Any " + MolecularCasing.getLocalizedName() + " in the outer ring", 1)
+            .addOutputHatch("Any " + MolecularCasing.getLocalizedName() + " in the outer ring", 1)
+            .addEnergyHatch("Any " + MolecularCasing.getLocalizedName() + " in the outer ring", 1)
+            .addOtherStructurePart(CustomItemList.becConnectorHatch.get(1).getDisplayName(), "The marked locations (1 or 2)", 2)
+            .addOtherStructurePart(CustomItemList.BECpipeBlock.get(1).getDisplayName(), "The marked locations (0-2, optional)", 3)
             .toolTipFinisher(GTValues.AuthorPineapple);
         // spotless:on
 
