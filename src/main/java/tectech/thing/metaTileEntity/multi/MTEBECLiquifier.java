@@ -98,7 +98,7 @@ public class MTEBECLiquifier extends MTEBECMultiblockBase<MTEBECLiquifier> {
             .addInputBus("Any " + MolecularCasing.getLocalizedName() + " in the outer ring", 1)
             .addOutputHatch("Any " + MolecularCasing.getLocalizedName() + " in the outer ring", 1)
             .addEnergyHatch("Any " + MolecularCasing.getLocalizedName() + " in the outer ring", 1)
-            .addOtherStructurePart(CustomItemList.becConnectorHatch.get(1).getDisplayName(), "The marked locations (1 or 2)", 2)
+            .addOtherStructurePart(BECHatches.Hatch.getDisplayName(), "The marked locations (1 or 2)", 2)
             .addOtherStructurePart(CustomItemList.BECpipeBlock.get(1).getDisplayName(), "The marked locations (0-2, optional)", 3)
             .toolTipFinisher(GTValues.AuthorPineapple);
         // spotless:on

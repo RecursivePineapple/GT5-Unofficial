@@ -57,7 +57,6 @@ import net.minecraftforge.fluids.FluidStack;
 import tectech.mechanics.boseEinsteinCondensate.BECFactoryGrid;
 import tectech.mechanics.boseEinsteinCondensate.BECInventory;
 import tectech.mechanics.boseEinsteinCondensate.CondensateStack;
-import tectech.thing.CustomItemList;
 import tectech.thing.metaTileEntity.hatch.MTEHatchEnergyMulti;
 import tectech.thing.metaTileEntity.multi.base.INameFunction;
 import tectech.thing.metaTileEntity.multi.base.IStatusFunction;
@@ -133,7 +132,7 @@ public class MTEBECGenerator extends MTEBECMultiblockBase<MTEBECGenerator> imple
             .addInputBus("Any " + MolecularCasing.getLocalizedName() + " in the first slice", 1)
             .addInputHatch("Any " + MolecularCasing.getLocalizedName() + " in the first slice", 1)
             .addEnergyHatch("Any " + MolecularCasing.getLocalizedName() + " in the first slice", 1)
-            .addOtherStructurePart(CustomItemList.becConnectorHatch.get(1).getDisplayName(), "The centre casing in the last slice", 2)
+            .addOtherStructurePart(BECHatches.Hatch.getDisplayName(), "The centre casing in the last slice", 2)
             .toolTipFinisher(GTValues.AuthorPineapple);
         // spotless:on
 

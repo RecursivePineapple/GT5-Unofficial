@@ -34,6 +34,7 @@ import net.minecraft.world.World;
 import net.minecraftforge.common.util.ForgeDirection;
 import tectech.mechanics.boseEinsteinCondensate.BECFactoryElement;
 import tectech.mechanics.boseEinsteinCondensate.BECFactoryNetwork;
+import tectech.thing.CustomItemList;
 import tectech.thing.metaTileEntity.hatch.MTEHatchBEC;
 import tectech.thing.metaTileEntity.multi.IStructureProvider;
 import tectech.thing.metaTileEntity.multi.StructureWrapper;
@@ -231,6 +232,13 @@ public abstract class MTEBECMultiblockBase<TSelf extends MTEBECMultiblockBase<TS
         @Override
         public List<? extends Class<? extends IMetaTileEntity>> mteClasses() {
             return mteClasses;
+        }
+
+        @Override
+        public String getDisplayName() {
+            return switch (this) {
+                case Hatch -> CustomItemList.becConnectorHatch.get(1).getDisplayName();
+            };
         }
 
         @Override

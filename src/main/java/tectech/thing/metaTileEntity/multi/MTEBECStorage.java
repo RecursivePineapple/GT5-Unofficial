@@ -40,7 +40,6 @@ import net.minecraft.util.EnumChatFormatting;
 import tectech.mechanics.boseEinsteinCondensate.BECFactoryGrid;
 import tectech.mechanics.boseEinsteinCondensate.BECInventory;
 import tectech.mechanics.boseEinsteinCondensate.CondensateStack;
-import tectech.thing.CustomItemList;
 import tectech.thing.metaTileEntity.multi.base.MTEBECMultiblockBase;
 import tectech.thing.metaTileEntity.multi.structures.BECStructureDefinitions;
 
@@ -108,7 +107,7 @@ public class MTEBECStorage extends MTEBECMultiblockBase<MTEBECStorage> implement
                 structure.addCasingInfoExact(tt2, QuantumGlass);
             })
             .addEnergyHatch("Any " + MolecularCasing.getLocalizedName() + " on the front face", 1)
-            .addOtherStructurePart(CustomItemList.becConnectorHatch.get(1).getDisplayName(), "The marked locations (0 to 6)", 2)
+            .addOtherStructurePart(BECHatches.Hatch.getDisplayName(), "The marked locations (0 to 6)", 2)
             .toolTipFinisher(GTValues.AuthorPineapple);
         // spotless:on
 
