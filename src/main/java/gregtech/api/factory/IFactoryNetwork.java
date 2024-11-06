@@ -13,8 +13,4 @@ public interface IFactoryNetwork<TSelf extends IFactoryNetwork<TSelf, TElement, 
     }
 
     public Collection<TElement> getElements();
-
-    public Collection<TElement> getPreviousNeighbours(TElement centre);
-
-    public void subsume(TGrid grid, TSelf other);
 }

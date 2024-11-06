@@ -4,10 +4,9 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
-import gregtech.api.interfaces.metatileentity.IMetaTileEntity;
 import it.unimi.dsi.fastutil.Pair;
 
-public interface IFactoryElement<TSelf extends IFactoryElement<TSelf, TNetwork, TGrid>, TNetwork extends IFactoryNetwork<TNetwork, TSelf, TGrid>, TGrid extends IFactoryGrid<TGrid, TSelf, TNetwork>> extends IMetaTileEntity {
+public interface IFactoryElement<TSelf extends IFactoryElement<TSelf, TNetwork, TGrid>, TNetwork extends IFactoryNetwork<TNetwork, TSelf, TGrid>, TGrid extends IFactoryGrid<TGrid, TSelf, TNetwork>> {
     
     /**
      * Detects all adjacent elements, regardless of what network they're on.
@@ -19,10 +18,6 @@ public interface IFactoryElement<TSelf extends IFactoryElement<TSelf, TNetwork, 
     void setNetwork(TNetwork network);
 
     default void onNeighbourAdded(TSelf neighbour) {
-        onNeighbourChanged(neighbour);
-    }
-
-    default void onNeighbourUpdated(TSelf neighbour) {
         onNeighbourChanged(neighbour);
     }
 

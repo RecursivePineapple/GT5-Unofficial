@@ -7,6 +7,7 @@ import java.util.List;
 
 import gregtech.api.interfaces.metatileentity.IMetaTileEntity;
 import gregtech.api.interfaces.tileentity.IGregTechTileEntity;
+import gregtech.api.util.TickDeferral;
 import mcp.mobius.waila.api.IWailaConfigHandler;
 import mcp.mobius.waila.api.IWailaDataAccessor;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -147,7 +148,7 @@ public class MTEPipeBEC extends MTEBaseFactoryPipe implements BECFactoryElement 
     public void onRemoval() {
         super.onRemoval();
 
-        BECFactoryGrid.INSTANCE.removeElement(this);
+        TickDeferral.schedule(() -> BECFactoryGrid.INSTANCE.removeElement(this));
     }
 
     @Override

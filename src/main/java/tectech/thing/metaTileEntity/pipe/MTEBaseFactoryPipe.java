@@ -3,8 +3,6 @@ package tectech.thing.metaTileEntity.pipe;
 import static gregtech.api.enums.Dyes.MACHINE_METAL;
 import static gregtech.api.util.GTRecipeBuilder.SECONDS;
 
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 import gregtech.GTMod;
 import gregtech.api.enums.Dyes;
 import gregtech.api.enums.Textures.BlockIcons.CustomIcon;
@@ -128,22 +126,24 @@ public abstract class MTEBaseFactoryPipe extends MetaPipeEntity implements IActi
             tSide1 = tSide3 = tSide5 = 1;
         }
 
-        if ((mConnections & ForgeDirection.DOWN.flag) != 0) {
+        // this.mConnections isn't synced, but base.mConnections is for some reason
+        byte conn = ((BaseMetaPipeEntity) getBaseMetaTileEntity()).mConnections;
+        if ((conn & ForgeDirection.DOWN.flag) != 0) {
             tSide0 = 0f;
         }
-        if ((mConnections & ForgeDirection.UP.flag) != 0) {
+        if ((conn & ForgeDirection.UP.flag) != 0) {
             tSide1 = 1f;
         }
-        if ((mConnections & ForgeDirection.NORTH.flag) != 0) {
+        if ((conn & ForgeDirection.NORTH.flag) != 0) {
             tSide2 = 0f;
         }
-        if ((mConnections & ForgeDirection.SOUTH.flag) != 0) {
+        if ((conn & ForgeDirection.SOUTH.flag) != 0) {
             tSide3 = 1f;
         }
-        if ((mConnections & ForgeDirection.WEST.flag) != 0) {
+        if ((conn & ForgeDirection.WEST.flag) != 0) {
             tSide4 = 0f;
         }
-        if ((mConnections & ForgeDirection.EAST.flag) != 0) {
+        if ((conn & ForgeDirection.EAST.flag) != 0) {
             tSide5 = 1f;
         }
 

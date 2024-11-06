@@ -23,4 +23,6 @@ public interface IFactoryGrid<TSelf extends IFactoryGrid<TSelf, TElement, TNetwo
      * Use with caution.
      */
     public void removeElementQuietly(TElement element);
+
+    public void subsume(TNetwork dest, TNetwork source);
 }

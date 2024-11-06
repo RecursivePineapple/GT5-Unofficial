@@ -2,7 +2,6 @@ package gregtech.api.factory.test;
 
 import static gregtech.api.enums.Dyes.MACHINE_METAL;
 
-import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -171,27 +170,11 @@ public class TestFactoryHatch extends MTEHatch implements TestFactoryElement {
     }
 
     @Override
-    public void updateConnections() {
-        
-    }
-
-    private WeakReference<TestFactoryElement> oldNeighbour;
-
-    @Override
     public void getNeighbours(Collection<TestFactoryElement> neighbours) {
-        TestFactoryElement old;
-        if (oldNeighbour != null && (old = oldNeighbour.get()) != null) {
-            old.updateConnections();
-        }
-
         IGregTechTileEntity base = getBaseMetaTileEntity();
 
         if (base.getTileEntityAtSide(base.getFrontFacing()) instanceof IGregTechTileEntity igte && igte.getColorization() == base.getColorization() && igte.getMetaTileEntity() instanceof TestFactoryElement element) {
             neighbours.add(element);
-            element.updateConnections();
-            oldNeighbour = new WeakReference<>(element);
-        } else {
-            oldNeighbour = null;
         }
     }
 

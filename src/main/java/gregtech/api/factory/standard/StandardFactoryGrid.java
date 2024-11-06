@@ -1,50 +1,65 @@
 package gregtech.api.factory.standard;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedList;
-import java.util.List;
+import java.util.Set;
 
-import gregtech.api.factory.BlockData;
+import com.google.common.collect.MultimapBuilder;
+import com.google.common.collect.SetMultimap;
+
+import gregtech.GTMod;
 import gregtech.api.factory.IFactoryElement;
 import gregtech.api.factory.IFactoryGrid;
 import gregtech.api.factory.IFactoryNetwork;
 
 public abstract class StandardFactoryGrid<TSelf extends StandardFactoryGrid<TSelf, TElement, TNetwork>, TElement extends IFactoryElement<TElement, TNetwork, TSelf>, TNetwork extends IFactoryNetwork<TNetwork, TElement, TSelf>> implements IFactoryGrid<TSelf, TElement, TNetwork> {
     
-    public final BlockData<TNetwork> networks = new BlockData<>();
+    public final HashSet<TNetwork> networks = new HashSet<>();
+    public final HashSet<TElement> vertices = new HashSet<>();
+    public final SetMultimap<TElement, TElement> edges = MultimapBuilder.hashKeys().hashSetValues().build();
 
     protected StandardFactoryGrid() {
         
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public void addElement(TElement element) {
         removeElement(element);
-        
+
+        vertices.add(element);
+        updateNeighbours(element);
+
         HashSet<TElement> discovered = new HashSet<>();
         HashSet<TNetwork> networks = new HashSet<>();
 
         walkAdjacency(element, discovered, networks, false);
 
         if (networks.size() == 0) {
+            // there are no neighbours, or the neighbours didn't have a network somehow (which is an illegal state! boo!)
             TNetwork network = createNetwork();
+            this.networks.add(network);
             
             for (TElement e : discovered) {
-                network.addElement(e);
-                this.networks.set(e, network);
+                if (e.getNetwork() != network) {
+                    e.setNetwork(network);
+                    network.addElement(e);
+                }
             }
         } else if (networks.size() == 1) {
+            // there was one network adjacent, so we can just add all discovered elements to it if they aren't already
             TNetwork network = networks.iterator().next();
 
             for (TElement e : discovered) {
-                network.addElement(e);
-                this.networks.set(e, network);
+                if (e.getNetwork() != network) {
+                    e.setNetwork(network);
+                    network.addElement(e);
+                }
             }
         } else {
-            var iter = networks.iterator();
+            // there were several adjacent networks; subsume all smaller networks into the biggest one
+            Iterator<TNetwork> iter = networks.iterator();
 
             TNetwork biggestNetwork = iter.next();
 
@@ -54,60 +69,80 @@ public abstract class StandardFactoryGrid<TSelf extends StandardFactoryGrid<TSel
                 if (network.getElements().size() > biggestNetwork.getElements().size()) biggestNetwork = network;
             }
 
-            for (TElement e : discovered) {
-                addElementQuietly(biggestNetwork, e);
+            for (TNetwork network : networks) {
+                if (network != biggestNetwork) {
+                    subsume(biggestNetwork, network);
+                }
             }
 
-            for (TNetwork network : networks) {
-                if (network != biggestNetwork) biggestNetwork.subsume((TSelf) this, network);
+            for (TElement e : discovered) {
+                if (e.getNetwork() == null) {
+                    e.setNetwork(biggestNetwork);
+                    biggestNetwork.addElement(e);
+                }
             }
         }
     }
 
     @Override
     public void addElementQuietly(TNetwork network, TElement element) {
+        vertices.add(element);
+        element.setNetwork(network);
         network.addElement(element);
-        this.networks.set(element, network);
     }
 
     protected abstract TNetwork createNetwork();
 
     @Override
     public void removeElement(TElement element) {
-        TNetwork network = networks.get(element);
+        if (!vertices.contains(element)) return;
 
-        if (network == null) return;
+        vertices.remove(element);
+        Set<TElement> neighbours = edges.removeAll(element);
 
-        Collection<TElement> neighbours = network.getPreviousNeighbours(element);
+        TNetwork network = element.getNetwork();
 
         network.removeElement(element);
-        networks.remove(element);
+        element.setNetwork(null);
 
+        // the network doesn't have any elements left, there aren't any adjacent neighbours to fix
         if (network.getElements().isEmpty()) {
             network.onNetworkRemoved();
+            networks.remove(network);
             return;
         }
 
-        if (neighbours == null || neighbours.size() <= 1) return;
+        for (TElement neighbour : neighbours) {
+            updateNeighbours(neighbour);
+        }
+
+        // if there's only one neighbour, then this element is at the end of a chain and we can return early since we definitely didn't split a network
+        if (neighbours.size() <= 1) return;
 
         HashSet<HashSet<TElement>> neighbouringClumps = new HashSet<>();
 
-        HashSet<TElement> allDiscovered = new HashSet<>();
-        for (TElement neighbour : neighbours) {
-            if (allDiscovered.contains(neighbour)) continue;
+        // the list of all discovered elements; if one is in here, it means we've visited it already and can skip iterating its neighbours
+        HashSet<TElement> discovered = new HashSet<>();
 
-            HashSet<TElement> discovered = new HashSet<>();
-            walkAdjacency(neighbour, discovered, null, true);
-            neighbouringClumps.add(discovered);
-            allDiscovered.addAll(discovered);
+        for (TElement neighbour : neighbours) {
+            if (discovered.contains(neighbour)) continue;
+
+            // find all elements connected to this neighbour
+            HashSet<TElement> clump = new HashSet<>();
+            walkAdjacency(neighbour, clump, null, true);
+
+            neighbouringClumps.add(clump);
+            discovered.addAll(clump);
         }
 
+        // if there's only one clump of neighbours then the network hasn't been split
         if (neighbouringClumps.size() <= 1) {
             return;
         }
 
         HashSet<TElement> biggestClump = null;
 
+        // find the biggest clump of neighbours; we'll split the other clumps from it
         for (HashSet<TElement> nn : neighbouringClumps) {
             if (biggestClump == null || nn.size() > biggestClump.size()) biggestClump = nn;
         }
@@ -121,8 +156,8 @@ public abstract class StandardFactoryGrid<TSelf extends StandardFactoryGrid<TSel
                 TNetwork newNetwork = createNetwork();
                 
                 for (TElement e : nn) {
+                    e.setNetwork(newNetwork);
                     newNetwork.addElement(e);
-                    this.networks.set(e, newNetwork);
                 }
             }
         }
@@ -130,31 +165,43 @@ public abstract class StandardFactoryGrid<TSelf extends StandardFactoryGrid<TSel
 
     @Override
     public void removeElementQuietly(TElement element) {
-        TNetwork network = networks.get(element);
+        if (!vertices.contains(element)) return;
 
-        if (network == null) return;
+        element.getNetwork().removeElement(element);
+        vertices.remove(element);
+        element.setNetwork(null);
 
-        network.removeElement(element);
-        networks.remove(element);
+        for (TElement neighbour : edges.removeAll(element)) {
+            updateNeighbours(neighbour);
+        }
     }
 
-    private void walkAdjacency(TElement start, HashSet<TElement> discovered, HashSet<TNetwork> networks, boolean includeNetworked) {
+    @Override
+    public void subsume(TNetwork dest, TNetwork source) {
+        for (TElement element : new ArrayList<>(source.getElements())) {
+            source.removeElement(element);
+            element.setNetwork(dest);
+            dest.addElement(element);
+        }
+
+        source.onNetworkRemoved();
+        this.networks.remove(source);
+    }
+
+    private void walkAdjacency(TElement start, HashSet<TElement> discovered, HashSet<TNetwork> networks, boolean recurseIntoNetworked) {
         LinkedList<TElement> queue = new LinkedList<>();
 
         queue.add(start);
 
-        List<TElement> neighbours = new ArrayList<>();
         while (queue.size() > 0) {
             TElement current = queue.removeFirst();
+
             discovered.add(current);
+
             if (networks != null) networks.add(current.getNetwork());
 
-            // don't continue scanning elements that are already part of a network
-            if (includeNetworked || current.getNetwork() == null) {
-                neighbours.clear();
-                current.getNeighbours(neighbours);
-    
-                for (TElement neighbour : neighbours) {
+            if (recurseIntoNetworked ? true : current.getNetwork() == null) {
+                for (TElement neighbour : edges.get(current)) {
                     if (!discovered.contains(neighbour)) {
                         queue.add(neighbour);
                     }
@@ -163,5 +210,47 @@ public abstract class StandardFactoryGrid<TSelf extends StandardFactoryGrid<TSel
         }
 
         if (networks != null) networks.remove(null);
+    }
+
+    public void updateNeighbours(TElement element) {
+        updateNeighbours(element, new HashSet<>());
+    }
+
+    private void updateNeighbours(TElement element, HashSet<TElement> updated) {
+        if (updated.contains(element)) return;
+        updated.add(element);
+
+        HashSet<TElement> neighbours = new HashSet<>();
+
+        element.getNeighbours(neighbours);
+
+        Set<TElement> oldNeighbours = edges.removeAll(element);
+        edges.putAll(element, neighbours);
+
+        for (TElement oldNeighbour : oldNeighbours) {
+            if (!neighbours.contains(oldNeighbour)) {
+                updateNeighbours(oldNeighbour, updated);
+    
+                if (edges.containsEntry(oldNeighbour, element)) {
+                    GTMod.GT_FML_LOGGER.error("A factory element isn't following the graph adjacency contract. Edge B -> A was kept when edge A -> B was removed. A = " + element + ", B = " + oldNeighbour);
+                }
+
+                oldNeighbour.onNeighbourRemoved(element);
+                element.onNeighbourRemoved(oldNeighbour);
+            }
+        }
+
+        for (TElement currentNeighbour : neighbours) {
+            if (!oldNeighbours.contains(currentNeighbour)) {
+                updateNeighbours(currentNeighbour, updated);
+    
+                if (!edges.containsEntry(currentNeighbour, element)) {
+                    GTMod.GT_FML_LOGGER.error("A factory element isn't following the graph adjacency contract. Edge B -> A was not added when edge A -> B was added. A = " + element + ", B = " + currentNeighbour);
+                }
+
+                currentNeighbour.onNeighbourAdded(element);
+                element.onNeighbourAdded(currentNeighbour);
+            }
+        }
     }
 }
