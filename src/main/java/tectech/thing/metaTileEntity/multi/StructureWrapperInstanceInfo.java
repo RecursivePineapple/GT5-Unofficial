@@ -26,7 +26,7 @@ public class StructureWrapperInstanceInfo<MTE extends MTEEnhancedMultiBlockBase<
 
     private static final int ERROR_WRAP_WIDTH = 180;
 
-    public List<String> getErrors() {
+    public String getErrors() {
         List<String> lines = new ArrayList<>();
 
         for (var e : structure.maxHatches.char2IntEntrySet()) {
@@ -48,7 +48,7 @@ public class StructureWrapperInstanceInfo<MTE extends MTEEnhancedMultiBlockBase<
             }
         }
 
-        return lines;
+        return String.join("\n", lines);
     }
 
     public boolean checkStructure(MTE instance) {

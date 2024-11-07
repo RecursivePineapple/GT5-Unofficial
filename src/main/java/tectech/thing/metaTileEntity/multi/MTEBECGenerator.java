@@ -270,10 +270,6 @@ public class MTEBECGenerator extends MTEBECMultiblockBase<MTEBECGenerator> imple
         return RecipeMaps.condensateCreationRecipes;
     }
 
-    private int getProcessingTime() {
-        return 1 * SECONDS;
-    }
-
     @Override
     protected SoundResource getActivitySoundLoop() {
         return SoundResource.GT_MACHINES_BEC_GENERATOR;
@@ -292,6 +288,10 @@ public class MTEBECGenerator extends MTEBECMultiblockBase<MTEBECGenerator> imple
     @Override
     public void onSoundLoopTicked(GTSoundLoop loop) {
         modifySoundLoop(loop);
+    }
+
+    private int getProcessingTime() {
+        return 1 * SECONDS;
     }
 
     @Override

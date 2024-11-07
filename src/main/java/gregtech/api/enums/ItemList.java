@@ -1520,6 +1520,8 @@ public enum ItemList implements IItemContainer {
     Machine_Multi_Autoclave,
     Casing_Autoclave,
 
+    BEC_Liquid_Pattern,
+
     Machine_LV_Miner,
     Machine_MV_Miner,
     Machine_HV_Miner,

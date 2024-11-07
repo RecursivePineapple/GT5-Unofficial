@@ -3278,6 +3278,14 @@ public class MetaGeneratedItem01 extends MetaGeneratedItemX32 {
                 new TCAspects.TC_AspectStack(TCAspects.ALIENIS, 32),
                 new TCAspects.TC_AspectStack(TCAspects.PERDITIO, 64)));
 
+        ItemList.BEC_Liquid_Pattern.set(
+            addItem(
+                IDMetaItem01.BEC_Liquid_Pattern.ID,
+                "Fluid Quantum Schematic",
+                "A metamaterial that causes bose-einstein condensate to collapse into a fluid.",
+                new TCAspects.TC_AspectStack(TCAspects.ALIENIS, 32),
+                new TCAspects.TC_AspectStack(TCAspects.PERDITIO, 64)));
+
         // Empty battery hulls
         ItemList.BatteryHull_EV.set(
             addItem(

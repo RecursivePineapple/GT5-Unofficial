@@ -18,13 +18,13 @@ public class MTEPipeBlockBEC extends MTEPipeBEC {
         super(aID, aName, aNameRegional);
     }
 
-    public MTEPipeBlockBEC(String aName) {
-        super(aName);
+    protected MTEPipeBlockBEC(MTEPipeBlockBEC prototype) {
+        super(prototype);
     }
 
     @Override
     public IMetaTileEntity newMetaEntity(IGregTechTileEntity iGregTechTileEntity) {
-        return new MTEPipeBlockBEC(mName);
+        return new MTEPipeBlockBEC(this);
     }
 
     @Override

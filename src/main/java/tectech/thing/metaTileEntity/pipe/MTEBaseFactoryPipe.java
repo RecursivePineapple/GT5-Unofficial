@@ -8,6 +8,7 @@ import gregtech.api.enums.Dyes;
 import gregtech.api.enums.Textures.BlockIcons.CustomIcon;
 import gregtech.api.interfaces.IIconContainer;
 import gregtech.api.interfaces.ITexture;
+import gregtech.api.interfaces.metatileentity.IMetaTileEntity;
 import gregtech.api.interfaces.tileentity.IGregTechTileEntity;
 import gregtech.api.metatileentity.BaseMetaPipeEntity;
 import gregtech.api.metatileentity.MetaPipeEntity;
@@ -36,9 +37,13 @@ public abstract class MTEBaseFactoryPipe extends MetaPipeEntity implements IActi
         super(aID, aName, aNameRegional, 0);
     }
 
-    public MTEBaseFactoryPipe(String aName) {
-        super(aName, 0);
+    protected MTEBaseFactoryPipe(MTEBaseFactoryPipe prototype) {
+        super(prototype.mName, 0);
+        mThickness = prototype.mThickness;
     }
+
+    @Override
+    public abstract IMetaTileEntity newMetaEntity(IGregTechTileEntity aTileEntity);
 
     @Override
     public ITexture[] getTexture(IGregTechTileEntity base, ForgeDirection side, int aConnections,

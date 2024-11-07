@@ -22,13 +22,13 @@ public class TestFactoryPipe extends MTEBaseFactoryPipe implements TestFactoryEl
         super(aID, aName, aNameRegional);
     }
 
-    public TestFactoryPipe(String aName) {
-        super(aName);
+    public TestFactoryPipe(TestFactoryPipe prototype) {
+        super(prototype);
     }
 
     @Override
     public IMetaTileEntity newMetaEntity(IGregTechTileEntity iGregTechTileEntity) {
-        return new TestFactoryPipe(mName);
+        return new TestFactoryPipe(this);
     }
 
     @Override

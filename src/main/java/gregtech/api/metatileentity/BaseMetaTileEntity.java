@@ -1028,6 +1028,14 @@ public class BaseMetaTileEntity extends CommonMetaTileEntity
     }
 
     @Override
+    public void onAdjacentBlockChange(int x, int y, int z) {
+        super.onAdjacentBlockChange(x, y, z);
+        if (hasValidMetaTileEntity()) {
+            mMetaTileEntity.onAdjacentBlockChange(x, y, z);
+        }
+    }
+
+    @Override
     public int getProgress() {
         return canAccessData() ? mMetaTileEntity.getProgresstime() : 0;
     }

@@ -231,6 +231,19 @@ public class MTEBECStorage extends MTEBECMultiblockBase<MTEBECStorage> implement
 
     @Override
     public boolean removeCondensate(Collection<CondensateStack> stacks) {
-        return false; // todo
+        boolean consumedEverything = true;
+
+        for (CondensateStack stack : stacks) {
+            long stored = mStoredCondensate.getLong(stack.material);
+            
+            long toConsume = Math.min(stored, stack.amount);
+
+            mStoredCondensate.mergeLong(stack.material, -toConsume, Long::sum);
+            stack.amount -= toConsume;
+
+            if (stack.amount > 0) consumedEverything = false;
+        }
+
+        return consumedEverything;
     }
 }

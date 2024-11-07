@@ -5,5 +5,11 @@ import net.minecraftforge.common.util.ForgeDirection;
 
 public interface BECFactoryElement extends IFactoryElement<BECFactoryElement, BECFactoryNetwork, BECFactoryGrid> {
 
-    public boolean canConnectOnSide(ForgeDirection side);
+    public static enum ConnectionType {
+        CONNECTED,
+        VISUAL_ONLY,
+        NONE,
+    }
+
+    public ConnectionType getConnectionOnSide(ForgeDirection side);
 }

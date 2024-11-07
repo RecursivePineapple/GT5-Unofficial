@@ -6,6 +6,9 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Set;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import com.google.common.collect.MultimapBuilder;
 import com.google.common.collect.SetMultimap;
 
@@ -16,6 +19,8 @@ import gregtech.api.factory.IFactoryNetwork;
 
 public abstract class StandardFactoryGrid<TSelf extends StandardFactoryGrid<TSelf, TElement, TNetwork>, TElement extends IFactoryElement<TElement, TNetwork, TSelf>, TNetwork extends IFactoryNetwork<TNetwork, TElement, TSelf>> implements IFactoryGrid<TSelf, TElement, TNetwork> {
     
+    public static final Logger LOGGER = LogManager.getLogger("Standard Factory Network");
+
     public final HashSet<TNetwork> networks = new HashSet<>();
     public final HashSet<TElement> vertices = new HashSet<>();
     public final SetMultimap<TElement, TElement> edges = MultimapBuilder.hashKeys().hashSetValues().build();
@@ -34,7 +39,13 @@ public abstract class StandardFactoryGrid<TSelf extends StandardFactoryGrid<TSel
         HashSet<TElement> discovered = new HashSet<>();
         HashSet<TNetwork> networks = new HashSet<>();
 
+        long pre = System.nanoTime();
+
         walkAdjacency(element, discovered, networks, false);
+
+        long post = System.nanoTime();
+
+        LOGGER.info("Walked adjacent elements in " + (post - pre) / 1e3 + " us");
 
         if (networks.size() == 0) {
             // there are no neighbours, or the neighbours didn't have a network somehow (which is an illegal state! boo!)
@@ -69,11 +80,16 @@ public abstract class StandardFactoryGrid<TSelf extends StandardFactoryGrid<TSel
                 if (network.getElements().size() > biggestNetwork.getElements().size()) biggestNetwork = network;
             }
 
+            pre = System.nanoTime();
+
             for (TNetwork network : networks) {
                 if (network != biggestNetwork) {
                     subsume(biggestNetwork, network);
                 }
             }
+
+            post = System.nanoTime();
+            LOGGER.info("Subsumed " + (networks.size() - 1) + " networks in " + (post - pre) / 1e3 + " us");
 
             for (TElement e : discovered) {
                 if (e.getNetwork() == null) {
@@ -124,6 +140,8 @@ public abstract class StandardFactoryGrid<TSelf extends StandardFactoryGrid<TSel
         // the list of all discovered elements; if one is in here, it means we've visited it already and can skip iterating its neighbours
         HashSet<TElement> discovered = new HashSet<>();
 
+        long pre = System.nanoTime();
+
         for (TElement neighbour : neighbours) {
             if (discovered.contains(neighbour)) continue;
 
@@ -161,6 +179,10 @@ public abstract class StandardFactoryGrid<TSelf extends StandardFactoryGrid<TSel
                 }
             }
         }
+
+        long post = System.nanoTime();
+
+        LOGGER.info("Split network in " + (post - pre) / 1e3 + " us (added " + (neighbouringClumps.size() - 1) + " new networks)");
     }
 
     @Override

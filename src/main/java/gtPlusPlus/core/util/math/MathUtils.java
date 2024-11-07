@@ -235,7 +235,7 @@ public class MathUtils {
         return new long[] {};
     }
 
-    private static long gcd(long a, long b) {
+    public static long gcd(long a, long b) {
         while (b > 0) {
             final long temp = b;
             b = a % b; // % is remainder
@@ -244,7 +244,7 @@ public class MathUtils {
         return a;
     }
 
-    private static long gcd(final long[] input) {
+    public static long gcd(final long[] input) {
         long result = input[0];
         for (int i = 1; i < input.length; i++) {
             result = gcd(result, input[i]);

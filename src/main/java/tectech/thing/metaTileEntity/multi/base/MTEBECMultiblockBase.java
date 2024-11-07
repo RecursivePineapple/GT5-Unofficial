@@ -13,6 +13,7 @@ import com.gtnewhorizon.structurelib.structure.IStructureDefinition;
 import com.gtnewhorizon.structurelib.structure.ISurvivalBuildEnvironment;
 import com.gtnewhorizons.modularui.api.math.Alignment;
 import com.gtnewhorizons.modularui.common.widget.DynamicPositionedColumn;
+import com.gtnewhorizons.modularui.common.widget.FakeSyncWidget;
 import com.gtnewhorizons.modularui.common.widget.SlotWidget;
 import com.gtnewhorizons.modularui.common.widget.TextWidget;
 
@@ -168,11 +169,13 @@ public abstract class MTEBECMultiblockBase<TSelf extends MTEBECMultiblockBase<TS
     protected void drawTexts(DynamicPositionedColumn screenElements, SlotWidget inventorySlot) {
         super.drawTexts(screenElements, inventorySlot);
 
-        screenElements.widget(
-            TextWidget.dynamicString(() -> {
-                return String.join("\n", structureInstanceInfo.getErrors());
-            }).setTextAlignment(Alignment.CenterLeft)
-            .setEnabled(!mMachine));
+        screenElements.widgets(
+            new FakeSyncWidget.BooleanSyncer(
+                () -> structureInstanceInfo.hasErrors,
+                value -> structureInstanceInfo.hasErrors = value),
+            TextWidget.dynamicString(() -> structureInstanceInfo.getErrors())
+                .setTextAlignment(Alignment.CenterLeft)
+                .setEnabled(structureInstanceInfo.hasErrors));
     }
 
     @Override
@@ -209,8 +212,8 @@ public abstract class MTEBECMultiblockBase<TSelf extends MTEBECMultiblockBase<TS
     }
 
     @Override
-    public boolean canConnectOnSide(ForgeDirection side) {
-        return false;
+    public ConnectionType getConnectionOnSide(ForgeDirection side) {
+        return ConnectionType.NONE;
     }
 
     public static enum BECHatches implements IHatchElement<MTEBECMultiblockBase<?>> {

@@ -7,7 +7,8 @@ import java.util.List;
 
 import gregtech.api.interfaces.metatileentity.IMetaTileEntity;
 import gregtech.api.interfaces.tileentity.IGregTechTileEntity;
-import gregtech.api.util.TickDeferral;
+import gregtech.common.covers.CoverInfo;
+import gregtech.common.covers.CoverShutter;
 import mcp.mobius.waila.api.IWailaConfigHandler;
 import mcp.mobius.waila.api.IWailaDataAccessor;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -27,15 +28,52 @@ public class MTEPipeBEC extends MTEBaseFactoryPipe implements BECFactoryElement 
 
     public MTEPipeBEC(int aID, String aName, String aNameRegional) {
         super(aID, aName, aNameRegional);
+        mThickness = 3f / 4f;
     }
 
-    public MTEPipeBEC(String aName) {
-        super(aName);
+    public MTEPipeBEC(MTEPipeBEC prototype) {
+        super(prototype);
     }
 
     @Override
     public IMetaTileEntity newMetaEntity(IGregTechTileEntity iGregTechTileEntity) {
-        return new MTEPipeBEC(mName);
+        return new MTEPipeBEC(this);
+    }
+
+    private boolean wasAllowedToWork = false;
+
+    @Override
+    public void onPostTick(IGregTechTileEntity base, long aTick) {
+        super.onPostTick(base, aTick);
+
+        if (base.isAllowedToWork() != wasAllowedToWork) {
+            wasAllowedToWork = base.isAllowedToWork();
+
+            boolean hasShutter = false;
+
+            for (ForgeDirection side : ForgeDirection.VALID_DIRECTIONS) {
+                if (base.getCoverBehaviorAtSideNew(side) instanceof CoverShutter) {
+                    hasShutter = true;
+                    break;
+                }
+            }
+
+            if (hasShutter) {
+                BECFactoryGrid.INSTANCE.addElement(this);
+            }
+        }
+    }
+
+    @Override
+    public void loadNBTData(NBTTagCompound nbtTagCompound) {
+        super.loadNBTData(nbtTagCompound);
+        wasAllowedToWork = nbtTagCompound.getBoolean("wasAllowedToWork");
+    }
+
+    @Override
+    public void saveNBTData(NBTTagCompound nbtTagCompound) {
+        super.saveNBTData(nbtTagCompound);
+        nbtTagCompound.setBoolean("wasAllowedToWork", wasAllowedToWork);
     }
 
     @Override
@@ -44,8 +82,22 @@ public class MTEPipeBEC extends MTEBaseFactoryPipe implements BECFactoryElement 
     }
 
     @Override
-    public boolean canConnectOnSide(ForgeDirection side) {
-        return true;
+    public ConnectionType getConnectionOnSide(ForgeDirection side) {
+        CoverInfo cover = getBaseMetaTileEntity().getCoverInfoAtSide(side);
+
+        if (cover != null && cover.getCoverBehavior() instanceof CoverShutter shutter) {
+            if (shutter.letsEnergyIn(side, cover.getCoverID(), cover.getCoverData(), getBaseMetaTileEntity())) {
+                return ConnectionType.CONNECTED;
+            }
+
+            if (shutter.alwaysLookConnected(side, cover.getCoverID(), cover.getCoverData(), getBaseMetaTileEntity())) {
+                return ConnectionType.VISUAL_ONLY;
+            }
+
+            return ConnectionType.NONE;
+        } else {
+            return ConnectionType.CONNECTED;
+        }
     }
 
     @Override
@@ -58,13 +110,20 @@ public class MTEPipeBEC extends MTEBaseFactoryPipe implements BECFactoryElement 
             if (base.getTileEntityAtSide(dir) instanceof IGregTechTileEntity igte) {
                 if (igte.getColorization() == base.getColorization()) {
                     if (igte.getMetaTileEntity() instanceof BECFactoryElement element) {
-                        if (element.canConnectOnSide(dir.getOpposite())) {
-                            neighbours.add(element);
+                        if (this.getConnectionOnSide(dir) == ConnectionType.CONNECTED) {
+                            if (element.getConnectionOnSide(dir.getOpposite()) == ConnectionType.CONNECTED) {
+                                neighbours.add(element);
+                            }
                         }
                     }
                 }
             }
         }
+    }
+
+    @Override
+    public void onAdjacentBlockChange(int x, int y, int z) {
+        mCheckConnections = true;
     }
 
     @Override
@@ -80,12 +139,12 @@ public class MTEPipeBEC extends MTEBaseFactoryPipe implements BECFactoryElement 
 
         if (base == null || base.isDead()) return;
 
-        for (ForgeDirection dir : ForgeDirection.VALID_DIRECTIONS) {
-            if (base.getTileEntityAtSide(dir) instanceof IGregTechTileEntity igte) {
+        for (ForgeDirection side : ForgeDirection.VALID_DIRECTIONS) {
+            if (base.getTileEntityAtSide(side) instanceof IGregTechTileEntity igte) {
                 if (igte.getColorization() == base.getColorization()) {
                     if (igte.getMetaTileEntity() instanceof BECFactoryElement element) {
-                        if (element.canConnectOnSide(dir.getOpposite())) {
-                            mConnections |= dir.flag;
+                        if (element.getConnectionOnSide(side.getOpposite()) != ConnectionType.NONE) {
+                            mConnections |= side.flag;
                         }
                     }
                 }
@@ -148,7 +207,7 @@ public class MTEPipeBEC extends MTEBaseFactoryPipe implements BECFactoryElement 
     public void onRemoval() {
         super.onRemoval();
 
-        TickDeferral.schedule(() -> BECFactoryGrid.INSTANCE.removeElement(this));
+        BECFactoryGrid.INSTANCE.removeElement(this);
     }
 
     @Override
