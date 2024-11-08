@@ -72,12 +72,12 @@ public class TileAnalysisResult {
     public PortableItemStack mGTItemLock = null;
     public String mGTFluidLock = null;
     public int mGTMode = 0;
-    public JsonElement mGTData = null;
+    public NBTTagCompound mGTData = null;
     public long mGTMEBusCapacity = 0;
 
     public AEColor mAEColour = null;
     public ForgeDirection mAEUp = null, mAEForward = null;
-    public JsonElement mAEConfig = null;
+    public NBTTagCompound mAEConfig = null;
     public PortableItemStack[] mAEUpgrades = null;
     public String mAECustomName = null;
     public AEPartData[] mAEParts = null;
@@ -233,7 +233,7 @@ public class TileAnalysisResult {
                     NBTTagCompound data = copyable.getCopiedData(null);
 
                     if (data != null && !data.hasNoTags()) {
-                        mGTData = MMUtils.toJsonObject(data);
+                        mGTData = data;
                     }
                 } catch (Throwable t) {
                     // Probably an NPE, but we're catching Throwable just to be safe
@@ -252,7 +252,7 @@ public class TileAnalysisResult {
         if (te instanceof AEBaseTile ae) {
             mAEUp = nullIfUnknown(ae.getUp());
             mAEForward = nullIfUnknown(ae.getForward());
-            mAEConfig = MMUtils.toJsonObject(ae.downloadSettings(SettingsFrom.MEMORY_CARD));
+            mAEConfig = ae.downloadSettings(SettingsFrom.MEMORY_CARD);
         }
 
         // check if the tile has a custom name
@@ -458,7 +458,7 @@ public class TileAnalysisResult {
 
             // paste the data
             if (mte instanceof IDataCopyable copyable) {
-                NBTTagCompound data = mGTData == null ? new NBTTagCompound() : (NBTTagCompound) MMUtils.toNbt(mGTData);
+                NBTTagCompound data = mGTData == null ? new NBTTagCompound() : mGTData;
 
                 try {
                     // There's no reason for this EntityPlayer parameter besides sending chat messages, so we just fail
@@ -497,7 +497,7 @@ public class TileAnalysisResult {
             }
 
             if (mAEConfig != null) {
-                ae.uploadSettings(SettingsFrom.MEMORY_CARD, (NBTTagCompound) MMUtils.toNbt(mAEConfig));
+                ae.uploadSettings(SettingsFrom.MEMORY_CARD, mAEConfig);
             }
         }
 

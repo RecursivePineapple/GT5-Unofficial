@@ -237,6 +237,44 @@ enum Messages {
             return packet;
         }
     })),
+    SchematicUploadStart(server(new ISimplePacketHandler<SimplePacket>() {
+
+        @Override
+        public void handle(EntityPlayer player, SimplePacket packet) {
+            
+        }
+
+        @Override
+        public SimplePacket getNewPacket(Messages message, @Nullable Object value) {
+            return new SimplePacket(message);
+        }
+    })),
+    SchematicUpload(server(new ISimplePacketHandler<SchematicPacket>() {
+
+        @Override
+        public void handle(EntityPlayer player, SchematicPacket packet) {
+
+        }
+
+        @Override
+        public SchematicPacket getNewPacket(Messages message, @Nullable Object value) {
+            SchematicPacket packet = new SchematicPacket(message);
+            packet.data = (byte[]) value;
+            return packet;
+        }
+    })),
+    SchematicUploadFinish(server(new ISimplePacketHandler<SimplePacket>() {
+
+        @Override
+        public void handle(EntityPlayer player, SimplePacket packet) {
+            
+        }
+
+        @Override
+        public SimplePacket getNewPacket(Messages message, @Nullable Object value) {
+            return new SimplePacket(message);
+        }
+    })),
 
     ;
 
@@ -442,6 +480,30 @@ enum Messages {
             message.worldId = buffer.readInt();
             message.location = buffer.readLong();
             message.state = buffer.readByte();
+            return message;
+        }
+    }
+
+    private static class SchematicPacket extends SimplePacket {
+
+        public byte[] data;
+
+        public SchematicPacket(Messages message) {
+            super(message);
+        }
+
+        @Override
+        public void encode(ByteBuf buffer) {
+            buffer.writeInt(data.length);
+            buffer.writeBytes(data);
+        }
+
+        @Override
+        public GTPacket decode(ByteArrayDataInput buffer) {
+            SchematicPacket message = new SchematicPacket(super.message);
+            int length = buffer.readInt();
+            message.data = new byte[length];
+            buffer.readFully(message.data);
             return message;
         }
     }
