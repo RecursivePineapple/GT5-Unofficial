@@ -1,9 +1,12 @@
 package gregtech.api.enums;
 
 import static gregtech.api.enums.Mods.GregTech;
+import static gregtech.api.enums.Mods.HodgePodge;
 
 import java.util.HashMap;
 import java.util.Map;
+
+import com.mitchej123.hodgepodge.textures.IPatchedTextureAtlasSprite;
 
 import net.minecraft.client.renderer.texture.TextureMap;
 import net.minecraft.util.IIcon;
@@ -1824,6 +1827,7 @@ public class Textures {
 
         @Override
         public IIcon getIcon() {
+            // markNeedsAnimationUpdate();
             return mIcon;
         }
 
@@ -1840,6 +1844,12 @@ public class Textures {
         @Override
         public void run() {
             mIcon = GregTechAPI.sBlockIcons.registerIcon(GregTech.getResourcePath("iconsets", this.toString()));
+        }
+
+        public void markNeedsAnimationUpdate() {
+            if (HodgePodge.isModLoaded() && mIcon instanceof IPatchedTextureAtlasSprite patched) {
+                patched.markNeedsAnimationUpdate();
+            }
         }
 
         public static class CustomIcon implements IIconContainer, Runnable {

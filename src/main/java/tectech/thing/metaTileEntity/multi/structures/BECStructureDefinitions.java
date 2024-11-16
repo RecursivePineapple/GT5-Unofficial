@@ -686,9 +686,9 @@ public class BECStructureDefinitions {
 
     public static final String[][] BEC_CONTAINMENT_FIELD = {{
         "                   ",
-        "      AA111AA      ",
+        "      1111111      ",
         "      BD1~1DB      ",
-        "      AA111AA      ",
+        "      1111111      ",
         "                   "
     },{
         "      AAAAAAA      ",

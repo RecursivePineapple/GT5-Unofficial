@@ -5,6 +5,10 @@ import net.minecraft.client.renderer.RenderBlocks;
 import net.minecraft.util.IIcon;
 import net.minecraftforge.common.util.ForgeDirection;
 
+import static gregtech.api.enums.Mods.HodgePodge;
+
+import com.mitchej123.hodgepodge.textures.IPatchedTextureAtlasSprite;
+
 import gregtech.api.interfaces.IBlockContainer;
 import gregtech.api.interfaces.ITexture;
 import gregtech.api.util.GTRenderingWorld;
@@ -30,7 +34,13 @@ class GTCopiedCTMBlockTexture extends GTTextureBase implements ITexture, IBlockC
 
     private IIcon getIcon(int ordinalSide, int aX, int aY, int aZ, RenderBlocks aRenderer) {
         final int tSide = mSide == 6 ? ordinalSide : mSide;
-        return mBlock.getIcon(getBlockAccess(aRenderer), aX, aY, aZ, tSide);
+        IIcon icon = mBlock.getIcon(getBlockAccess(aRenderer), aX, aY, aZ, tSide);
+        
+        // if (HodgePodge.isModLoaded() && icon instanceof IPatchedTextureAtlasSprite patched) {
+        //     patched.markNeedsAnimationUpdate();
+        // }
+
+        return icon;
     }
 
     private GTRenderingWorld getBlockAccess(RenderBlocks aRenderer) {

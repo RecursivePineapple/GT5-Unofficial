@@ -21,7 +21,6 @@ import tectech.loader.gui.CreativeTabTecTech;
 import tectech.loader.thing.MuTeLoader;
 import tectech.mechanics.enderStorage.EnderWorldSavedData;
 import tectech.proxy.CommonProxy;
-import tectech.recipe.CondensateRecipeLoader;
 import tectech.recipe.EyeOfHarmonyRecipeStorage;
 import tectech.recipe.TecTechRecipeMaps;
 
@@ -104,7 +103,6 @@ public class TecTech {
     public void onLoadCompleted(FMLLoadCompleteEvent event) {
         eyeOfHarmonyRecipeStorage = new EyeOfHarmonyRecipeStorage();
         MainLoader.onLoadCompleted();
-        CondensateRecipeLoader.run();
     }
 
     public static EyeOfHarmonyRecipeStorage eyeOfHarmonyRecipeStorage = null;

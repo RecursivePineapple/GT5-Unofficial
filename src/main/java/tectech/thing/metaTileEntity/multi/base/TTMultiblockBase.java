@@ -1623,6 +1623,7 @@ public abstract class TTMultiblockBase extends MTEExtendedPowerMultiBlockBase<TT
         }
         // sub eu
         setEUVar(getEUVar() - EUuse);
+        onEnergyDrained(EUuse, EUtEffective, Amperes);
         return true;
     }
 
@@ -1645,7 +1646,12 @@ public abstract class TTMultiblockBase extends MTEExtendedPowerMultiBlockBase<TT
         }
         // sub eu
         setEUVar(getEUVar() - EUuse);
+        onEnergyDrained(EUuse, EUtEffective, Amperes);
         return true;
+    }
+
+    protected void onEnergyDrained(long consumedEU, long eut, long amperes) {
+        
     }
 
     // new method

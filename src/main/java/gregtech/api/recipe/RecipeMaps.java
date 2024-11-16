@@ -45,6 +45,7 @@ import gregtech.api.enums.OrePrefixes;
 import gregtech.api.enums.TierEU;
 import gregtech.api.gui.modularui.GTUITextures;
 import gregtech.api.interfaces.IRecipeMap;
+import gregtech.api.items.ItemCondensate;
 import gregtech.api.objects.ItemData;
 import gregtech.api.recipe.maps.AssemblerBackend;
 import gregtech.api.recipe.maps.AssemblyLineFrontend;
@@ -1205,14 +1206,6 @@ public final class RecipeMaps {
     public static final RecipeMap<RecipeMapBackend> ic2NuclearFakeRecipes = RecipeMapBuilder.of("gt.recipe.ic2nuke")
         .maxIO(1, 1, 0, 0)
         .minInputs(1, 0)
-        .disableOptimize()
-        .logo(GTUITextures.PICTURE_RADIATION_WARNING)
-        .logoPos(152, 41)
-        .neiRecipeBackgroundSize(170, 60)
-        .neiHandlerInfo(builder -> builder.setDisplayStack(GTModHandler.getIC2Item("nuclearReactor", 1, null)))
-        .build();
-    public static final RecipeMap<RecipeMapBackend> condensateCreationRecipes = RecipeMapBuilder.of("gt.recipe.create-condensate")
-        .maxIO(1, 1, 1, 0)
         .disableOptimize()
         .logo(GTUITextures.PICTURE_RADIATION_WARNING)
         .logoPos(152, 41)

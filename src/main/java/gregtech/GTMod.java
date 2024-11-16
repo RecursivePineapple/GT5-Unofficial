@@ -592,11 +592,11 @@ public class GTMod implements IGTMod {
         GregTechAPI.sAfterGTPostload = null;
 
         GTPostLoad.createGTtoolsCreativeTab();
+        BECRecipeLoader.run();
     }
 
     @Mod.EventHandler
     public void onLoadComplete(FMLLoadCompleteEvent aEvent) {
-        BECRecipeLoader.run();
         gregtechproxy.onLoadComplete();
         for (Runnable tRunnable : GregTechAPI.sGTCompleteLoad) {
             try {

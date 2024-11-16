@@ -225,11 +225,14 @@ public class GTRecipeConstants {
     public static final RecipeMetadataKey<Integer> EU_MULTIPLIER = SimpleRecipeMetadataKey
         .create(Integer.class, "eu_multiplier");
 
-    public static final RecipeMetadataKey<CondensateStack> CONDENSATE_INPUT = SimpleRecipeMetadataKey
-        .create(CondensateStack.class, "condensate_input");
+    public static final RecipeMetadataKey<CondensateStack[]> CONDENSATE_INPUTS = SimpleRecipeMetadataKey
+        .create(CondensateStack[].class, "condensate_inputs");
 
-    public static final RecipeMetadataKey<CondensateStack> CONDENSATE_OUTPUT = SimpleRecipeMetadataKey
-        .create(CondensateStack.class, "condensate_output");
+    public static final RecipeMetadataKey<CondensateStack[]> CONDENSATE_OUTPUTS = SimpleRecipeMetadataKey
+        .create(CondensateStack[].class, "condensate_outputs");
+
+    public static final RecipeMetadataKey<Long> CONDENSATE_EU_COST = SimpleRecipeMetadataKey
+        .create(Long.class, "condensate_eu_cost");
 
     /**
      * Add a arc furnace recipe. Adds to both normal arc furnace and plasma arc furnace.

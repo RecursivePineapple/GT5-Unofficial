@@ -42,6 +42,7 @@ import gregtech.api.util.HatchElementBuilder;
 import gregtech.api.util.IntFraction;
 import gregtech.api.util.MultiblockTooltipBuilder;
 import gregtech.api.util.shutdown.ShutDownReason;
+import gtPlusPlus.core.material.Material;
 import it.unimi.dsi.fastutil.objects.Object2LongArrayMap;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraftforge.fluids.Fluid;
@@ -210,11 +211,15 @@ public class MTEBECLiquifier extends MTEBECMultiblockBase<MTEBECLiquifier> {
 
                 Fluid fluid = null;
 
-                Materials material = stack.material;
+                if (stack.material instanceof Materials gtMat) {
+                    if (fluid == null && gtMat.mStandardMoltenFluid != null) fluid = gtMat.mStandardMoltenFluid;
+                    if (fluid == null && gtMat.mFluid != null) fluid = gtMat.mFluid;
+                }
 
-                if (fluid == null && material.mStandardMoltenFluid != null) fluid = material.mStandardMoltenFluid;
-                if (fluid == null && material.mFluid != null) fluid = material.mFluid;
-    
+                if (stack.material instanceof Material gtppMat) {
+                    if (fluid == null && gtppMat.getFluid() != null) fluid = gtppMat.getFluid();
+                }
+
                 if (fluid == null) continue;
 
                 if (!running) {
@@ -225,7 +230,7 @@ public class MTEBECLiquifier extends MTEBECMultiblockBase<MTEBECLiquifier> {
                 }
 
                 euQuota -= toConsume * euPerLitre;
-                inv.removeCondensate(Arrays.asList(new CondensateStack(material, toConsume)));
+                inv.removeCondensate(Arrays.asList(new CondensateStack(stack.material, toConsume)));
                 consumedCondensate.mergeLong(fluid, toConsume, Long::sum);
             }
         }

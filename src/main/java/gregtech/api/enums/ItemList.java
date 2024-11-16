@@ -1521,6 +1521,7 @@ public enum ItemList implements IItemContainer {
     Casing_Autoclave,
 
     BEC_Liquid_Pattern,
+    BEC_Condensate,
 
     Machine_LV_Miner,
     Machine_MV_Miner,

@@ -12,10 +12,12 @@ import static gregtech.api.enums.HatchElement.InputHatch;
 import static gregtech.api.util.GTRecipeBuilder.SECONDS;
 import static gregtech.api.util.GTUtility.filterValidMTEs;
 
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import javax.annotation.Nonnull;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -28,7 +30,6 @@ import com.gtnewhorizons.modularui.common.widget.SlotWidget;
 import com.gtnewhorizons.modularui.common.widget.TextWidget;
 
 import gregtech.api.enums.GTValues;
-import gregtech.api.enums.Materials;
 import gregtech.api.enums.SoundResource;
 import gregtech.api.interfaces.metatileentity.IMetaTileEntity;
 import gregtech.api.interfaces.tileentity.IGregTechTileEntity;
@@ -37,7 +38,6 @@ import gregtech.api.metatileentity.implementations.MTEHatchInput;
 import gregtech.api.metatileentity.implementations.MTEHatchInputBus;
 import gregtech.api.metatileentity.implementations.MTEHatchMultiInput;
 import gregtech.api.recipe.RecipeMap;
-import gregtech.api.recipe.RecipeMaps;
 import gregtech.api.recipe.check.CheckRecipeResult;
 import gregtech.api.recipe.check.CheckRecipeResultRegistry;
 import gregtech.api.util.GTRecipe;
@@ -48,8 +48,11 @@ import gregtech.api.util.MultiblockTooltipBuilder;
 import gregtech.client.GTSoundLoop;
 import gregtech.client.ISoundLoopAware;
 import gregtech.common.tileentities.machines.MTEHatchInputME;
+import gregtech.loaders.load.BECRecipeLoader;
+import it.unimi.dsi.fastutil.objects.Object2LongOpenHashMap;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.NBTTagList;
 import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.StatCollector;
 import net.minecraftforge.common.util.ForgeDirection;
@@ -57,6 +60,7 @@ import net.minecraftforge.fluids.FluidStack;
 import tectech.mechanics.boseEinsteinCondensate.BECFactoryGrid;
 import tectech.mechanics.boseEinsteinCondensate.BECInventory;
 import tectech.mechanics.boseEinsteinCondensate.CondensateStack;
+import tectech.recipe.TecTechRecipeMaps;
 import tectech.thing.metaTileEntity.hatch.MTEHatchEnergyMulti;
 import tectech.thing.metaTileEntity.multi.base.INameFunction;
 import tectech.thing.metaTileEntity.multi.base.IStatusFunction;
@@ -169,8 +173,7 @@ public class MTEBECGenerator extends MTEBECMultiblockBase<MTEBECGenerator> imple
             for (var mat : mOutputCondensate) {
                 if (mat == null) continue;
                 ret.append(EnumChatFormatting.AQUA)
-                    .append(mat.material.mLocalizedName)
-                    .append(" Condensate")
+                    .append(mat.getPreview().getDisplayName())
                     .append(EnumChatFormatting.WHITE)
                     .append(" x ")
                     .append(EnumChatFormatting.GOLD);
@@ -198,12 +201,7 @@ public class MTEBECGenerator extends MTEBECMultiblockBase<MTEBECGenerator> imple
         super.saveNBTData(aNBT);
 
         if (mOutputCondensate != null) {
-            aNBT.setInteger("mOutMatCount", mOutputCondensate.size());
-
-            for (int i = 0; i < mOutputCondensate.size(); i++) {
-                aNBT.setString("mOutMatName." + i, mOutputCondensate.get(i).material.mName);
-                aNBT.setLong("mOutMatAmount." + i, mOutputCondensate.get(i).amount);
-            }
+            aNBT.setTag("condensate", CondensateStack.save(mOutputCondensate));
         }
     }
 
@@ -211,23 +209,10 @@ public class MTEBECGenerator extends MTEBECMultiblockBase<MTEBECGenerator> imple
     public void loadNBTData(NBTTagCompound aNBT) {
         super.loadNBTData(aNBT);
 
-        int count = aNBT.getInteger("mOutMatCount");
+        mOutputCondensate = null;
 
-        if (count > 0) {
-            List<CondensateStack> outputMats = new ArrayList<>();
-
-            for(int i = 0; i < count; i++) {
-                Materials material = Materials.get(aNBT.getString("mOutMatName." + i));
-                long amount = aNBT.getLong("mOutMatAmount." + i);
-
-                if (material != null && material != Materials._NULL && amount > 0) {
-                    outputMats.add(new CondensateStack(material, amount));
-                }
-            }
-
-            mOutputCondensate = outputMats;
-        } else {
-            mOutputCondensate = null;
+        if (aNBT.getTag("condensate") instanceof NBTTagList list) {
+            mOutputCondensate = CondensateStack.load(list);
         }
     }
 
@@ -240,7 +225,7 @@ public class MTEBECGenerator extends MTEBECMultiblockBase<MTEBECGenerator> imple
 
     @Override
     public void outputAfterRecipe_EM() {
-        if (mOutputCondensate != null) {
+        if (mOutputCondensate != null && !mOutputCondensate.isEmpty()) {
             if (network != null) {
                 for (BECInventory inv : network.getComponents(BECInventory.class)) {
                     inv.addCondensate(mOutputCondensate);
@@ -266,8 +251,9 @@ public class MTEBECGenerator extends MTEBECMultiblockBase<MTEBECGenerator> imple
     }
 
     @Override
-    public RecipeMap<?> getRecipeMap() {
-        return RecipeMaps.condensateCreationRecipes;
+    @Nonnull
+    public Collection<RecipeMap<?>> getAvailableRecipeMaps() {
+        return Arrays.asList(TecTechRecipeMaps.condensateCreationFromItemRecipes, TecTechRecipeMaps.condensateCreationFromFluidRecipes);
     }
 
     @Override
@@ -312,25 +298,27 @@ public class MTEBECGenerator extends MTEBECMultiblockBase<MTEBECGenerator> imple
 
         long startingQuota = euQuota;
 
-        HashMap<Materials, Long> outputMaterials = new HashMap<>();
+        Object2LongOpenHashMap<Object> outputMaterials = new Object2LongOpenHashMap<>();
 
         for (MTEHatchInputBus inputBus : filterValidMTEs(mInputBusses)) {
             for (int i = inputBus.getSizeInventory() - 1; i >= 0; i--) {
                 ItemStack slot = inputBus.getStackInSlot(i);
 
                 if (slot != null) {
-                    GTRecipe recipe = RecipeMaps.condensateCreationRecipes.findRecipeQuery()
+                    GTRecipe recipe = TecTechRecipeMaps.condensateCreationFromItemRecipes.findRecipeQuery()
                         .items(slot)
                         .find();
 
                     if (recipe != null) {
-                        CondensateStack output = recipe.getMetadata(GTRecipeConstants.CONDENSATE_OUTPUT);
+                        CondensateStack[] output = recipe.getMetadata(GTRecipeConstants.CONDENSATE_OUTPUTS);
 
                         if (output == null) {
                             continue;
                         }
 
-                        long quotaRemaining = euQuota / recipe.mEUt;
+                        long cost = BECRecipeLoader.getRecipeCost(recipe);
+
+                        long quotaRemaining = euQuota / cost;
                         long toRemove = Math.min(Math.min(quotaRemaining, slot.stackSize), Integer.MAX_VALUE);
                         
                         if (toRemove == 0) {
@@ -339,10 +327,12 @@ public class MTEBECGenerator extends MTEBECMultiblockBase<MTEBECGenerator> imple
 
                         inputBus.decrStackSize(i, (int) toRemove);
 
-                        euQuota -= recipe.mEUt * toRemove;
+                        euQuota -= cost * toRemove;
 
-                        long toAdd = toRemove * output.amount;
-                        outputMaterials.merge(output.material, toAdd, Long::sum);
+                        for (CondensateStack stack : output) {
+                            long toAdd = toRemove * stack.amount;
+                            outputMaterials.merge(stack.material, toAdd, Long::sum);
+                        }
                     }
                 }
             }
@@ -374,7 +364,7 @@ public class MTEBECGenerator extends MTEBECMultiblockBase<MTEBECGenerator> imple
 
             return CheckRecipeResultRegistry.NO_RECIPE;
         } else {
-            mOutputCondensate = outputMaterials.isEmpty() ? null : outputMaterials.entrySet().stream().map(e -> new CondensateStack(e.getKey(), e.getValue())).collect(Collectors.toList());
+            mOutputCondensate = outputMaterials.isEmpty() ? null : outputMaterials.object2LongEntrySet().stream().map(e -> new CondensateStack(e.getKey(), e.getLongValue())).collect(Collectors.toList());
             mMaxProgresstime = baseProcessingTime;
             mEfficiency = 10_000;
 
@@ -385,34 +375,39 @@ public class MTEBECGenerator extends MTEBECMultiblockBase<MTEBECGenerator> imple
         }
     }
 
-    private long tryDrainFluid(HashMap<Materials, Long> outputMaterials, long euQuota, MTEHatchInput inputHatch, FluidStack fluidStack) {
-        GTRecipe recipe = RecipeMaps.condensateCreationRecipes.findRecipeQuery()
-            .fluids(new FluidStack(fluidStack.getFluid(), 1000))
+    private long tryDrainFluid(Object2LongOpenHashMap<Object> outputMaterials, long euQuota, MTEHatchInput inputHatch, FluidStack fluidStack) {
+        GTRecipe recipe = TecTechRecipeMaps.condensateCreationFromFluidRecipes.findRecipeQuery()
+            .fluids(new FluidStack(fluidStack.getFluid(), 1))
             .find();
         
         if (recipe == null) {
             return 0;
         }
 
-        CondensateStack output = recipe.getMetadata(GTRecipeConstants.CONDENSATE_OUTPUT);
+        CondensateStack[] output = recipe.getMetadata(GTRecipeConstants.CONDENSATE_OUTPUTS);
 
         if (output == null) {
             return 0;
         }
+        
+        long cost = BECRecipeLoader.getRecipeCost(recipe);
 
-        long availableQuota = euQuota * 1000 / recipe.mEUt;
+        long availableQuota = euQuota * 1000 / cost;
         long toRemove = GTUtility.clamp(fluidStack.amount, 0, availableQuota);
 
         if (toRemove <= 0) {
             return 0;
         }
 
-        euQuota -= GTUtility.ceilDiv(toRemove * recipe.mEUt, 1000);
+        euQuota -= GTUtility.ceilDiv(toRemove * cost, 1000);
 
         long toDrain = GTUtility.min(fluidStack.amount, toRemove, Integer.MAX_VALUE);
 
         FluidStack drained = inputHatch.drain(ForgeDirection.UNKNOWN, new FluidStack(fluidStack, (int) toDrain), true);
-        outputMaterials.merge(output.material, (long) drained.amount, (a, b) -> a + b);
+
+        for (CondensateStack stack : output) {
+            outputMaterials.merge(stack, (long) drained.amount, Long::sum);
+        }
 
         return euQuota;
     }

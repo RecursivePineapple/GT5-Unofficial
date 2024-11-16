@@ -11,6 +11,7 @@ import static gregtech.api.enums.GTValues.NW;
 import static gregtech.api.enums.GTValues.V;
 import static gregtech.api.enums.GTValues.W;
 import static gregtech.api.enums.Materials.FLUID_MAP;
+import static gregtech.api.enums.Mods.HodgePodge;
 import static gregtech.api.enums.Mods.Translocator;
 import static gregtech.common.UndergroundOil.undergroundOilReadInformation;
 import static net.minecraftforge.common.util.ForgeDirection.DOWN;
@@ -89,6 +90,7 @@ import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EnumChatFormatting;
+import net.minecraft.util.IIcon;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.ResourceLocation;
@@ -122,6 +124,7 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.SetMultimap;
 import com.gtnewhorizon.structurelib.alignment.IAlignment;
 import com.gtnewhorizon.structurelib.alignment.IAlignmentProvider;
+import com.mitchej123.hodgepodge.textures.IPatchedTextureAtlasSprite;
 import com.mojang.authlib.GameProfile;
 
 import buildcraft.api.transport.IPipeTile;
@@ -2545,6 +2548,12 @@ public class GTUtility {
             "Probably missing mapping or different texture class used for: " + blockFromBlock.getUnlocalizedName()
                 + " meta:"
                 + metaFromBlock);
+    }
+
+    public static void markNeedsAnimationUpdate(IIcon icon) {
+        if (HodgePodge.isModLoaded() && icon instanceof IPatchedTextureAtlasSprite) {
+            ((IPatchedTextureAtlasSprite) icon).markNeedsAnimationUpdate();
+        }
     }
 
     /**

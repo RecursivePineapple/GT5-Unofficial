@@ -248,6 +248,9 @@ gt.recipe.purificationplantplasmaheating=Temperature Fluctuation
 gt.recipe.purificationplantuvtreatment=High Energy Laser Treatment
 gt.recipe.purificationplantdegasifier=Degassing
 gt.recipe.purificationplantquarkextractor=Baryonic Perfection
+gt.recipe.create-condensate-item=Condensate Generation (Items)
+gt.recipe.create-condensate-fluid=Condensate Generation (Fluids)
+gt.recipe.liquify-condensate=Condensate Liquification
 
 # Recipe categories
 gt.recipe.category.arc_furnace_recycling=Arc Furnace Recycling
