@@ -159,7 +159,6 @@ import gregtech.api.util.GTShapelessRecipe;
 import gregtech.api.util.GTUtility;
 import gregtech.api.util.WorldSpawnedEventBuilder;
 import gregtech.common.config.OPStuff;
-import gregtech.common.entities.EntityItemLarge;
 import gregtech.common.items.IDMetaTool01;
 import gregtech.common.items.MetaGeneratedItem98;
 import gregtech.common.items.MetaGeneratedTool01;
@@ -1046,8 +1045,6 @@ public abstract class GTProxy implements IGTMod, IFuelHandler {
 
         // Register chunk manager with Forge
         GTChunkManager.init();
-
-        EntityItemLarge.registerCommon();
     }
 
     public void onLoad() {
