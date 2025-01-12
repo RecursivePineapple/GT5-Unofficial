@@ -134,6 +134,7 @@ public enum GregtechItemList implements IGregtechItemContainer {
     // Larger Volumetric Flasks
     VOLUMETRIC_FLASK_8k,
     VOLUMETRIC_FLASK_32k,
+    KLEIN_BOTTLE,
 
     // RTG Fuels
     Pellet_RTG_PU238,
@@ -369,11 +370,7 @@ public enum GregtechItemList implements IGregtechItemContainer {
     // large mixer
     Industrial_Mixer,
 
-    // Naq Reactor
-    Casing_Naq_Reactor_A,
-    Casing_Naq_Reactor_B,
-    Casing_Naq_Reactor_C,
-    /* Controller_Naq_Reactor, */
+    // Containment Casing
     Casing_Containment,
 
     // Arc Furnace
@@ -518,7 +515,6 @@ public enum GregtechItemList implements IGregtechItemContainer {
     // Custom Fluid Hatches
     Hatch_Input_Cryotheum,
     Hatch_Input_Pyrotheum,
-    Hatch_Input_Naquadah,
     Hatch_Input_Steam,
 
     // Steam Multi Buses
@@ -676,13 +672,6 @@ public enum GregtechItemList implements IGregtechItemContainer {
 
     // Solar Tower Reflector
     Solar_Tower_Reflector,
-
-    // Super Tier Chests
-    Super_Chest_LV,
-    Super_Chest_MV,
-    Super_Chest_HV,
-    Super_Chest_EV,
-    Super_Chest_IV,
 
     // Wireless Chargers
     Charger_LV,

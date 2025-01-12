@@ -43,6 +43,7 @@ import net.minecraft.nbt.NBTTagList;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumChatFormatting;
+import net.minecraft.util.StatCollector;
 import net.minecraft.util.StringUtils;
 import net.minecraft.world.World;
 import net.minecraftforge.common.util.Constants;
@@ -95,6 +96,7 @@ import gregtech.api.util.MultiblockTooltipBuilder;
 import gregtech.api.util.OverclockCalculator;
 import gregtech.api.util.VoidProtectionHelper;
 import gregtech.api.util.shutdown.ShutDownReason;
+import gregtech.api.util.shutdown.ShutDownReasonRegistry;
 import gregtech.common.tileentities.machines.MTEHatchInputBusME;
 import gregtech.common.tileentities.machines.MTEHatchInputME;
 import mcp.mobius.waila.api.IWailaConfigHandler;
@@ -303,13 +305,14 @@ public class MTEAdvAssLine extends MTEExtendedPowerMultiBlockBase<MTEAdvAssLine>
     @Override
     protected MultiblockTooltipBuilder createTooltip() {
         final MultiblockTooltipBuilder tt = new MultiblockTooltipBuilder();
-        tt.addMachineType("Assembling Line")
-            .addInfo("Built exactly the same as standard Assembling Line")
-            .addInfo("Assembling Line with item pipelining")
+        tt.addMachineType("Assembly Line, AAL")
+            .addInfo("Built exactly the same as standard Assembly Line")
+            .addInfo("Assembly Line with item pipelining")
             .addInfo("All fluids are however consumed at start")
             .addInfo("Use voltage of worst energy hatch for overclocking")
-            .addInfo("Perform normal overclock with given voltage")
-            .addInfo("Perform laser overclock with extra amperages from multi-amp energy hatches")
+            .addInfo("Performs normal overclock with given voltage")
+            .addTecTechHatchInfo()
+            .addInfo("Performs laser overclock with extra amperage from multi-amp energy hatches")
             .addInfo("Each laser overclock reduces recipe time by 50%")
             .addInfo(
                 "and multiplies power by (4 + " + formatNumbers(LASER_OVERCLOCK_PENALTY_FACTOR)
@@ -321,7 +324,7 @@ public class MTEAdvAssLine extends MTEExtendedPowerMultiBlockBase<MTEAdvAssLine>
             .addStructureInfo(
                 "Layer 1 - Solid Steel Machine Casing, Input Bus (last can be Output Bus), Solid Steel Machine Casing")
             .addStructureInfo(
-                "Layer 2 - Borosilicate Glass(any)/Warded Glass/Reinforced Glass, Assembling Line Casing, Reinforced Glass")
+                "Layer 2 - Borosilicate Glass(any)/Warded Glass/Reinforced Glass, Assembly Line Casing, Reinforced Glass")
             .addStructureInfo("Layer 3 - Grate Machine Casing, Assembler Machine Casing, Grate Machine Casing")
             .addStructureInfo("Layer 4 - Empty, Solid Steel Machine Casing, Empty")
             .addStructureInfo("Up to 16 repeating slices, each one allows for 1 more item in recipes")
@@ -430,12 +433,12 @@ public class MTEAdvAssLine extends MTEExtendedPowerMultiBlockBase<MTEAdvAssLine>
     }
 
     /**
-     * roughly the same as {@link #criticalStopMachine()}, but does not attempt to send a halting sound if world is not
+     * Does a critical shutdown of the machine, but does not attempt to send a halting sound if world is not
      * loaded. also supports setting a stop reason
      */
     private void criticalStopMachine(String reason) {
         int oMaxProgresstime = mMaxProgresstime;
-        stopMachine();
+        stopMachine(ShutDownReasonRegistry.NONE);
         // don't do these at all if the machine wasn't working before anyway
         if (oMaxProgresstime > 0) {
             if (getBaseMetaTileEntity().getWorld() != null) sendSound(INTERRUPT_SOUND_INDEX);
@@ -520,9 +523,11 @@ public class MTEAdvAssLine extends MTEExtendedPowerMultiBlockBase<MTEAdvAssLine>
          * l -> { currentInputLength = l; for (SliceStatusWidget w : arr) { w.updateText(); } }));
          */
         screenElements.widget(
-            new TextWidget(Text.localised("ggfab.gui.advassline.shutdown")).setEnabled(this::hasAbnormalStopReason));
+            new TextWidget(Text.localised("ggfab.gui.advassline.shutdown")).setTextAlignment(Alignment.CenterLeft)
+                .setEnabled(this::hasAbnormalStopReason));
         screenElements.widget(
             new TextWidget().setTextSupplier(() -> Text.localised(lastStopReason))
+                .setTextAlignment(Alignment.CenterLeft)
                 .attachSyncer(
                     new FakeSyncWidget.StringSyncer(() -> lastStopReason, r -> this.lastStopReason = r),
                     screenElements)
@@ -926,6 +931,7 @@ public class MTEAdvAssLine extends MTEExtendedPowerMultiBlockBase<MTEAdvAssLine>
         NBTTagCompound tag = accessor.getNBTData();
         String machineProgressString = GTWaila.getMachineProgressString(
             tag.getBoolean("isActive"),
+            tag.getBoolean("isAllowedToWork"),
             tag.getInteger("maxProgress"),
             tag.getInteger("progress"));
         currentTip.remove(machineProgressString);
@@ -989,14 +995,12 @@ public class MTEAdvAssLine extends MTEExtendedPowerMultiBlockBase<MTEAdvAssLine>
 
     @Override
     public boolean onWireCutterRightClick(ForgeDirection side, ForgeDirection wrenchingSide, EntityPlayer aPlayer,
-        float aX, float aY, float aZ) {
-        if (aPlayer.isSneaking()) {
-            batchMode = !batchMode;
-            if (batchMode) {
-                GTUtility.sendChatToPlayer(aPlayer, "Batch mode enabled");
-            } else {
-                GTUtility.sendChatToPlayer(aPlayer, "Batch mode disabled");
-            }
+        float aX, float aY, float aZ, ItemStack aTool) {
+        batchMode = !batchMode;
+        if (batchMode) {
+            GTUtility.sendChatToPlayer(aPlayer, StatCollector.translateToLocal("misc.BatchModeTextOn"));
+        } else {
+            GTUtility.sendChatToPlayer(aPlayer, StatCollector.translateToLocal("misc.BatchModeTextOff"));
         }
         return true;
     }

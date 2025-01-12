@@ -5,9 +5,9 @@ import static com.gtnewhorizon.structurelib.structure.StructureUtility.onElement
 import static com.gtnewhorizon.structurelib.structure.StructureUtility.transpose;
 import static gregtech.api.enums.GTValues.AuthorSilverMoon;
 import static gregtech.api.enums.HatchElement.InputBus;
-import static gregtech.api.multitileentity.multiblock.casing.Glasses.chainAllGlasses;
 import static gregtech.api.objects.XSTR.XSTR_INSTANCE;
 import static gregtech.api.util.GTStructureUtility.buildHatchAdder;
+import static gregtech.api.util.GTStructureUtility.chainAllGlasses;
 
 import java.io.IOException;
 import java.text.Collator;
@@ -63,7 +63,6 @@ import com.gtnewhorizons.modularui.common.widget.TextWidget;
 import com.gtnewhorizons.modularui.common.widget.textfield.TextFieldWidget;
 
 import appeng.api.util.DimensionalCoord;
-import appeng.api.util.WorldCoord;
 import appeng.client.render.BlockPosHighlighter;
 import gregtech.api.GregTechAPI;
 import gregtech.api.enums.ItemList;
@@ -311,6 +310,9 @@ public class MTEDroneCentre extends MTEExtendedPowerMultiBlockBase<MTEDroneCentr
         for (DroneConnection con : connectionList) {
             if (!con.customName.equals(con.machine.getLocalName()))
                 conList.setString(con.machineCoord.toString(), con.customName);
+        }
+        for (String pos : tempNameList.keySet()) {
+            conList.setString(pos, tempNameList.get(pos));
         }
         aNBT.setTag("conList", conList);
     }
@@ -891,10 +893,7 @@ public class MTEDroneCentre extends MTEExtendedPowerMultiBlockBase<MTEDroneCentr
             machineCoord.posY,
             machineCoord.posZ,
             player.dimension);
-        WorldCoord blockPos2 = new WorldCoord((int) player.posX, (int) player.posY, (int) player.posZ);
-        BlockPosHighlighter.highlightBlock(
-            blockPos,
-            System.currentTimeMillis() + 500 * WorldCoord.getTaxicabDistance(blockPos, blockPos2));
+        BlockPosHighlighter.highlightBlocks(player, Collections.singletonList(blockPos), null, null);
     }
 
     public static HashMultimap<Integer, MTEDroneCentre> getCentreMap() {

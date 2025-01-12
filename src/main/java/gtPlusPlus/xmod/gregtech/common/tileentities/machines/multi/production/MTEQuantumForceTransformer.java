@@ -56,7 +56,6 @@ import gregtech.api.enums.Materials;
 import gregtech.api.enums.SoundResource;
 import gregtech.api.enums.TAE;
 import gregtech.api.enums.Textures;
-import gregtech.api.interfaces.IIconContainer;
 import gregtech.api.interfaces.ITexture;
 import gregtech.api.interfaces.metatileentity.IMetaTileEntity;
 import gregtech.api.interfaces.tileentity.IGregTechTileEntity;
@@ -243,10 +242,9 @@ public class MTEQuantumForceTransformer extends MTEExtendedPowerMultiBlockBase<M
     @Override
     protected MultiblockTooltipBuilder createTooltip() {
         MultiblockTooltipBuilder tt = new MultiblockTooltipBuilder();
-        tt.addMachineType("Quantum Force Transformer")
+        tt.addMachineType("Quantum Force Transformer, QFT")
             .addInfo("Allows Complex chemical lines to be performed instantly in one step")
             .addInfo("Every recipe requires a catalyst, each catalyst adds 1 parallel and lasts forever")
-            .addInfo("Accepts TecTech Energy and Laser Hatches")
             .addInfo("All inputs go on the bottom, all outputs go on the top")
             .addInfo("Put a circuit in the controller to specify the focused output")
             .addInfo("Check NEI to see the order of outputs, and which circuit number you need.")
@@ -260,6 +258,7 @@ public class MTEQuantumForceTransformer extends MTEExtendedPowerMultiBlockBase<M
             .addInfo("Casing functions:")
             .addInfo("Pulse Manipulators: Recipe Tier Allowed (check NEI for the tier of each recipe)")
             .addInfo("Shielding Cores: Focusing Tier (equal to or higher than recipe tier to allow focus)")
+            .addTecTechHatchInfo()
             .addPollutionAmount(getPollutionPerSecond(null))
             .beginStructureBlock(15, 21, 15, true)
             .addController("Bottom Center")
@@ -415,14 +414,6 @@ public class MTEQuantumForceTransformer extends MTEExtendedPowerMultiBlockBase<M
         return mFocusingTier;
     }
 
-    protected IIconContainer getActiveOverlay() {
-        return TexturesGtBlock.oMCAQFTActive;
-    }
-
-    protected IIconContainer getInactiveOverlay() {
-        return TexturesGtBlock.oMCAQFT;
-    }
-
     protected int getCasingTextureId() {
         return TAE.getIndexFromPage(0, 10);
     }
@@ -562,6 +553,11 @@ public class MTEQuantumForceTransformer extends MTEExtendedPowerMultiBlockBase<M
                     }
                     return -1;
                 } else {
+                    for (ItemStack stack : inputItems) {
+                        if (GTUtility.isAnyIntegratedCircuit(stack)) {
+                            return stack.getItemDamage() - 1;
+                        }
+                    }
                     final ItemStack controllerStack = getControllerSlot();
                     return GTUtility.isAnyIntegratedCircuit(controllerStack) ? controllerStack.getItemDamage() - 1 : -1;
                 }
@@ -774,14 +770,28 @@ public class MTEQuantumForceTransformer extends MTEExtendedPowerMultiBlockBase<M
     public ITexture[] getTexture(IGregTechTileEntity aBaseMetaTileEntity, ForgeDirection side, ForgeDirection facing,
         int aColorIndex, boolean aActive, boolean aRedstone) {
         if (side == facing) {
-            if (aActive) return new ITexture[] { getCasingTexture(), TextureFactory.builder()
-                .addIcon(getActiveOverlay())
-                .extFacing()
-                .build() };
-            return new ITexture[] { getCasingTexture(), TextureFactory.builder()
-                .addIcon(getInactiveOverlay())
-                .extFacing()
-                .build() };
+            if (aActive) {
+                return new ITexture[] { Textures.BlockIcons.getCasingTextureForId(TAE.GTPP_INDEX(15)),
+                    TextureFactory.builder()
+                        .addIcon(TexturesGtBlock.oMCAQFTActive)
+                        .extFacing()
+                        .build(),
+                    TextureFactory.builder()
+                        .addIcon(TexturesGtBlock.oMCAQFTActiveGlow)
+                        .extFacing()
+                        .glow()
+                        .build() };
+            }
+            return new ITexture[] { Textures.BlockIcons.getCasingTextureForId(TAE.GTPP_INDEX(15)),
+                TextureFactory.builder()
+                    .addIcon(TexturesGtBlock.oMCAQFT)
+                    .extFacing()
+                    .build(),
+                TextureFactory.builder()
+                    .addIcon(TexturesGtBlock.oMCAQFTGlow)
+                    .extFacing()
+                    .glow()
+                    .build() };
         }
         return new ITexture[] { getCasingTexture() };
     }
@@ -935,5 +945,17 @@ public class MTEQuantumForceTransformer extends MTEExtendedPowerMultiBlockBase<M
     @Override
     protected SoundResource getActivitySoundLoop() {
         return SoundResource.GT_MACHINES_QUANTUM_FORCE_TRANSFORMER_LOOP;
+    }
+
+    @Override
+    public boolean onWireCutterRightClick(ForgeDirection side, ForgeDirection wrenchingSide, EntityPlayer aPlayer,
+        float aX, float aY, float aZ) {
+        batchMode = !batchMode;
+        if (batchMode) {
+            GTUtility.sendChatToPlayer(aPlayer, StatCollector.translateToLocal("misc.BatchModeTextOn"));
+        } else {
+            GTUtility.sendChatToPlayer(aPlayer, StatCollector.translateToLocal("misc.BatchModeTextOff"));
+        }
+        return true;
     }
 }

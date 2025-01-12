@@ -26,8 +26,7 @@ public class MTEHatchMuffler extends MTEHatch {
     private static final String localizedDescFormat = GTLanguageManager.addStringLocalization(
         "gt.blockmachines.hatch.muffler.desc.format",
         "Outputs the Pollution (Might cause ... things)%n" + "DO NOT OBSTRUCT THE OUTPUT!%n"
-            + "Reduces Pollution to %d%%%n"
-            + "Recovers %d%% of CO2/CO/SO2");
+            + "Reduces Pollution to %d%%%n");
     private final int pollutionReduction = calculatePollutionReduction(100);
     private final int pollutionRecover = 100 - pollutionReduction;
     private final String[] description = String.format(localizedDescFormat, pollutionReduction, pollutionRecover)
@@ -194,15 +193,24 @@ public class MTEHatchMuffler extends MTEHatch {
     }
 
     /**
-     * @param mte The multi-block controller's {@link MetaTileEntity} MetaTileEntity is passed so newer muffler hatches
-     *            can do wacky things with the multis
+     * @param mte             The multi-block controller's {@link MetaTileEntity} MetaTileEntity is passed so newer
+     *                        muffler hatches can do wacky things with the multis
+     * @param pollutionAmount How much pollution to output. Reduced by muffler efficiency.
      * @return pollution success
      */
-    public boolean polluteEnvironment(MetaTileEntity mte) {
+    public boolean polluteEnvironment(MetaTileEntity mte, int pollutionAmount) {
         if (getBaseMetaTileEntity().getAirAtSide(getBaseMetaTileEntity().getFrontFacing())) {
-            Pollution.addPollution(getBaseMetaTileEntity(), calculatePollutionReduction(10000));
+            Pollution.addPollution(getBaseMetaTileEntity(), calculatePollutionReduction(pollutionAmount));
             return true;
         }
         return false;
+    }
+
+    /**
+     * @deprecated Use {@link #polluteEnvironment(MetaTileEntity, int)}.
+     */
+    @Deprecated
+    public boolean polluteEnvironment(MetaTileEntity mte) {
+        return polluteEnvironment(mte, 10000);
     }
 }

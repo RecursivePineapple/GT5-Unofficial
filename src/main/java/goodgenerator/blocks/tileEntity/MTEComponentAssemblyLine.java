@@ -212,7 +212,7 @@ public class MTEComponentAssemblyLine extends MTEExtendedPowerMultiBlockBase<MTE
     @Override
     protected MultiblockTooltipBuilder createTooltip() {
         MultiblockTooltipBuilder tt = new MultiblockTooltipBuilder();
-        tt.addMachineType("High-Capacity Component Assembler")
+        tt.addMachineType("High-Capacity Component Assembler, CoAL")
             .addInfo("Assembles basic components (motors, pumps, etc.) in large batches.")
             .addInfo(
                 "The " + EnumChatFormatting.BOLD
@@ -232,8 +232,17 @@ public class MTEComponentAssemblyLine extends MTEExtendedPowerMultiBlockBase<MTE
                     + " laser and multi-amp hatches!")
             .addInfo("Supports overclocking beyond MAX!")
             .addInfo(EnumChatFormatting.ITALIC + "Much more efficient than other competing brands!")
+            .addTecTechHatchInfo()
             .beginStructureBlock(9, 10, 33, false)
-            .addOtherStructurePart("Borosilicate Glass", "Can be UV tier or higher")
+            .addController("Mid of the eighth layer")
+            .addCasingInfoExactly("Advanced Iridium Plated Machine Casing", 644, false)
+            .addCasingInfoExactly("Advanced Filter Casing", 124, false)
+            .addCasingInfoExactly("Borosilicate Glass (UV+)", 280, false)
+            .addCasingInfoExactly("Assembler Machine Casing", 30, false)
+            .addCasingInfoExactly("Component Assembly Line Casing", 43, true)
+            .addCasingInfoExactly("PBI Pipe Casing", 126, false)
+            .addCasingInfoExactly("Tungstensteel Frame Box", 4, false)
+            .addCasingInfoExactly("Assembly Line Casing", 55, false)
             .addInputBus("Start of conveyor belt", 1)
             .addOutputBus("End of conveyor belt", 2)
             .addEnergyHatch("Second-top layer", 3)
@@ -345,15 +354,12 @@ public class MTEComponentAssemblyLine extends MTEExtendedPowerMultiBlockBase<MTE
     @Override
     public boolean onWireCutterRightClick(ForgeDirection side, ForgeDirection wrenchingSide, EntityPlayer aPlayer,
         float aX, float aY, float aZ, ItemStack aTool) {
-        if (aPlayer.isSneaking()) {
-            batchMode = !batchMode;
-            if (batchMode) {
-                GTUtility.sendChatToPlayer(aPlayer, "Batch recipes.");
-            } else {
-                GTUtility.sendChatToPlayer(aPlayer, "Don't batch recipes.");
-            }
+        batchMode = !batchMode;
+        if (batchMode) {
+            GTUtility.sendChatToPlayer(aPlayer, StatCollector.translateToLocal("misc.BatchModeTextOn"));
+        } else {
+            GTUtility.sendChatToPlayer(aPlayer, StatCollector.translateToLocal("misc.BatchModeTextOff"));
         }
-
         return true;
     }
 

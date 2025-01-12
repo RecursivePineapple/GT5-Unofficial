@@ -374,6 +374,7 @@ public class GTRecipe implements Comparable<GTRecipe> {
             map.getBackend()
                 .reInit();
         }
+        RecipeAssemblyLine.reInit();
     }
 
     public ItemStack getRepresentativeInput(int aIndex) {
@@ -937,6 +938,7 @@ public class GTRecipe implements Comparable<GTRecipe> {
 
         public ItemStack mResearchItem;
         public int mResearchTime;
+        public int mResearchVoltage;
         public ItemStack[] mInputs;
         public FluidStack[] mFluidInputs;
         public ItemStack mOutput;
@@ -945,16 +947,19 @@ public class GTRecipe implements Comparable<GTRecipe> {
         public ItemStack[][] mOreDictAlt;
         private int mPersistentHash;
 
+        private final List<ItemStack> dataSticksForNEI = new ArrayList<>();
+
         /**
          * THIS CONSTRUCTOR DOES SET THE PERSISTENT HASH.
          * <p>
          * if you set one yourself, it will give you one of the RunetimeExceptions!
          */
-        public RecipeAssemblyLine(ItemStack aResearchItem, int aResearchTime, ItemStack[] aInputs,
+        public RecipeAssemblyLine(ItemStack aResearchItem, int aResearchTime, int aResearchVoltage, ItemStack[] aInputs,
             FluidStack[] aFluidInputs, ItemStack aOutput, int aDuration, int aEUt) {
             this(
                 aResearchItem,
                 aResearchTime,
+                aResearchVoltage,
                 aInputs,
                 aFluidInputs,
                 aOutput,
@@ -969,6 +974,7 @@ public class GTRecipe implements Comparable<GTRecipe> {
             for (FluidStack tFluidInput : aFluidInputs)
                 tPersistentHash = tPersistentHash * 31 + GTUtility.persistentHash(tFluidInput, true, false);
             tPersistentHash = tPersistentHash * 31 + aResearchTime;
+            tPersistentHash = tPersistentHash * 31 + aResearchVoltage;
             tPersistentHash = tPersistentHash * 31 + aDuration;
             tPersistentHash = tPersistentHash * 31 + aEUt;
             setPersistentHash(tPersistentHash);
@@ -979,10 +985,11 @@ public class GTRecipe implements Comparable<GTRecipe> {
          * <p>
          * if you don't set one yourself, it will break a lot of stuff!
          */
-        public RecipeAssemblyLine(ItemStack aResearchItem, int aResearchTime, ItemStack[] aInputs,
+        public RecipeAssemblyLine(ItemStack aResearchItem, int aResearchTime, int aResearchVoltage, ItemStack[] aInputs,
             FluidStack[] aFluidInputs, ItemStack aOutput, int aDuration, int aEUt, ItemStack[][] aAlt) {
             mResearchItem = aResearchItem;
             mResearchTime = aResearchTime;
+            mResearchVoltage = aResearchVoltage;
             mInputs = aInputs;
             mFluidInputs = aFluidInputs;
             mOutput = aOutput;
@@ -1006,7 +1013,8 @@ public class GTRecipe implements Comparable<GTRecipe> {
             GTItemStack thisOutput = new GTItemStack(mOutput);
             GTItemStack thisResearch = new GTItemStack(mResearchItem);
             int miscRecipeDataHash = Arrays.deepHashCode(
-                new Object[] { totalInputStackSize, mDuration, mEUt, thisOutput, thisResearch, mResearchTime });
+                new Object[] { totalInputStackSize, mDuration, mEUt, thisOutput, thisResearch, mResearchTime,
+                    mResearchVoltage });
             result = prime * result + inputFluidHash;
             result = prime * result + inputHash;
             result = prime * result + miscRecipeDataHash;
@@ -1059,7 +1067,8 @@ public class GTRecipe implements Comparable<GTRecipe> {
             }
 
             return this.mDuration == other.mDuration && this.mEUt == other.mEUt
-                && this.mResearchTime == other.mResearchTime;
+                && this.mResearchTime == other.mResearchTime
+                && this.mResearchVoltage == other.mResearchVoltage;
         }
 
         public int getPersistentHash() {
@@ -1099,6 +1108,28 @@ public class GTRecipe implements Comparable<GTRecipe> {
             if (this.mPersistentHash != 0) throw new IllegalStateException("Cannot set persistent hash twice!");
             if (aPersistentHash == 0) this.mPersistentHash = 1;
             else this.mPersistentHash = aPersistentHash;
+        }
+
+        /**
+         * WARNING: this class will maintain a strong reference over ALL data sticks created this way. DO NOT call this
+         * methods recklessly as it will cause memory leak!
+         */
+        public ItemStack newDataStickForNEI(String aDisplayName) {
+            ItemStack dataStick = ItemList.Tool_DataStick.getWithName(1L, aDisplayName);
+            // we don't actually needs to set the recipe data here. no one will read the recipe data before a world load
+            // and before a world load id remap will happen and the recipe data will be finally set in the below
+            // reInit() method
+            // AssemblyLineUtils.setAssemblyLineRecipeOnDataStick(dataStick, this, false);
+            dataSticksForNEI.add(dataStick);
+            return dataStick;
+        }
+
+        public static void reInit() {
+            for (RecipeAssemblyLine recipe : sAssemblylineRecipes) {
+                for (ItemStack stack : recipe.dataSticksForNEI) {
+                    AssemblyLineUtils.setAssemblyLineRecipeOnDataStick(stack, recipe, false);
+                }
+            }
         }
 
         /**

@@ -90,6 +90,18 @@ public class TecTechRecipeMaps {
         .logoPos(151, 63)
         .build();
 
+    public static final RecipeMap<RecipeMapBackend> godforgeFakeUpgradeCostRecipes = RecipeMapBuilder
+        .of("gt.recipe.upgrade_costs")
+        .maxIO(12, 2, 0, 2)
+        .addSpecialTexture(83, 38, 30, 13, GTUITextures.PICTURE_ARROW_GRAY)
+        .dontUseProgressBar()
+        .neiTransferRect(83, 38, 30, 13)
+        .frontend(GodforgeUpgradeCostFrontend::new)
+        .neiHandlerInfo(
+            builder -> builder.setDisplayStack(CustomItemList.Machine_Multi_ForgeOfGods.get(1))
+                .setHeight(100))
+        .build();
+
     public static final RecipeMap<RecipeMapBackend> condensateCreationFromItemRecipes = RecipeMapBuilder.of("gt.recipe.create-condensate-item")
         .maxIO(1, 1, 0, 0)
         .disableOptimize()

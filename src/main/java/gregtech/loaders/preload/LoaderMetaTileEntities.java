@@ -885,6 +885,7 @@ import static gregtech.api.enums.MetaTileEntityIDs.transformer_UV_ZPM;
 import static gregtech.api.enums.MetaTileEntityIDs.transformer_ZPM_LuV;
 import static gregtech.api.enums.Mods.Forestry;
 import static gregtech.api.enums.Mods.NewHorizonsCoreMod;
+import static gregtech.api.enums.Mods.Thaumcraft;
 import static gregtech.api.recipe.RecipeMaps.alloySmelterRecipes;
 import static gregtech.api.recipe.RecipeMaps.amplifierRecipes;
 import static gregtech.api.recipe.RecipeMaps.arcFurnaceRecipes;
@@ -990,6 +991,7 @@ import gregtech.common.tileentities.generators.MTEMagicEnergyConverter;
 import gregtech.common.tileentities.generators.MTEMagicalEnergyAbsorber;
 import gregtech.common.tileentities.generators.MTENaquadahReactor;
 import gregtech.common.tileentities.generators.MTEPlasmaGenerator;
+import gregtech.common.tileentities.generators.MTESolarGenerator;
 import gregtech.common.tileentities.generators.MTESteamTurbine;
 import gregtech.common.tileentities.machines.MTEBasicHullBronze;
 import gregtech.common.tileentities.machines.MTEBasicHullBronzeBricks;
@@ -1010,6 +1012,7 @@ import gregtech.common.tileentities.machines.basic.MTEMassfabricator;
 import gregtech.common.tileentities.machines.basic.MTEMicrowaveEnergyTransmitter;
 import gregtech.common.tileentities.machines.basic.MTEMiner;
 import gregtech.common.tileentities.machines.basic.MTEMonsterRepellent;
+import gregtech.common.tileentities.machines.basic.MTENameRemover;
 import gregtech.common.tileentities.machines.basic.MTEPotionBrewer;
 import gregtech.common.tileentities.machines.basic.MTEPump;
 import gregtech.common.tileentities.machines.basic.MTEReplicator;
@@ -1020,6 +1023,9 @@ import gregtech.common.tileentities.machines.basic.MTETurboCharger;
 import gregtech.common.tileentities.machines.basic.MTEWorldAccelerator;
 import gregtech.common.tileentities.machines.long_distance.MTELongDistancePipelineFluid;
 import gregtech.common.tileentities.machines.long_distance.MTELongDistancePipelineItem;
+import gregtech.common.tileentities.machines.multi.MTEAirFilter1;
+import gregtech.common.tileentities.machines.multi.MTEAirFilter2;
+import gregtech.common.tileentities.machines.multi.MTEAirFilter3;
 import gregtech.common.tileentities.machines.multi.MTEAssemblyLine;
 import gregtech.common.tileentities.machines.multi.MTEBrickedBlastFurnace;
 import gregtech.common.tileentities.machines.multi.MTECharcoalPit;
@@ -1071,6 +1077,7 @@ import gregtech.common.tileentities.machines.multi.MTEPCBFactory;
 import gregtech.common.tileentities.machines.multi.MTEPlasmaForge;
 import gregtech.common.tileentities.machines.multi.MTEProcessingArray;
 import gregtech.common.tileentities.machines.multi.MTEPyrolyseOven;
+import gregtech.common.tileentities.machines.multi.MTEResearchCompleter;
 import gregtech.common.tileentities.machines.multi.MTETranscendentPlasmaMixer;
 import gregtech.common.tileentities.machines.multi.MTEVacuumFreezer;
 import gregtech.common.tileentities.machines.multi.MTEWormholeGenerator;
@@ -1539,7 +1546,7 @@ public class LoaderMetaTileEntities implements Runnable { // TODO CHECK CIRCUIT 
             new MTEOilCracker(OIL_CRACKER_CONTROLLER.ID, "multimachine.cracker", "Oil Cracking Unit").getStackForm(1));
 
         ItemList.Machine_Multi_Assemblyline.set(
-            new MTEAssemblyLine(ASSEMBLING_LINE_CONTROLLER.ID, "multimachine.assemblyline", "Assembling Line")
+            new MTEAssemblyLine(ASSEMBLING_LINE_CONTROLLER.ID, "multimachine.assemblyline", "Assembly Line")
                 .getStackForm(1L));
         ItemList.Machine_Multi_DieselEngine.set(
             new MTEDieselEngine(COMBUSTION_ENGINE_CONTROLLER.ID, "multimachine.dieselengine", "Large Combustion Engine")
@@ -1630,6 +1637,12 @@ public class LoaderMetaTileEntities implements Runnable { // TODO CHECK CIRCUIT 
         ItemList.LargeFluidExtractor.set(
             new MTELargeFluidExtractor(LARGE_FLUID_EXTRACTOR.ID, "multimachine.fluidextractor", "Large Fluid Extractor")
                 .getStackForm(1));
+
+        if (Thaumcraft.isModLoaded()) {
+            ItemList.ResearchCompleter.set(
+                new MTEResearchCompleter(ResearchCompleter.ID, "Research Completer", "Research Completer")
+                    .getStackForm(1));
+        }
     }
 
     private static void registerSteamMachines() {
@@ -12156,6 +12169,33 @@ public class LoaderMetaTileEntities implements Runnable { // TODO CHECK CIRCUIT 
                 .getStackForm(1));
     }
 
+    private static void registerSolarPanels() {
+        ItemList.Machine_LV_SolarPanel.set(
+            new MTESolarGenerator(SOLAR_PANEL_LV.ID, "basicgenerator.solarpanel.01", "Basic Solar Panel", 1)
+                .getStackForm(1));
+        ItemList.Machine_MV_SolarPanel.set(
+            new MTESolarGenerator(SOLAR_PANEL_MV.ID, "basicgenerator.solarpanel.02", "Advanced Solar Panel", 2)
+                .getStackForm(1));
+        ItemList.Machine_HV_SolarPanel.set(
+            new MTESolarGenerator(SOLAR_PANEL_HV.ID, "basicgenerator.solarpanel.03", "Advanced Solar Panel II", 3)
+                .getStackForm(1));
+        ItemList.Machine_EV_SolarPanel.set(
+            new MTESolarGenerator(SOLAR_PANEL_EV.ID, "basicgenerator.solarpanel.04", "Advanced Solar Panel III", 4)
+                .getStackForm(1));
+        ItemList.Machine_IV_SolarPanel.set(
+            new MTESolarGenerator(SOLAR_PANEL_IV.ID, "basicgenerator.solarpanel.05", "Advanced Solar Panel IV", 5)
+                .getStackForm(1));
+        ItemList.Machine_LuV_SolarPanel.set(
+            new MTESolarGenerator(SOLAR_PANEL_LuV.ID, "basicgenerator.solarpanel.06", "Elite Solar Panel", 6)
+                .getStackForm(1));
+        ItemList.Machine_ZPM_SolarPanel.set(
+            new MTESolarGenerator(SOLAR_PANEL_ZPM.ID, "basicgenerator.solarpanel.07", "Elite Solar Panel II", 7)
+                .getStackForm(1));
+        ItemList.Machine_UV_SolarPanel.set(
+            new MTESolarGenerator(SOLAR_PANEL_UV.ID, "basicgenerator.solarpanel.08", "Ultimate Solar Panel", 8)
+                .getStackForm(1));
+    }
+
     private static void registerCombustionGenerators() {
         ItemList.Generator_Diesel_LV.set(
             new MTEDieselGenerator(
@@ -12328,6 +12368,23 @@ public class LoaderMetaTileEntities implements Runnable { // TODO CHECK CIRCUIT 
                 8).getStackForm(1L));
     }
 
+    private static void registerNameRemover() {
+        ItemList.NameRemover
+            .set(new MTENameRemover(NAME_REMOVER.ID, "fix.name.remover", "Name Remover", 0).getStackForm(1L));
+    }
+
+    private static void registerAirFilters() {
+        ItemList.Machine_Multi_AirFilterT1.set(
+            new MTEAirFilter1(AIR_FILTER_CONTROLLER_T1.ID, "multimachine.airfilter.01", "Electric Air Filter T1")
+                .getStackForm(1L));
+        ItemList.Machine_Multi_AirFilterT2.set(
+            new MTEAirFilter2(AIR_FILTER_CONTROLLER_T2.ID, "multimachine.airfilter.02", "Electric Air Filter T2")
+                .getStackForm(1L));
+        ItemList.Machine_Multi_AirFilterT3.set(
+            new MTEAirFilter3(AIR_FILTER_CONTROLLER_T3.ID, "multimachine.airfilter.03", "Electric Air Filter T3")
+                .getStackForm(1L));
+    }
+
     private static void generateWiresAndPipes() {
         for (int meta = 0; meta < GregTechAPI.sGeneratedMaterials.length; meta++) {
             Materials material = GregTechAPI.sGeneratedMaterials[meta];
@@ -12368,47 +12425,46 @@ public class LoaderMetaTileEntities implements Runnable { // TODO CHECK CIRCUIT 
 
         makeWires(Materials.RedAlloy, 2000, 0L, 1L, 1L, GTValues.V[0], true, false);
 
-        makeWires(Materials.Cobalt, 1200, 2L, 4L, 2L, GTValues.V[1], true, false);
+        makeWires(Materials.Cobalt, 1200, 1L, 2L, 2L, GTValues.V[1], true, false);
         makeWires(Materials.Lead, 1220, 2L, 4L, 2L, GTValues.V[1], true, false);
         makeWires(Materials.Tin, 1240, 1L, 2L, 1L, GTValues.V[1], true, false);
-
         makeWires(Materials.Zinc, 1260, 1L, 2L, 1L, GTValues.V[1], true, false);
         makeWires(Materials.SolderingAlloy, 1280, 1L, 2L, 1L, GTValues.V[1], true, false);
 
         makeWires(Materials.Iron, 1300, 3L, 6L, 2L, GTValues.V[2], true, false);
         makeWires(Materials.Nickel, 1320, 3L, 6L, 3L, GTValues.V[2], true, false);
-        makeWires(Materials.Cupronickel, 1340, 3L, 6L, 2L, GTValues.V[2], true, false);
+        makeWires(Materials.Cupronickel, 1340, 3L, 6L, 4L, GTValues.V[2], true, false);
         makeWires(Materials.Copper, 1360, 2L, 4L, 1L, GTValues.V[2], true, false);
         makeWires(Materials.AnnealedCopper, 1380, 1L, 2L, 1L, GTValues.V[2], true, false);
 
-        makeWires(Materials.Kanthal, 1400, 3L, 6L, 4L, GTValues.V[3], true, false);
+        makeWires(Materials.Kanthal, 1400, 3L, 6L, 5L, GTValues.V[3], true, false);
         makeWires(Materials.Gold, 1420, 2L, 4L, 3L, GTValues.V[3], true, false);
-        makeWires(Materials.Electrum, 1440, 2L, 4L, 2L, GTValues.V[3], true, false);
+        makeWires(Materials.Electrum, 1440, 1L, 2L, 2L, GTValues.V[3], true, false);
         makeWires(Materials.Silver, 1460, 1L, 2L, 1L, GTValues.V[3], true, false);
         makeWires(Materials.BlueAlloy, 1480, 1L, 2L, 2L, GTValues.V[3], true, false);
 
-        makeWires(Materials.Nichrome, 1500, 4L, 8L, 3L, GTValues.V[4], true, false);
-        makeWires(Materials.Steel, 1520, 2L, 4L, 2L, GTValues.V[4], true, false);
-        makeWires(Materials.BlackSteel, 1540, 2L, 4L, 3L, GTValues.V[4], true, false);
+        makeWires(Materials.Nichrome, 1500, 4L, 8L, 6L, GTValues.V[4], true, false);
+        makeWires(Materials.Steel, 1520, 3L, 6L, 2L, GTValues.V[4], true, false);
+        makeWires(Materials.BlackSteel, 1540, 1L, 2L, 4L, GTValues.V[4], true, false);
         makeWires(Materials.Titanium, 1560, 2L, 4L, 4L, GTValues.V[4], true, false);
         makeWires(Materials.Aluminium, 1580, 1L, 2L, 1L, GTValues.V[4], true, false);
+        makeWires(Materials.TPV, 1840, 1L, 2L, 6L, GTValues.V[4], true, false);
 
         makeWires(Materials.Graphene, 1600, 1L, 2L, 1L, GTValues.V[5], false, true);
-        makeWires(Materials.Osmium, 1620, 2L, 4L, 4L, GTValues.V[5], true, false);
         makeWires(Materials.Platinum, 1640, 1L, 2L, 2L, GTValues.V[5], true, false);
-        makeWires(Materials.TungstenSteel, 1660, 2L, 4L, 3L, GTValues.V[5], true, false);
-        makeWires(Materials.Tungsten, 1680, 2L, 4L, 2L, GTValues.V[5], true, false);
+        makeWires(Materials.TungstenSteel, 1660, 4L, 8L, 4L, GTValues.V[5], true, false);
+        makeWires(Materials.Tungsten, 1680, 2L, 4L, 6L, GTValues.V[5], true, false);
 
+        makeWires(Materials.Osmium, 1620, 2L, 4L, 4L, GTValues.V[6], true, false);
         makeWires(Materials.HSSG, 1700, 2L, 4L, 4L, GTValues.V[6], true, false);
         makeWires(Materials.NiobiumTitanium, 1720, 2L, 4L, 4L, GTValues.V[6], true, false);
-        makeWires(Materials.VanadiumGallium, 1740, 2L, 4L, 4L, GTValues.V[6], true, false);
-        makeWires(Materials.YttriumBariumCuprate, 1760, 4L, 8L, 4L, GTValues.V[6], true, false);
+        makeWires(Materials.VanadiumGallium, 1740, 4L, 8L, 4L, GTValues.V[6], true, false);
+        makeWires(Materials.YttriumBariumCuprate, 1760, 3L, 6L, 6L, GTValues.V[6], true, false);
 
         makeWires(Materials.Naquadah, 1780, 2L, 4L, 2L, GTValues.V[7], true, false);
 
-        makeWires(Materials.NaquadahAlloy, 1800, 4L, 8L, 2L, GTValues.V[8], true, false);
-        makeWires(Materials.Duranium, 1820, 8L, 16L, 1L, GTValues.V[8], true, false);
-        makeWires(Materials.TPV, 1840, 1L, 2L, 6L, GTValues.V[4], true, false);
+        makeWires(Materials.NaquadahAlloy, 1800, 4L, 8L, 6L, GTValues.V[8], true, false);
+        makeWires(Materials.Duranium, 1820, 2L, 4L, 4L, GTValues.V[8], true, false);
 
         // Superconductor base.
         makeWires(Materials.Pentacadmiummagnesiumhexaoxid, 2200, 1L, 2L, 1L, GTValues.V[2], false, false);
@@ -12444,7 +12500,7 @@ public class LoaderMetaTileEntities implements Runnable { // TODO CHECK CIRCUIT 
         makeWires(Materials.SuperconductorUIV, 2081, 0L, 0L, 64L, GTValues.V[11], false, true);
         makeWires(Materials.SuperconductorUMV, 2089, 0L, 0L, 64L, GTValues.V[12], false, true);
 
-        makeWires(Materials.Ichorium, 2600, 2L, 2L, 12L, GTValues.V[9], false, true);
+        makeWires(Materials.Ichorium, 2600, 4L, 8L, 12L, GTValues.V[9], false, true);
         makeWires(MaterialsUEVplus.SpaceTime, 2606, 0L, 0L, 1_000_000L, GTValues.V[14], false, true);
 
         GTOreDictUnificator.registerOre(
@@ -12839,6 +12895,7 @@ public class LoaderMetaTileEntities implements Runnable { // TODO CHECK CIRCUIT 
         registerItemDistributor();
         registerRecipeFilter();
         registerLightningRods();
+        registerSolarPanels();
         registerCombustionGenerators();
         registerGasTurbines();
         registerSteamTurbines();
@@ -12895,6 +12952,8 @@ public class LoaderMetaTileEntities implements Runnable { // TODO CHECK CIRCUIT 
         registerUnpackager();
         registerPrinter();
         registerOven();
+        registerNameRemover();
+        registerAirFilters();
 
         ItemList.AdvDebugStructureWriter.set(
             new MTEAdvDebugStructureWriter(

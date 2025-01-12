@@ -91,7 +91,6 @@ public abstract class CoverableTileEntity extends BaseTileEntity implements ICov
 
     protected void writeCoverNBT(NBTTagCompound aNBT, boolean isDrop) {
         final NBTTagList tList = new NBTTagList();
-        final int[] coverSides = new int[] { 0, 0, 0, 0, 0, 0 };
 
         for (final ForgeDirection side : ForgeDirection.VALID_DIRECTIONS) {
             final CoverInfo coverInfo = getCoverInfoAtSide(side);
@@ -107,6 +106,7 @@ public abstract class CoverableTileEntity extends BaseTileEntity implements ICov
         if (tList.tagCount() > 0) {
             aNBT.setTag(GTValues.NBT.COVERS, tList);
             // Backwards compat, in case of a revert... for now
+            final int[] coverSides = new int[] { 0, 0, 0, 0, 0, 0 };
             aNBT.setIntArray("mCoverSides", coverSides);
         }
 
@@ -421,6 +421,21 @@ public abstract class CoverableTileEntity extends BaseTileEntity implements ICov
         return true;
     }
 
+    @Override
+    public ItemStack removeCoverAtSide(ForgeDirection side, boolean aForced) {
+        final CoverInfo coverInfo = getCoverInfoAtSide(side);
+        if (!coverInfo.isValid()) return null;
+        if (!coverInfo.onCoverRemoval(aForced) && !aForced) return null;
+        final ItemStack tStack = coverInfo.getDrop();
+        if (tStack != null) {
+            coverInfo.onDropped();
+        }
+        clearCoverInfoAtSide(side);
+        updateOutputRedstoneSignal(side);
+
+        return tStack;
+    }
+
     protected void onBaseTEDestroyed() {
         for (ForgeDirection side : ForgeDirection.VALID_DIRECTIONS) {
             final CoverInfo coverInfo = getCoverInfoAtSide(side);
@@ -444,6 +459,21 @@ public abstract class CoverableTileEntity extends BaseTileEntity implements ICov
     public void setStrongOutputRedstoneSignal(ForgeDirection side, byte strength) {
         mStrongRedstone |= (byte) side.flag;
         setOutputRedstoneSignal(side, strength);
+    }
+
+    @Override
+    public void setRedstoneOutputStrength(ForgeDirection side, boolean isStrong) {
+        if (isStrong) {
+            mStrongRedstone |= (byte) side.flag;
+        } else {
+            mStrongRedstone &= ~(byte) side.flag;
+        }
+        setOutputRedstoneSignal(side, mSidedRedstone[side.ordinal()]);
+    }
+
+    @Override
+    public boolean getRedstoneOutputStrength(ForgeDirection side) {
+        return (mStrongRedstone & side.flag) != 0;
     }
 
     @Override
@@ -746,7 +776,8 @@ public abstract class CoverableTileEntity extends BaseTileEntity implements ICov
         if (coverItem == null) return Collections.emptyList();
         final boolean coverHasGUI = coverInfo.hasCoverGUI();
 
-        final List<String> tooltip = coverItem.getTooltip(Minecraft.getMinecraft().thePlayer, true);
+        final Minecraft mc = Minecraft.getMinecraft();
+        final List<String> tooltip = coverItem.getTooltip(mc.thePlayer, mc.gameSettings.advancedItemTooltips);
         final ImmutableList.Builder<String> builder = ImmutableList.builder();
         builder.add(
             (coverHasGUI ? EnumChatFormatting.UNDERLINE : EnumChatFormatting.DARK_GRAY)

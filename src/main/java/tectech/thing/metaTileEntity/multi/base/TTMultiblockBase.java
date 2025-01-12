@@ -657,17 +657,6 @@ public abstract class TTMultiblockBase extends MTEExtendedPowerMultiBlockBase<TT
     }
 
     /**
-     * get pollution per tick
-     *
-     * @param itemStack what is in controller
-     * @return how much pollution is produced
-     */
-    @Override
-    public int getPollutionPerTick(ItemStack itemStack) {
-        return 0;
-    }
-
-    /**
      * EM pollution per tick
      *
      * @param itemStack - item in controller
@@ -685,7 +674,7 @@ public abstract class TTMultiblockBase extends MTEExtendedPowerMultiBlockBase<TT
      * should do it
      */
     protected void notAllowedToWork_stopMachine_EM() {
-        stopMachine();
+        stopMachine(ShutDownReasonRegistry.NONE);
     }
 
     /**
@@ -854,7 +843,7 @@ public abstract class TTMultiblockBase extends MTEExtendedPowerMultiBlockBase<TT
         for (MTEHatchDataOutput data : eOutputData) {
             data.q = null;
         }
-
+        mLastWorkingTick = mTotalRunTime;
         mOutputItems = null;
         mOutputFluids = null;
         mEfficiency = 0;
@@ -1135,6 +1124,7 @@ public abstract class TTMultiblockBase extends MTEExtendedPowerMultiBlockBase<TT
                                     mProgresstime = 0;
                                     mMaxProgresstime = 0;
                                     mEfficiencyIncrease = 0;
+                                    mLastWorkingTick = mTotalRunTime;
 
                                     if (aBaseMetaTileEntity.isAllowedToWork()) {
                                         if (checkRecipe()) {
@@ -1170,10 +1160,10 @@ public abstract class TTMultiblockBase extends MTEExtendedPowerMultiBlockBase<TT
                                 updateSlots();
                             } // else notAllowedToWork_stopMachine_EM(); //it is already stopped here
                         }
-                    } else { // not repaired
+                    } else if (aBaseMetaTileEntity.isAllowedToWork()) { // not repaired
                         stopMachine(ShutDownReasonRegistry.NO_REPAIR);
                     }
-                } else { // not complete
+                } else if (aBaseMetaTileEntity.isAllowedToWork()) { // not complete
                     stopMachine(ShutDownReasonRegistry.STRUCTURE_INCOMPLETE);
                 }
             }
@@ -1483,7 +1473,7 @@ public abstract class TTMultiblockBase extends MTEExtendedPowerMultiBlockBase<TT
                 getPowerFlow(),
                 getPowerFlow() * getMaxEfficiency(aStack) / Math.max(1000L, mEfficiency),
                 eAmpereFlow)) {
-                criticalStopMachine();
+                stopMachine(ShutDownReasonRegistry.POWER_LOSS);
                 return false;
             }
         }
@@ -2112,7 +2102,7 @@ public abstract class TTMultiblockBase extends MTEExtendedPowerMultiBlockBase<TT
     }
 
     // NEW METHOD
-    public final boolean addDataConnectorToMachineList(IGregTechTileEntity aTileEntity, int aBaseCasingIndex) {
+    public final boolean addDataInputToMachineList(IGregTechTileEntity aTileEntity, int aBaseCasingIndex) {
         if (aTileEntity == null) {
             return false;
         }
@@ -2123,6 +2113,18 @@ public abstract class TTMultiblockBase extends MTEExtendedPowerMultiBlockBase<TT
         if (aMetaTileEntity instanceof MTEHatchDataInput) {
             ((MTEHatch) aMetaTileEntity).updateTexture(aBaseCasingIndex);
             return eInputData.add((MTEHatchDataInput) aMetaTileEntity);
+        }
+        return false;
+    }
+
+    // NEW METHOD
+    public final boolean addDataOutputToMachineList(IGregTechTileEntity aTileEntity, int aBaseCasingIndex) {
+        if (aTileEntity == null) {
+            return false;
+        }
+        IMetaTileEntity aMetaTileEntity = aTileEntity.getMetaTileEntity();
+        if (aMetaTileEntity == null) {
+            return false;
         }
         if (aMetaTileEntity instanceof MTEHatchDataOutput) {
             ((MTEHatch) aMetaTileEntity).updateTexture(aBaseCasingIndex);
@@ -2202,14 +2204,14 @@ public abstract class TTMultiblockBase extends MTEExtendedPowerMultiBlockBase<TT
                 return t.eDynamoMulti.size();
             }
         },
-        InputData("GT5U.MBTT.InputData", TTMultiblockBase::addDataConnectorToMachineList, MTEHatchDataInput.class) {
+        InputData("GT5U.MBTT.InputData", TTMultiblockBase::addDataInputToMachineList, MTEHatchDataInput.class) {
 
             @Override
             public long count(TTMultiblockBase t) {
                 return t.eInputData.size();
             }
         },
-        OutputData("GT5U.MBTT.OutputData", TTMultiblockBase::addDataConnectorToMachineList, MTEHatchDataOutput.class) {
+        OutputData("GT5U.MBTT.OutputData", TTMultiblockBase::addDataOutputToMachineList, MTEHatchDataOutput.class) {
 
             @Override
             public long count(TTMultiblockBase t) {
@@ -2330,8 +2332,8 @@ public abstract class TTMultiblockBase extends MTEExtendedPowerMultiBlockBase<TT
         builder.widget(
             new Scrollable().setVerticalScroll()
                 .widget(screenElements)
-                .setPos(0, 7)
-                .setSize(190, doesBindPlayerInventory() ? 79 : 165));
+                .setPos(10, 7)
+                .setSize(182, doesBindPlayerInventory() ? 79 : 165));
 
         Widget powerPassButton = createPowerPassButton();
         builder.widget(powerPassButton)

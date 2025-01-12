@@ -130,11 +130,17 @@ public class MTEChemicalPlant extends GTPPMultiBlockBase<MTEChemicalPlant> imple
 
     @Override
     protected MultiblockTooltipBuilder createTooltip() {
-        MultiblockTooltipBuilder tt = new MultiblockTooltipBuilder();
-        tt.addMachineType(getMachineType())
+        return new MultiblockTooltipBuilder().addMachineType(getMachineType())
             .addInfo("Heavy Industry, now right at your doorstep!")
-            .addInfo("Please read the user manual for more information on construction and usage")
+            .addInfo("Plant tier is determined by casing tier")
+            .addInfo("Hatch tiers can't be higher than machine casing tier, UHV casing unlocks all tiers")
+            .addInfo("Higher tier coils increases processing speed : T1 = 50%, T2 = 100%, T3 = 150%...")
+            .addInfo("Higher tier pipe casing boosts parallel and reduces catalyst consumption :")
+            .addInfo("+2 parallel per tier, +20% chance of not damaging catalyst per tier")
+            .addInfo("Any catalyst must be placed in the catalyst housing")
+            .addInfo("Awakened Draconium coils combined with Tungstensteel pipe casing makes catalyst unbreakable")
             .addController("Bottom Center")
+            .addOtherStructurePart("Catalyst Housing", "Bottom Casing")
             .addStructureHint("Catalyst Housing", 1)
             .addInputBus("Bottom Casing", 1)
             .addOutputBus("Bottom Casing", 1)
@@ -142,12 +148,11 @@ public class MTEChemicalPlant extends GTPPMultiBlockBase<MTEChemicalPlant> imple
             .addOutputHatch("Bottom Casing", 1)
             .addEnergyHatch("Bottom Casing", 1)
             .addMaintenanceHatch("Bottom Casing", 1)
-            .addSubChannelUsage("casing", "metal machine casing")
+            .addSubChannelUsage("casing", "metal machine casing (minimum 70)")
             .addSubChannelUsage("machine", "tier machine casing")
             .addSubChannelUsage("coil", "heating coil blocks")
             .addSubChannelUsage("pipe", "pipe casing blocks")
             .toolTipFinisher();
-        return tt;
     }
 
     public void setMachineMeta(int meta) {
@@ -256,6 +261,12 @@ public class MTEChemicalPlant extends GTPPMultiBlockBase<MTEChemicalPlant> imple
                     t.mCasing++;
                     return true;
                 } else return false;
+            }
+
+            @Override
+            public boolean couldBeValid(MTEChemicalPlant mteChemicalPlant, World world, int x, int y, int z,
+                ItemStack trigger) {
+                return check(aIndex, world, x, y, z);
             }
 
             private boolean check(int aIndex, World world, int x, int y, int z) {
@@ -424,8 +435,18 @@ public class MTEChemicalPlant extends GTPPMultiBlockBase<MTEChemicalPlant> imple
     }
 
     @Override
+    protected IIconContainer getActiveGlowOverlay() {
+        return TexturesGtBlock.oMCAChemicalPlantActiveGlow;
+    }
+
+    @Override
     protected IIconContainer getInactiveOverlay() {
         return TexturesGtBlock.oMCAChemicalPlant;
+    }
+
+    @Override
+    protected IIconContainer getInactiveGlowOverlay() {
+        return TexturesGtBlock.oMCAChemicalPlantGlow;
     }
 
     @Override
@@ -512,11 +533,6 @@ public class MTEChemicalPlant extends GTPPMultiBlockBase<MTEChemicalPlant> imple
     @Override
     public int getMaxEfficiency(final ItemStack aStack) {
         return 10000;
-    }
-
-    @Override
-    public int getPollutionPerTick(final ItemStack aStack) {
-        return 0;
     }
 
     @Override

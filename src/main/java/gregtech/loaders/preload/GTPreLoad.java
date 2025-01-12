@@ -179,18 +179,6 @@ public class GTPreLoad {
                 GTLog.exp = new PrintStream(GTLog.mExplosionLog);
             } catch (Throwable ignored) {}
         }
-
-        if (Gregtech.general.loggingPlayerActicity) {
-            GTLog.mPlayerActivityLogFile = new File(parentFile, "logs/PlayerActivity.log");
-            if (!GTLog.mPlayerActivityLogFile.exists()) {
-                try {
-                    GTLog.mPlayerActivityLogFile.createNewFile();
-                } catch (Throwable ignored) {}
-            }
-            try {
-                GTLog.pal = new PrintStream(GTLog.mPlayerActivityLogFile);
-            } catch (Throwable ignored) {}
-        }
     }
 
     public static void runMineTweakerCompat() {
@@ -390,7 +378,7 @@ public class GTPreLoad {
         GTMod.gregtechproxy.mGTBees = Gregtech.general.GTBees;
         GTMod.gregtechproxy.mCraftingUnification = Gregtech.general.craftingUnification;
         GTMod.gregtechproxy.mNerfedWoodPlank = Gregtech.general.nerfedWoodPlank;
-        GTMod.gregtechproxy.mNerfedVanillaTools = Gregtech.general.nerfedVanillaTools;
+        GTMod.gregtechproxy.mChangeWoodenVanillaTools = Gregtech.general.changedWoodenVanillaTools;
         GTMod.gregtechproxy.mAchievements = Gregtech.general.achievements;
         GTMod.gregtechproxy.mHideUnusedOres = Gregtech.general.hideUnusedOres;
         GTMod.gregtechproxy.mEnableAllMaterials = Gregtech.general.enableAllMaterials;
@@ -428,8 +416,6 @@ public class GTPreLoad {
         GTValues.alwaysReloadChunkloaders = Gregtech.machines.alwaysReloadChunkloaders;
         GTValues.debugChunkloaders = Gregtech.debug.debugChunkloaders;
         GTValues.disableDigitalChestsExternalAccess = Gregtech.machines.disableDigitalChestsExternalAccess;
-        GTValues.enableMultiTileEntities = Gregtech.machines.enableMultiTileEntities
-            || (boolean) Launch.blackboard.get("fml.deobfuscatedEnvironment");
         GregTechAPI.sMachineExplosions = Gregtech.machines.machineExplosions;
         GregTechAPI.sMachineFlammable = Gregtech.machines.machineFlammable;
         GregTechAPI.sMachineNonWrenchExplosions = Gregtech.machines.machineNonWrenchExplosions;

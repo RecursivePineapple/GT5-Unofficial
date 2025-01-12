@@ -52,6 +52,7 @@ import gregtech.api.util.shutdown.ShutDownReasonRegistry;
 import gregtech.common.items.IDMetaItem03;
 import gregtech.common.items.MetaGeneratedItem03;
 import gregtech.common.tileentities.machines.MTEHatchInputBusME;
+import gregtech.loaders.postload.chains.PurifiedWaterRecipes;
 
 public class MTEPurificationUnitBaryonicPerfection
     extends MTEPurificationUnitBase<MTEPurificationUnitBaryonicPerfection> implements ISurvivalConstructable {
@@ -311,7 +312,9 @@ public class MTEPurificationUnitBaryonicPerfection
                     + CATALYST_BASE_COST
                     + "L"
                     + EnumChatFormatting.WHITE
-                    + " Molten Infinity")
+                    + " Molten Infinity"
+                    + EnumChatFormatting.GRAY
+                    + ".")
             .addInfo("For every duplicate occurrence of an inserted catalyst in the sequence, this cost is doubled.")
             .addSeparator()
             .addInfo("Keeps track of the entire sequence of catalysts inserted this recipe.")
@@ -321,8 +324,18 @@ public class MTEPurificationUnitBaryonicPerfection
                     + BARYONIC_MATTER_OUTPUT
                     + "L "
                     + EnumChatFormatting.WHITE
-                    + "Stabilised Baryonic Matter")
-            .addInfo("At the end of the recipe, all incorrectly inserted catalysts are returned in the output bus.")
+                    + "Stabilised Baryonic Matter"
+                    + EnumChatFormatting.GRAY
+                    + ".")
+            .addInfo(
+                "At the end of a successful recipe, outputs additional " + EnumChatFormatting.RED
+                    + PurifiedWaterRecipes.extraBaryonicOutput
+                    + "L "
+                    + EnumChatFormatting.WHITE
+                    + "Stabilised Baryonic Matter"
+                    + EnumChatFormatting.GRAY
+                    + " per parallel.")
+            .addInfo("At the end of the recipe, returns all incorrectly inserted catalysts in the output bus.")
             .addSeparator()
             .addInfo(
                 EnumChatFormatting.AQUA + ""
@@ -341,6 +354,7 @@ public class MTEPurificationUnitBaryonicPerfection
                     + EnumChatFormatting.ITALIC
                     + "This ultimately creates both Stabilised Baryonic Matter and, most importantly, absolutely perfectly purified water.")
             .beginStructureBlock(17, 17, 17, false)
+            .addController("Front center")
             .addCasingInfoMinColored(
                 "Quark Exclusion Casing",
                 EnumChatFormatting.GRAY,
@@ -371,7 +385,6 @@ public class MTEPurificationUnitBaryonicPerfection
                 108,
                 EnumChatFormatting.GOLD,
                 false)
-            .addController("Front Center")
             .addInputBus("Any Quark Exclusion Casing. Stocking bus is blacklisted.", 1)
             .addInputHatch("Any Quark Exclusion Casing", 1)
             .addOutputBus("Any Quark Exclusion Casing", 1)
@@ -408,7 +421,7 @@ public class MTEPurificationUnitBaryonicPerfection
         // Output incorrect indices unchanged, the spent ones will follow if recipe was successful from the actual
         // recipe outputs
         for (int i = 0; i < insertedCatalysts.size(); ++i) {
-            if (i == correctStartIndex || i == correctStartIndex + 1) continue;
+            if (correctStartIndex != -1 && (i == correctStartIndex || i == correctStartIndex + 1)) continue;
 
             addOutput(insertedCatalysts.get(i));
         }

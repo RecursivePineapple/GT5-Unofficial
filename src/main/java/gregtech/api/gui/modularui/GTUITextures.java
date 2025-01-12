@@ -216,6 +216,12 @@ public class GTUITextures {
         .fullImage(GregTech.ID, "gui/progressbar/water_plasma_heater");
     public static final UITexture PROGRESSBAR_UV_TREATMENT = UITexture
         .fullImage(GregTech.ID, "gui/progressbar/uvtreatment");
+    public static final UITexture PROGRESSBAR_STEAM_FILL = UITexture
+        .fullImage(GregTech.ID, "gui/progressbar/steam_fill");
+    public static final UITexture PROGRESSBAR_STEAM_FILL_STEEL = UITexture
+        .fullImage(GregTech.ID, "gui/progressbar/steam_fill_steel");
+    public static final UITexture PROGRESSBAR_NAME_REMOVER = UITexture
+        .fullImage(GregTech.ID, "gui/progressbar/name_remover");
 
     public static FallbackableUITexture fallbackableProgressbar(String name, UITexture fallback) {
         return new FallbackableUITexture(UITexture.fullImage(GregTech.ID, "gui/progressbar/" + name), fallback);
@@ -409,6 +415,7 @@ public class GTUITextures {
         .fullImage(GregTech.ID, "gui/overlay_button/hourglass");
     public static final UITexture OVERLAY_BUTTON_PATTERN_OPTIMIZE = UITexture
         .fullImage(GregTech.ID, "gui/overlay_button/pattern_optimize");
+    public static final UITexture OVERLAY_BUTTON_X2 = UITexture.fullImage(GregTech.ID, "gui/overlay_button/x2");
 
     public static final UITexture OVERLAY_BUTTON_LIQUIDMODE = UITexture
         .fullImage(GregTech.ID, "gui/overlay_button/LiquidMode");
@@ -537,6 +544,7 @@ public class GTUITextures {
     public static final UITexture PICTURE_SLOTS_HOLO_3BY3 = UITexture
         .fullImage(GregTech.ID, "gui/picture/slots_holo_3by3");
     public static final UITexture PICTURE_ARROW_DOUBLE = UITexture.fullImage(GregTech.ID, "gui/picture/arrow_double");
+    public static final UITexture PICTURE_ARROW_GRAY = UITexture.fullImage(GregTech.ID, "gui/picture/arrow_gray");
     public static final UITexture PICTURE_SUPER_BUFFER = UITexture.fullImage(GregTech.ID, "gui/picture/super_buffer");
     public static final UITexture PICTURE_SQUARE_LIGHT_GRAY = UITexture
         .fullImage(GregTech.ID, "gui/picture/square_light_gray");

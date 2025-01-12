@@ -1,5 +1,6 @@
 package gtPlusPlus.xmod.gregtech.common.tileentities.machines.multi.production.mega;
 
+import static bartworks.util.BWTooltipReference.TT;
 import static com.gtnewhorizon.structurelib.structure.StructureUtility.ofBlock;
 import static com.gtnewhorizon.structurelib.structure.StructureUtility.ofChain;
 import static com.gtnewhorizon.structurelib.structure.StructureUtility.onElementPass;
@@ -272,7 +273,7 @@ public class MTEMegaAlloyBlastSmelter extends MTEExtendedPowerMultiBlockBase<MTE
     @Override
     protected MultiblockTooltipBuilder createTooltip() {
         MultiblockTooltipBuilder tt = new MultiblockTooltipBuilder();
-        tt.addMachineType("Fluid Alloy Cooker")
+        tt.addMachineType("Fluid Alloy Cooker, MABS")
             .addInfo(
                 "Runs the same recipes as the normal ABS, except with up to " + EnumChatFormatting.BOLD
                     + EnumChatFormatting.UNDERLINE
@@ -297,12 +298,19 @@ public class MTEMegaAlloyBlastSmelter extends MTEExtendedPowerMultiBlockBase<MTE
                     + EnumChatFormatting.RESET
                     + EnumChatFormatting.GRAY)
             .addInfo("The glass limits the tier of the energy hatch. UEV glass unlocks all tiers.")
-            .addInfo("UV glass required for TecTech laser hatches.")
+            .addTecTechHatchInfo()
+            .addInfo("UV glass required for " + TT + " laser hatches.")
             .addInfo(
                 EnumChatFormatting.ITALIC + "\"all it does is make metals hot\""
                     + EnumChatFormatting.RESET
                     + EnumChatFormatting.GRAY)
+            .addPollutionAmount(getPollutionPerSecond(null))
             .beginStructureBlock(11, 20, 11, false)
+            .addController("Mid of the fourth layer")
+            .addCasingInfoExactly("Blast Smelter Casing Block", 218, false)
+            .addCasingInfoExactly("Blast Smelter Heat Containment Coil", 56, false)
+            .addCasingInfoExactly("Coil", 360, true)
+            .addCasingInfoExactly("Borosilicate Glass", 339, true)
             .addMaintenanceHatch("Around the controller", 2)
             .addOtherStructurePart("Input Bus, Output Bus, Input Hatch, Output Bus, Energy Hatch", "Bottom Casing", 1)
             .addMufflerHatch("1 in the center of the top layer", 3)
@@ -387,12 +395,22 @@ public class MTEMegaAlloyBlastSmelter extends MTEExtendedPowerMultiBlockBase<MTE
                     TextureFactory.builder()
                         .addIcon(TexturesGtBlock.oMCAMegaAlloyBlastSmelterActive)
                         .extFacing()
+                        .build(),
+                    TextureFactory.builder()
+                        .addIcon(TexturesGtBlock.oMCAMegaAlloyBlastSmelterActiveGlow)
+                        .extFacing()
+                        .glow()
                         .build() };
             }
             return new ITexture[] { Textures.BlockIcons.getCasingTextureForId(TAE.GTPP_INDEX(15)),
                 TextureFactory.builder()
                     .addIcon(TexturesGtBlock.oMCAMegaAlloyBlastSmelter)
                     .extFacing()
+                    .build(),
+                TextureFactory.builder()
+                    .addIcon(TexturesGtBlock.oMCAMegaAlloyBlastSmelterGlow)
+                    .extFacing()
+                    .glow()
                     .build() };
         }
         return new ITexture[] { Textures.BlockIcons.getCasingTextureForId(TAE.GTPP_INDEX(15)) };
@@ -427,15 +445,12 @@ public class MTEMegaAlloyBlastSmelter extends MTEExtendedPowerMultiBlockBase<MTE
     @Override
     public boolean onWireCutterRightClick(ForgeDirection side, ForgeDirection wrenchingSide, EntityPlayer aPlayer,
         float aX, float aY, float aZ, ItemStack aTool) {
-        if (aPlayer.isSneaking()) {
-            batchMode = !batchMode;
-            if (batchMode) {
-                GTUtility.sendChatToPlayer(aPlayer, "Batch recipes.");
-            } else {
-                GTUtility.sendChatToPlayer(aPlayer, "Don't batch recipes.");
-            }
+        batchMode = !batchMode;
+        if (batchMode) {
+            GTUtility.sendChatToPlayer(aPlayer, StatCollector.translateToLocal("misc.BatchModeTextOn"));
+        } else {
+            GTUtility.sendChatToPlayer(aPlayer, StatCollector.translateToLocal("misc.BatchModeTextOff"));
         }
-
         return true;
     }
 

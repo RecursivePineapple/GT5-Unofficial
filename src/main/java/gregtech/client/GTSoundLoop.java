@@ -9,7 +9,6 @@ import net.minecraft.world.World;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import gregtech.api.interfaces.tileentity.IGregTechTileEntity;
-import gregtech.api.multitileentity.machine.MultiTileBasicMachine;
 
 @SideOnly(Side.CLIENT)
 public class GTSoundLoop extends MovingSound {
@@ -38,19 +37,6 @@ public class GTSoundLoop extends MovingSound {
         }
     }
 
-    public GTSoundLoop(ResourceLocation sound, MultiTileBasicMachine<?> base, boolean stopWhenActive,
-        boolean stopWhenInactive) {
-        super(sound);
-        this.whileActive = stopWhenActive;
-        this.whileInactive = stopWhenInactive;
-        xPosF = machineX = base.getXCoord();
-        yPosF = machineY = base.getYCoord();
-        zPosF = machineZ = base.getZCoord();
-        worldID = base.getWorld().provider.dimensionId;
-        repeat = true;
-        volume = VOLUME_RAMP;
-    }
-
     @Override
     public void update() {
         if (donePlaying) {
@@ -76,11 +62,6 @@ public class GTSoundLoop extends MovingSound {
             if (igte.getMetaTileEntity() instanceof ISoundLoopAware loopAware) {
                 loopAware.onSoundLoopTicked(this);
             }
-            return;
-        }
-
-        if (tile instanceof MultiTileBasicMachine<?> mute) {
-            fadeMe |= mute.isActive() ? whileActive : whileInactive;
             return;
         }
 

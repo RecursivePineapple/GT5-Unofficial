@@ -15,8 +15,6 @@ import net.minecraftforge.fluids.FluidStack;
 
 import cpw.mods.fml.common.registry.GameRegistry;
 import gregtech.api.enums.GTValues;
-import gregtech.api.enums.ItemList;
-import gregtech.api.util.AssemblyLineUtils;
 import gregtech.api.util.GTOreDictUnificator;
 import gregtech.api.util.GTRecipe;
 import gregtech.api.util.GTRecipe.RecipeAssemblyLine;
@@ -58,6 +56,7 @@ public class TTRecipeAdder extends RecipeAdder {
         GTRecipe.RecipeAssemblyLine recipeGT = new GTRecipe.RecipeAssemblyLine(
             CustomItemList.UnusedStuff.get(1),
             totalComputationRequired / computationRequiredPerSec,
+            0,
             aInputs,
             aFluidInputs,
             aOutput,
@@ -66,6 +65,7 @@ public class TTRecipeAdder extends RecipeAdder {
         RecipeAssemblyLine recipeTT = new GTRecipe.RecipeAssemblyLine(
             aResearchItem,
             totalComputationRequired / computationRequiredPerSec,
+            0,
             aInputs,
             aFluidInputs,
             aOutput,
@@ -74,12 +74,10 @@ public class TTRecipeAdder extends RecipeAdder {
         GTRecipe.RecipeAssemblyLine.sAssemblylineRecipes.add(recipeGT);
         TecTechRecipeMaps.researchableALRecipeList.add(recipeTT);
 
-        ItemStack writesDataStick = ItemList.Tool_DataStick.getWithName(1L, "Writes Research result");
-        AssemblyLineUtils.setAssemblyLineRecipeOnDataStick(writesDataStick, recipeTT, false);
         GTValues.RA.stdBuilder()
             .itemInputs(aResearchItem)
             .itemOutputs(aOutput)
-            .special(writesDataStick)
+            .special(recipeTT.newDataStickForNEI("Writes Research result"))
             .duration(totalComputationRequired)
             .eut(researchEUt)
             .metadata(RESEARCH_STATION_DATA, researchAmperage | computationRequiredPerSec << 16)
@@ -88,13 +86,11 @@ public class TTRecipeAdder extends RecipeAdder {
             .fake()
             .addTo(researchStationFakeRecipes);
 
-        ItemStack readsDataStick = ItemList.Tool_DataStick.getWithName(1L, "Reads Research result");
-        AssemblyLineUtils.setAssemblyLineRecipeOnDataStick(readsDataStick, recipeTT, false);
         GTValues.RA.stdBuilder()
             .itemInputs(aInputs)
             .itemOutputs(aOutput)
             .fluidInputs(aFluidInputs)
-            .special(readsDataStick)
+            .special(recipeTT.newDataStickForNEI("Reads Research result"))
             .duration(assDuration)
             .eut(assEUt)
             .ignoreCollision()
@@ -198,6 +194,7 @@ public class TTRecipeAdder extends RecipeAdder {
         GTRecipe.RecipeAssemblyLine recipeGT = new GTRecipe.RecipeAssemblyLine(
             CustomItemList.UnusedStuff.get(1),
             totalComputationRequired / computationRequiredPerSec,
+            0,
             tInputs,
             aFluidInputs,
             aOutput,
@@ -209,6 +206,7 @@ public class TTRecipeAdder extends RecipeAdder {
         GTRecipe.RecipeAssemblyLine recipeTT = new GTRecipe.RecipeAssemblyLine(
             aResearchItem,
             totalComputationRequired / computationRequiredPerSec,
+            0,
             tInputs,
             aFluidInputs,
             aOutput,
@@ -218,12 +216,10 @@ public class TTRecipeAdder extends RecipeAdder {
         recipeTT.setPersistentHash(tPersistentHash);
         TecTechRecipeMaps.researchableALRecipeList.add(recipeTT);
 
-        ItemStack writesDataStick = ItemList.Tool_DataStick.getWithName(1L, "Writes Research result");
-        AssemblyLineUtils.setAssemblyLineRecipeOnDataStick(writesDataStick, recipeTT, false);
         GTValues.RA.stdBuilder()
             .itemInputs(aResearchItem)
             .itemOutputs(aOutput)
-            .special(writesDataStick)
+            .special(recipeTT.newDataStickForNEI("Writes Research result"))
             .duration(totalComputationRequired)
             .eut(researchEUt)
             .metadata(RESEARCH_STATION_DATA, researchAmperage | computationRequiredPerSec << 16)
@@ -232,13 +228,11 @@ public class TTRecipeAdder extends RecipeAdder {
             .fake()
             .addTo(researchStationFakeRecipes);
 
-        ItemStack readsDataStick = ItemList.Tool_DataStick.getWithName(1L, "Reads Research result");
-        AssemblyLineUtils.setAssemblyLineRecipeOnDataStick(readsDataStick, recipeTT, false);
         assemblylineVisualRecipes.addFakeRecipe(
             false,
             tInputs,
             new ItemStack[] { aOutput },
-            new ItemStack[] { readsDataStick },
+            new ItemStack[] { recipeTT.newDataStickForNEI("Reads Research result") },
             aFluidInputs,
             null,
             assDuration,

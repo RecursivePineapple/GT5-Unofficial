@@ -48,6 +48,7 @@ import gregtech.api.recipe.check.SimpleCheckRecipeResult;
 import gregtech.api.render.TextureFactory;
 import gregtech.api.util.GTRecipe;
 import gregtech.api.util.MultiblockTooltipBuilder;
+import gregtech.api.util.shutdown.ShutDownReasonRegistry;
 import gtnhlanth.api.recipe.LanthanidesRecipeMaps;
 import gtnhlanth.util.DescTextLocalization;
 
@@ -113,7 +114,7 @@ public class MTEDissolutionTank extends MTEEnhancedMultiBlockBase<MTEDissolution
             @Override
             protected CheckRecipeResult onRecipeStart(@Nonnull GTRecipe recipe) {
                 if (!checkRatio(recipe, Arrays.asList(inputFluids))) {
-                    criticalStopMachine();
+                    stopMachine(ShutDownReasonRegistry.CRITICAL_NONE);
                     return SimpleCheckRecipeResult.ofFailurePersistOnShutdown("dissolution_ratio");
                 }
                 return CheckRecipeResultRegistry.SUCCESSFUL;
@@ -238,7 +239,11 @@ public class MTEDissolutionTank extends MTEEnhancedMultiBlockBase<MTEDissolution
         tt.addMachineType("Dissolution Tank")
             .addInfo("Input Water and Fluid, output Fluid")
             .addInfo("You must input the Fluids at the correct Ratio")
+            .beginStructureBlock(5, 5, 5, true)
             .addController("Front bottom")
+            .addCasingInfoExactly("Clean Stainless Steel Machine Casing", 42, false)
+            .addCasingInfoExactly("Titanium Reinforced Borosilicate Glass", 24, false)
+            .addCasingInfoExactly("Heat Proof Machine Casing", 9, false)
             .addInputHatch("Hint block with dot 1")
             .addInputBus("Hint block with dot 1")
             .addOutputHatch("Hint block with dot 1")
