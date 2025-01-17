@@ -980,8 +980,8 @@ public abstract class TTMultiblockBase extends MTEExtendedPowerMultiBlockBase<TT
                 Arrays.fill(parametrization.groups, null);
                 parametrization.parameterInArrayList.clear();
                 parametrization.parameterOutArrayList.clear();
-                Arrays.fill(parametrization.eParamsInStatus, null);
-                Arrays.fill(parametrization.eParamsOutStatus, null);
+                Arrays.fill(parametrization.eParamsInStatus, LedStatus.STATUS_UNUSED);
+                Arrays.fill(parametrization.eParamsOutStatus, LedStatus.STATUS_UNUSED);
 
                 parametersInstantiation_EM();
     

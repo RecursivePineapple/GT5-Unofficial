@@ -2363,6 +2363,38 @@ public class GTUtility {
         return rList;
     }
 
+    public static <S, T> List<T> mapToList(Collection<S> in, Function<S, T> mapper) {
+        List<T> out = new ArrayList<>(in.size());
+        for (S s : in)
+            out.add(mapper.apply(s));
+        return out;
+    }
+
+    public static <S, T> List<T> mapToList(S[] in, Function<S, T> mapper) {
+        List<T> out = new ArrayList<>(in.length);
+        for (S s : in)
+            out.add(mapper.apply(s));
+        return out;
+    }
+
+    public static <S, T> T[] mapToArray(Collection<S> in, IntFunction<T[]> ctor, Function<S, T> mapper) {
+        T[] out = ctor.apply(in.size());
+
+        Iterator<S> iter = in.iterator();
+        for (int i = 0; i < out.length && iter.hasNext(); i++) {
+            out[i] = mapper.apply(iter.next());
+        }
+
+        return out;
+    }
+
+    public static <S, T> T[] mapToArray(S[] in, IntFunction<T[]> ctor, Function<S, T> mapper) {
+        T[] out = ctor.apply(in.length);
+        for (int i = 0; i < out.length; i++)
+            out[i] = mapper.apply(in[i]);
+        return out;
+    }
+
     public static Block getBlockFromStack(ItemStack itemStack) {
         if (isStackInvalid(itemStack)) return Blocks.air;
         return getBlockFromItem(itemStack.getItem());
@@ -4529,6 +4561,10 @@ public class GTUtility {
 
     public static int clamp(int val, int lo, int hi) {
         return MathHelper.clamp_int(val, lo, hi);
+    }
+
+    public static float clamp(float val, float lo, float hi) {
+        return val < lo ? lo : val > hi ? hi : val;
     }
 
     public static int min(int first, int... rest) {

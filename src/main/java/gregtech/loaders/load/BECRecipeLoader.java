@@ -108,10 +108,10 @@ public class BECRecipeLoader {
         }
 
         public Object getMaterial() {
+            if (gtMat != null && gtMat.mMetaItemSubID > 0) return gtMat;
             if (bartMat != null) return bartMat;
             if (gtppMat != null) return gtppMat;
-            if (gtMat != null) return gtMat;
-            throw new IllegalStateException("One of gtMat, gtppMat, bartMat must be non-null.");
+            throw new IllegalStateException("One of gtMat, gtppMat, bartMat must be non-null: " + name);
         }
 
         @Override
@@ -146,7 +146,7 @@ public class BECRecipeLoader {
         FLUID_MATS.clear();
 
         for (Materials mat : GregTechAPI.sGeneratedMaterials) {
-            if (mat != null && mat != Materials._NULL) {
+            if (mat != null && mat != Materials._NULL && mat.mMetaItemSubID > 0) {
                 getMaterial(mat).gtMat = mat;
             }
         }

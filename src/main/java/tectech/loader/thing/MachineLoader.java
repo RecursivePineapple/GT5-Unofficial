@@ -37,7 +37,6 @@ import tectech.thing.metaTileEntity.hatch.MTEHatchWirelessDataItemsOutput;
 import tectech.thing.metaTileEntity.hatch.MTEHatchWirelessMulti;
 import tectech.thing.metaTileEntity.multi.MTEActiveTransformer;
 import tectech.thing.metaTileEntity.multi.MTEBECGenerator;
-import tectech.thing.metaTileEntity.multi.MTEBECLiquifier;
 import tectech.thing.metaTileEntity.multi.MTEBECStorage;
 import tectech.thing.metaTileEntity.multi.MTEDataBank;
 import tectech.thing.metaTileEntity.multi.MTEEnergyInfuser;
@@ -1663,11 +1662,6 @@ public class MachineLoader implements Runnable {
             BoseEinsteinCondensateStorage.ID,
             "multimachine.em.bec-storage",
             "Bose-Einstein Condensate Containment Field"
-            ).getStackForm(1L));
-        Machine_Multi_BECLiquifier.set(new MTEBECLiquifier(
-            BoseEinsteinCondensateLiquifier.ID,
-            "multimachine.em.bec-liquifier",
-            "Bose-Einstein Condensate Fluid Observation Array"
             ).getStackForm(1L));
 
         // ===================================================================================================

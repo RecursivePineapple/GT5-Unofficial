@@ -1,9 +1,10 @@
 package tectech.thing.metaTileEntity.multi;
 
 import static gregtech.api.casing.Casings.AdvancedFusionCoilII;
-import static gregtech.api.casing.Casings.AdvancedMolecularCasing;
-import static gregtech.api.casing.Casings.MolecularCasing;
-import static gregtech.api.casing.Casings.QuantumGlass;
+import static gregtech.api.casing.Casings.ElectromagneticWaveguide;
+import static gregtech.api.casing.Casings.ElectromagneticallyIsolatedCasing;
+import static gregtech.api.casing.Casings.FineStructureConstantManipulator;
+import static gregtech.api.casing.Casings.SuperconductivePlasmaEnergyConduit;
 import static gregtech.api.enums.GTValues.V;
 import static gregtech.api.enums.HatchElement.Energy;
 import static gregtech.api.enums.HatchElement.ExoticEnergy;
@@ -20,10 +21,9 @@ import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
 
 import org.jetbrains.annotations.NotNull;
+import org.joml.Vector3f;
 
 import com.gtnewhorizon.structurelib.structure.IStructureDefinition;
-import com.gtnewhorizon.structurelib.structure.StructureDefinition;
-import com.gtnewhorizon.structurelib.util.Vec3Impl;
 import com.gtnewhorizons.modularui.api.math.Alignment;
 import com.gtnewhorizons.modularui.common.widget.DynamicPositionedColumn;
 import com.gtnewhorizons.modularui.common.widget.SlotWidget;
@@ -31,6 +31,7 @@ import com.gtnewhorizons.modularui.common.widget.TextWidget;
 
 import gregtech.api.enums.GTValues;
 import gregtech.api.enums.SoundResource;
+import gregtech.api.interfaces.ITexture;
 import gregtech.api.interfaces.metatileentity.IMetaTileEntity;
 import gregtech.api.interfaces.tileentity.IGregTechTileEntity;
 import gregtech.api.metatileentity.implementations.MTEHatch;
@@ -40,16 +41,18 @@ import gregtech.api.metatileentity.implementations.MTEHatchMultiInput;
 import gregtech.api.recipe.RecipeMap;
 import gregtech.api.recipe.check.CheckRecipeResult;
 import gregtech.api.recipe.check.CheckRecipeResultRegistry;
+import gregtech.api.structure.MultiblockTooltipBuilder2;
 import gregtech.api.util.GTRecipe;
 import gregtech.api.util.GTRecipeConstants;
 import gregtech.api.util.GTUtility;
-import gregtech.api.util.HatchElementBuilder;
 import gregtech.api.util.MultiblockTooltipBuilder;
 import gregtech.client.GTSoundLoop;
 import gregtech.client.ISoundLoopAware;
+import gregtech.client.volumetric.LinearSound;
 import gregtech.common.tileentities.machines.MTEHatchInputME;
 import gregtech.loaders.load.BECRecipeLoader;
 import it.unimi.dsi.fastutil.objects.Object2LongOpenHashMap;
+
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
@@ -61,6 +64,7 @@ import tectech.mechanics.boseEinsteinCondensate.BECFactoryGrid;
 import tectech.mechanics.boseEinsteinCondensate.BECInventory;
 import tectech.mechanics.boseEinsteinCondensate.CondensateStack;
 import tectech.recipe.TecTechRecipeMaps;
+import tectech.thing.CustomItemList;
 import tectech.thing.metaTileEntity.hatch.MTEHatchEnergyMulti;
 import tectech.thing.metaTileEntity.multi.base.INameFunction;
 import tectech.thing.metaTileEntity.multi.base.IStatusFunction;
@@ -73,12 +77,20 @@ public class MTEBECGenerator extends MTEBECMultiblockBase<MTEBECGenerator> imple
     
     private List<CondensateStack> mOutputCondensate;
 
+    private final LinearSound soundPos;
+
     public MTEBECGenerator(int aID, String aName, String aNameRegional) {
         super(aID, aName, aNameRegional);
+
+        this.soundPos = new LinearSound()
+            .setCoords(0, 0, 2, 0, 0, 25)
+            .setCentre(2, 1, 10);
     }
 
     protected MTEBECGenerator(MTEBECGenerator prototype) {
         super(prototype);
+
+        this.soundPos = prototype.soundPos;
     }
 
     @Override
@@ -91,56 +103,50 @@ public class MTEBECGenerator extends MTEBECMultiblockBase<MTEBECGenerator> imple
         return BECStructureDefinitions.BEC_GENERATOR;
     }
 
-    // spotless:off
     @Override
     public IStructureDefinition<MTEBECGenerator> compile(String[][] definition) {
-        structure.addCasing('A', MolecularCasing);
-        structure.addCasing('B', AdvancedMolecularCasing);
-        structure.addCasing('C', AdvancedFusionCoilII);
-        structure.addCasing('D', QuantumGlass);
+        structure.addCasing('A', SuperconductivePlasmaEnergyConduit);
+        structure.addCasing('B', ElectromagneticallyIsolatedCasing);
+        structure.addCasing('C', FineStructureConstantManipulator);
+        structure.addCasing('D', ElectromagneticWaveguide);
+        structure.addCasing('E', AdvancedFusionCoilII);
+        structure.addCasingWithHatches('O', ElectromagneticallyIsolatedCasing, 2, 1, Arrays.asList(BECHatches.Hatch));
+        structure.addCasingWithHatches('1', ElectromagneticallyIsolatedCasing, 1, 16, Arrays.asList(InputBus, InputHatch, Energy, ExoticEnergy));
 
-        return StructureDefinition.<MTEBECGenerator>builder()
-            .addShape(STRUCTURE_PIECE_MAIN, definition)
-            .addElement('A', MolecularCasing.asElement())
-            .addElement('B', AdvancedMolecularCasing.asElement())
-            .addElement('C', AdvancedFusionCoilII.asElement())
-            .addElement('D', QuantumGlass.asElement())
-            .addElement('O', HatchElementBuilder.<MTEBECGenerator>builder()
-                    .anyOf(BECHatches.Hatch)
-                    .casingIndex(MolecularCasing.getTextureId())
-                    .dot(2)
-                    .build())
-            .addElement('1', HatchElementBuilder.<MTEBECGenerator>builder()
-                    .anyOf(InputBus, InputHatch, Energy, ExoticEnergy)
-                    .casingIndex(MolecularCasing.getTextureId())
-                    .dot(1)
-                    .buildAndChain(structure.getCasingAdder('1', MolecularCasing, 16)))
-            .build();
+        return structure.buildStructure(definition);
     }
 
     @Override
     protected MultiblockTooltipBuilder createTooltip() {
-        MultiblockTooltipBuilder tt = new MultiblockTooltipBuilder();
+        MultiblockTooltipBuilder2<MTEBECGenerator> tt = new MultiblockTooltipBuilder2<>(structure);
 
-        // spotless:off
-        tt.addMachineType("Bose-Einstein Condensate Generator")
-            .addInfo("Makes fancy atoms")
-            .beginStructureBlock(structure.size.x, structure.size.y, structure.size.z, false)
-            .addController("Front Center")
-            .pipe(tt2 -> {
-                structure.addCasingInfoRange(tt2, MolecularCasing);
-                structure.addCasingInfoExact(tt2, AdvancedMolecularCasing);
-                structure.addCasingInfoExact(tt2, AdvancedFusionCoilII);
-                structure.addCasingInfoExact(tt2, QuantumGlass);
-            })
-            .addInputBus("Any " + MolecularCasing.getLocalizedName() + " in the first slice", 1)
-            .addInputHatch("Any " + MolecularCasing.getLocalizedName() + " in the first slice", 1)
-            .addEnergyHatch("Any " + MolecularCasing.getLocalizedName() + " in the first slice", 1)
-            .addOtherStructurePart(BECHatches.Hatch.getDisplayName(), "The centre casing in the last slice", 2)
-            .toolTipFinisher(GTValues.AuthorPineapple);
-        // spotless:on
+        tt.addMachineType("BEC Generator")
+            .addInfo("Makes fancy atoms");
+
+        tt.beginStructureBlock();
+        tt.addController("Front Center");
+        tt.addHatchNameOverride(BECHatches.Hatch, CustomItemList.becConnectorHatch.get(1));
+        tt.addHatchLocationOverride(
+            Arrays.asList(InputBus, InputHatch, Energy, ExoticEnergy),
+            "Any " + ElectromagneticallyIsolatedCasing.getLocalizedName() + " in the first slice");
+        tt.addHatchLocationOverride(
+            BECHatches.Hatch,
+            "The centre casing in the last slice");
+        tt.addAllCasingInfo(
+            Arrays.asList(
+                ElectromagneticallyIsolatedCasing,
+                SuperconductivePlasmaEnergyConduit,
+                AdvancedFusionCoilII,
+                ElectromagneticWaveguide));
+
+        tt.toolTipFinisher(EnumChatFormatting.WHITE, 0, GTValues.AuthorPineapple);
 
         return tt;
+    }
+
+    @Override
+    protected ITexture getCasingTexture() {
+        return ElectromagneticallyIsolatedCasing.getCasingTexture();
     }
 
     protected Parameters.Group.ParameterIn blockingMode;
@@ -263,12 +269,9 @@ public class MTEBECGenerator extends MTEBECMultiblockBase<MTEBECGenerator> imple
 
     @Override
     public void modifySoundLoop(GTSoundLoop loop) {
-        Vec3Impl pos = getExtendedFacing().getWorldOffset(new Vec3Impl(0, 0, 10));
+        Vector3f v = soundPos.getPosition(this);
 
-        IGregTechTileEntity igte = getBaseMetaTileEntity();
-
-        loop.setPosition(pos.get0() + igte.getXCoord(), pos.get1() + igte.getYCoord(), pos.get2() + igte.getZCoord());
-        loop.setVolume(2);
+        if (v != null) loop.setPosition(v);
     }
 
     @Override

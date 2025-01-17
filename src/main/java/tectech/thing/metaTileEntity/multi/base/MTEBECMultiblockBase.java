@@ -23,6 +23,9 @@ import gregtech.api.interfaces.ITexture;
 import gregtech.api.interfaces.metatileentity.IMetaTileEntity;
 import gregtech.api.interfaces.tileentity.IGregTechTileEntity;
 import gregtech.api.render.TextureFactory;
+import gregtech.api.structure.IStructureProvider;
+import gregtech.api.structure.StructureWrapper;
+import gregtech.api.structure.StructureWrapperInstanceInfo;
 import gregtech.api.util.IGTHatchAdder;
 import gtPlusPlus.xmod.gregtech.common.blocks.textures.TexturesGtBlock;
 import mcp.mobius.waila.api.IWailaConfigHandler;
@@ -37,9 +40,6 @@ import tectech.mechanics.boseEinsteinCondensate.BECFactoryElement;
 import tectech.mechanics.boseEinsteinCondensate.BECFactoryNetwork;
 import tectech.thing.CustomItemList;
 import tectech.thing.metaTileEntity.hatch.MTEHatchBEC;
-import tectech.thing.metaTileEntity.multi.IStructureProvider;
-import tectech.thing.metaTileEntity.multi.StructureWrapper;
-import tectech.thing.metaTileEntity.multi.StructureWrapperInstanceInfo;
 
 public abstract class MTEBECMultiblockBase<TSelf extends MTEBECMultiblockBase<TSelf>> extends TTMultiblockBase implements ISurvivalConstructable, BECFactoryElement, IStructureProvider<TSelf> {
     
@@ -165,17 +165,22 @@ public abstract class MTEBECMultiblockBase<TSelf extends MTEBECMultiblockBase<TS
         return structureInstanceInfo.checkStructure((TSelf) this);
     }
 
+    private String errorMessage;
+
     @Override
     protected void drawTexts(DynamicPositionedColumn screenElements, SlotWidget inventorySlot) {
         super.drawTexts(screenElements, inventorySlot);
 
         screenElements.widgets(
-            new FakeSyncWidget.BooleanSyncer(
-                () -> structureInstanceInfo.hasErrors,
-                value -> structureInstanceInfo.hasErrors = value),
-            TextWidget.dynamicString(() -> structureInstanceInfo.getErrors())
+            new FakeSyncWidget.StringSyncer(
+                () -> {
+                    structureInstanceInfo.validate();
+                    return structureInstanceInfo.getErrorMessage();
+                },
+                error -> errorMessage = error),
+            TextWidget.dynamicString(() -> errorMessage)
                 .setTextAlignment(Alignment.CenterLeft)
-                .setEnabled(structureInstanceInfo.hasErrors));
+                .setEnabled(errorMessage != null && !errorMessage.isEmpty()));
     }
 
     @Override

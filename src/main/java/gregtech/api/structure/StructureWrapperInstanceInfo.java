@@ -1,4 +1,4 @@
-package tectech.thing.metaTileEntity.multi;
+package gregtech.api.structure;
 
 import static net.minecraft.util.EnumChatFormatting.DARK_RED;
 import static net.minecraft.util.EnumChatFormatting.RESET;
@@ -6,19 +6,24 @@ import static net.minecraft.util.EnumChatFormatting.RESET;
 import java.util.ArrayList;
 import java.util.List;
 
+import net.minecraft.item.ItemStack;
+
+import gregtech.api.metatileentity.implementations.MTEEnhancedMultiBlockBase;
+
 import com.gtnewhorizon.structurelib.structure.ISurvivalBuildEnvironment;
 import com.gtnewhorizons.modularui.api.drawable.TextRenderer;
 
-import gregtech.api.metatileentity.implementations.MTEEnhancedMultiBlockBase;
 import it.unimi.dsi.fastutil.chars.Char2IntArrayMap;
-import net.minecraft.item.ItemStack;
 
 public class StructureWrapperInstanceInfo<MTE extends MTEEnhancedMultiBlockBase<?> & IStructureProvider<MTE>> {
+
     public final StructureWrapper<MTE> structure;
 
     public Char2IntArrayMap actualCasingCounts = new Char2IntArrayMap();
 
-    public boolean hasErrors = false;
+    private boolean valid = false;
+
+    private String error;
 
     public StructureWrapperInstanceInfo(StructureWrapper<MTE> structure) {
         this.structure = structure;
@@ -26,47 +31,64 @@ public class StructureWrapperInstanceInfo<MTE extends MTEEnhancedMultiBlockBase<
 
     private static final int ERROR_WRAP_WIDTH = 180;
 
-    public String getErrors() {
+    /**
+     * Validates this structure. Currently only checks casing counts.
+     * @return True when valid.
+     */
+    public boolean validate() {
         List<String> lines = new ArrayList<>();
 
-        for (var e : structure.maxHatches.char2IntEntrySet()) {
+        this.error = null;
+        valid = true;
+
+        for (var e : structure.casings.char2ObjectEntrySet()) {
             int presentCasings = actualCasingCounts.get(e.getCharKey());
-            int minCasings = structure.definitionCasingCounts.get(e.getCharKey()) - e.getIntValue();
+            int minCasings = e.getValue().definitionCasingCount - e.getValue().maxHatches;
 
             if (presentCasings < minCasings) {
-                hasErrors = true;
-                
+                valid = false;
+
                 String error = String.format(
                     "%sNot enough %s: need %d, but have %d.%s",
                     DARK_RED,
-                    structure.casings.get(e.getCharKey()).getLocalizedName(),
+                    e.getValue().casing.getLocalizedName(),
                     minCasings,
                     presentCasings,
-                    RESET);
+                    RESET
+                );
 
                 lines.addAll(TextRenderer.getFontRenderer().listFormattedStringToWidth(error, ERROR_WRAP_WIDTH));
             }
         }
 
-        return String.join("\n", lines);
+        error = String.join("\n", lines);
+
+        return valid;
     }
 
     public boolean checkStructure(MTE instance) {
         actualCasingCounts.clear();
-        hasErrors = false;
 
         if (!structure.checkStructure(instance)) {
+            valid = false;
             return false;
         }
 
-        for (var e : structure.definitionCasingCounts.char2IntEntrySet()) {
-            actualCasingCounts.putIfAbsent(e.getCharKey(), e.getIntValue());
+        for (var e : structure.casings.char2ObjectEntrySet()) {
+            actualCasingCounts.putIfAbsent(e.getCharKey(), e.getValue().definitionCasingCount);
         }
 
-        // this is fine :fire:
-        getErrors();
+        validate();
 
-        return !hasErrors;
+        return valid;
+    }
+
+    public String getErrorMessage() {
+        return error;
+    }
+
+    public boolean isValid() {
+        return valid;
     }
 
     public void construct(MTE instance, ItemStack trigger, boolean hintsOnly) {

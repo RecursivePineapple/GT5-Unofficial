@@ -3,12 +3,52 @@ package gregtech.api.casing;
 import java.util.function.Supplier;
 
 import gtPlusPlus.core.block.ModBlocks;
+
 import net.minecraft.block.Block;
+
+import gregtech.api.GregTechAPI;
+
 import tectech.thing.block.BlockQuantumGlass;
 import tectech.thing.casing.BlockGTCasingsTT;
 import tectech.thing.casing.TTCasingsContainer;
 
 public enum Casings implements ICasing {
+
+    TinItemPipeCasing
+        (() -> GregTechAPI.sBlockCasings11, 0, 2112),
+    BrassItemPipeCasing
+        (() -> GregTechAPI.sBlockCasings11, 1, 2112),
+    ElectrumItemPipeCasing
+        (() -> GregTechAPI.sBlockCasings11, 2, 2112),
+    PlatinumItemPipeCasing
+        (() -> GregTechAPI.sBlockCasings11, 3, 2112),
+    OsmiumItemPipeCasing
+        (() -> GregTechAPI.sBlockCasings11, 4, 2112),
+    QuantiumItemPipeCasing
+        (() -> GregTechAPI.sBlockCasings11, 5, 2112),
+    FluxedElectrumItemPipeCasing
+        (() -> GregTechAPI.sBlockCasings11, 6, 2112),
+    BlackPlutoniumItemPipeCasing
+        (() -> GregTechAPI.sBlockCasings11, 7, 2112),
+    SuperconductivePlasmaEnergyConduit
+        (() -> GregTechAPI.sBlockCasings11, 8, 2112),
+    ElectromagneticallyIsolatedCasing
+        (() -> GregTechAPI.sBlockCasings11, 9, 2112),
+    FineStructureConstantManipulator
+        (() -> GregTechAPI.sBlockCasings11, 10, 2112),
+
+    ChemicalGradeGlass
+        (() -> GregTechAPI.sBlockGlass1, 0, 2048),
+    ElectronPermeableNeutroniumCoatedGlass
+        (() -> GregTechAPI.sBlockGlass1, 1, 2048),
+    OmniPurposeInfinityFusedGlass
+        (() -> GregTechAPI.sBlockGlass1, 2, 2048),
+    NonPhotonicMatterExclusionGlass
+        (() -> GregTechAPI.sBlockGlass1, 3, 2048),
+    HawkingRadiationRealignmentFocus
+        (() -> GregTechAPI.sBlockGlass1, 4, 2048),
+    ElectromagneticWaveguide
+        (() -> GregTechAPI.sBlockGlass1, 5, 2048),
 
     FusionMachineCasingMKIV
         (() -> ModBlocks.blockCasings6Misc, 0, 116),

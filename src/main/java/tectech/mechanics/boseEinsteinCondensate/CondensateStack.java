@@ -5,6 +5,7 @@ import static gregtech.api.enums.GTValues.M;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 
 import org.jetbrains.annotations.Nullable;
@@ -100,7 +101,7 @@ public class CondensateStack {
         return tag;
     }
 
-    public static NBTTagList save(List<CondensateStack> stacks) {
+    public static NBTTagList save(Collection<CondensateStack> stacks) {
         NBTTagList tags = new NBTTagList();
 
         for (CondensateStack stack : stacks) {
@@ -117,7 +118,7 @@ public class CondensateStack {
         for (NBTTagCompound tag : ((List<NBTTagCompound>) stacks.tagList)) {
             CondensateStack stack = CondensateStack.readFromTag(tag);
 
-            if (stack != null) out.add(stack);
+            if (stack != null && stack.material != null) out.add(stack);
         }
 
         return out;
@@ -126,9 +127,19 @@ public class CondensateStack {
     public static @Nullable CondensateStack readFromTag(NBTTagCompound tag) {
         String matName = tag.getString("n");
 
-        Object material = Materials.get(matName);
+        Object material = null;
 
-        if (material == Materials._NULL) material = Material.mMaterialCache.get(matName);
+        Materials gtMat = Materials.get(matName);
+
+        if (gtMat != null && gtMat.mMetaItemSubID > 0) material = gtMat;
+
+        if (material == null) {
+            material = Werkstoff.werkstoffVarNameHashMap.get(matName);
+        }
+
+        if (material == null) {
+            material = Material.mMaterialCache.get(matName);
+        }
 
         if (material == null) return null;
         

@@ -8,18 +8,21 @@ import net.minecraft.world.World;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
+
 import gregtech.api.interfaces.tileentity.IGregTechTileEntity;
+
+import org.joml.Vector3f;
 
 @SideOnly(Side.CLIENT)
 public class GTSoundLoop extends MovingSound {
 
-    private static final float VOLUME_RAMP = 0.0625f;
+    public static final float VOLUME_RAMP = 0.0625f;
     private final boolean whileActive;
     private final boolean whileInactive;
     private final int worldID, machineX, machineY, machineZ;
     
     private boolean fadeMe = false;
-    private float targetVolume = 1;
+    private float targetVolume = 1, volumeRamp;
 
     public GTSoundLoop(ResourceLocation p_i45104_1_, IGregTechTileEntity base, boolean stopWhenActive,
         boolean stopWhenInactive) {
@@ -31,7 +34,25 @@ public class GTSoundLoop extends MovingSound {
         zPosF = machineZ = base.getZCoord();
         worldID = base.getWorld().provider.dimensionId;
         repeat = true;
+        volumeRamp = VOLUME_RAMP;
         volume = VOLUME_RAMP;
+        if (base.getMetaTileEntity() instanceof ISoundLoopAware loopAware) {
+            loopAware.modifySoundLoop(this);
+        }
+    }
+
+    public GTSoundLoop(ResourceLocation p_i45104_1_, IGregTechTileEntity base, boolean stopWhenActive,
+        boolean stopWhenInactive, float volumeRamp) {
+        super(p_i45104_1_);
+        this.whileActive = stopWhenActive;
+        this.whileInactive = stopWhenInactive;
+        xPosF = machineX = base.getXCoord();
+        yPosF = machineY = base.getYCoord();
+        zPosF = machineZ = base.getZCoord();
+        worldID = base.getWorld().provider.dimensionId;
+        repeat = true;
+        this.volumeRamp = volumeRamp;
+        volume = volumeRamp;
         if (base.getMetaTileEntity() instanceof ISoundLoopAware loopAware) {
             loopAware.modifySoundLoop(this);
         }
@@ -43,13 +64,13 @@ public class GTSoundLoop extends MovingSound {
             return;
         }
         if (fadeMe) {
-            volume -= VOLUME_RAMP * targetVolume;
+            volume -= volumeRamp * targetVolume;
             if (volume <= 0) {
                 volume = 0;
                 donePlaying = true;
             }
         } else if (volume < targetVolume) {
-            volume += VOLUME_RAMP * targetVolume;
+            volume += volumeRamp * targetVolume;
         }
         World world = Minecraft.getMinecraft().thePlayer.worldObj;
         donePlaying = world.provider.dimensionId != worldID
@@ -74,6 +95,12 @@ public class GTSoundLoop extends MovingSound {
         zPosF = z;
     }
 
+    public void setPosition(Vector3f v) {
+        xPosF = v.x;
+        yPosF = v.y;
+        zPosF = v.z;
+    }
+
     public boolean isFading() {
         return fadeMe;
     }
@@ -86,11 +113,7 @@ public class GTSoundLoop extends MovingSound {
         }
     }
 
-    public boolean isDonePlaying() {
-        return donePlaying;
-    }
-
     public void setDonePlaying(boolean isDone) {
-        donePlaying = isDone;
+        this.donePlaying = isDone;
     }
 }

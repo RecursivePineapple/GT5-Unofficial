@@ -21,6 +21,7 @@ import java.util.Set;
 import java.util.function.Supplier;
 
 import net.minecraft.item.ItemStack;
+import net.minecraft.launchwrapper.Launch;
 import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.world.World;
 import net.minecraftforge.fluids.FluidStack;
@@ -33,6 +34,7 @@ import gregtech.api.interfaces.IIconContainer;
 import gregtech.api.interfaces.internal.IGTMod;
 import gregtech.api.interfaces.internal.IGTRecipeAdder;
 import gregtech.api.net.IGT_NetworkHandler;
+import gregtech.api.util.GTChunkAssociatedData;
 
 /**
  * Made for static imports, this Class is just a Helper.
@@ -545,6 +547,8 @@ public class GTValues {
     public static final FluidStack[] emptyFluidStack = new FluidStack[0];
     public static final ItemStack[] emptyItemStackArray = new ItemStack[0];
     public static final IIconContainer[] emptyIconContainerArray = new IIconContainer[3];
+
+    public static boolean DEVENV = (boolean) Launch.blackboard.get("fml.deobfuscatedEnvironment");
 
     /**
      * Pretty formatting for author names.

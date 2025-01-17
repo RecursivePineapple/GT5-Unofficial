@@ -37,7 +37,7 @@ public enum CustomItemList implements IItemContainer {
     TestHatch,
     Machine_Multi_BECGenerator,
     Machine_Multi_BECStorage,
-    Machine_Multi_BECLiquifier,
+    Machine_Multi_BECAssembler,
     rack_Hatch,
     holder_Hatch,
     capacitor_Hatch,

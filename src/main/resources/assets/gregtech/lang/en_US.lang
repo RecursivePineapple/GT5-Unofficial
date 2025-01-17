@@ -154,6 +154,10 @@ GT5U.MS.multismelting=Multi smelting
 
 gt.casing.tiertooltip=Casing Tier: %s
 
+gt.casing11.8.tooltip=§b§lPrevents observation. Just don't look at it too hard.
+gt.casing11.9.tooltip=§b§l
+gt.casing11.10.tooltip=§b§lVacuum decay not included.
+
 # Machine types
 gt.recipe.alloysmelter=Alloy Smelter
 gt.recipe.alloysmelter.description=HighTech combination Smelter

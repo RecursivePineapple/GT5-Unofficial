@@ -99,6 +99,12 @@ public class Textures {
         MACHINE_CASING_ITEM_PIPE_FLUXED_ELECTRUM,
         MACHINE_CASING_ITEM_PIPE_BLACK_PLUTONIUM,
 
+        BEC1,
+        BEC1_90,
+        BEC2,
+        BEC3,
+        BEC4,
+
         BLOCK_STEELEAF,
         BLOCK_ICHORIUM,
         BLOCK_FIRESTONE,
