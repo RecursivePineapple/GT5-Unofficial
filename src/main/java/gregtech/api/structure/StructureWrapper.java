@@ -105,8 +105,14 @@ public class StructureWrapper<MTE extends MTEEnhancedMultiBlockBase<?> & IStruct
         }
     }
 
+    private void ensureStructureLoaded() {
+        if (structureDefinition == null) {
+            loadStructure();
+        }
+    }
+
     public boolean checkStructure(MTE instance) {
-        loadStructure();
+        ensureStructureLoaded();
 
         if (!GTValues.DEVENV) {
             return checkStructureImpl(instance);
@@ -141,6 +147,8 @@ public class StructureWrapper<MTE extends MTEEnhancedMultiBlockBase<?> & IStruct
     }
 
     public void construct(MTE instance, ItemStack trigger, boolean hintsOnly) {
+        ensureStructureLoaded();
+
         if (!GTValues.DEVENV) {
             constructImpl(instance, trigger, hintsOnly);
         } else {
@@ -176,6 +184,8 @@ public class StructureWrapper<MTE extends MTEEnhancedMultiBlockBase<?> & IStruct
 
     public int survivalConstruct(MTE instance, ItemStack trigger, int elementBudget, ISurvivalBuildEnvironment env) {
         if (instance.mMachine) return -1;
+
+        ensureStructureLoaded();
 
         if (!GTValues.DEVENV) {
             return survivalConstructImpl(instance, trigger, elementBudget, env);
