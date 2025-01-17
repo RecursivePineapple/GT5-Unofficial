@@ -174,7 +174,7 @@ public enum IDMetaItem01 {
     EnergisedTesseract(417),
     Black_Hole_Opener(418),
     Black_Hole_Closer(419),
-    BEC_Liquid_Pattern(420),
+    Black_Hole_Stabilizer(420),
     StableAdhesive(427),
     SuperconductorComposite(428),
     NaquadriaSupersolid(429),

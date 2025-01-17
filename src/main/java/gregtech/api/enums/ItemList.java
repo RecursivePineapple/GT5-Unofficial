@@ -1522,6 +1522,7 @@ public enum ItemList implements IItemContainer {
     Hawking_Glass,
     Black_Hole_Opener,
     Black_Hole_Closer,
+    Black_Hole_Stabilizer,
 
     Machine_Multi_IndustrialBrewery,
 
@@ -1535,7 +1536,6 @@ public enum ItemList implements IItemContainer {
     Machine_Multi_Autoclave,
     Casing_Autoclave,
 
-    BEC_Liquid_Pattern,
     BEC_Condensate,
 
     Machine_LV_Miner,
@@ -2608,9 +2608,12 @@ public enum ItemList implements IItemContainer {
     Casing_AirFilter_Vent_T3,
     Casing_Pyrolyse,
     NameRemover,
+    Hatch_Nanite,
+    Hatch_Catalyst_Bulk,
     Machine_Multi_AirFilterT1,
     Machine_Multi_AirFilterT2,
     Machine_Multi_AirFilterT3,
+
     // semicolon after the comment to reduce merge conflicts
     ;
 

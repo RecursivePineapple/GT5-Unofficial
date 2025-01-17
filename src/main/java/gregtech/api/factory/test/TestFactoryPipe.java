@@ -3,21 +3,21 @@ package gregtech.api.factory.test;
 import java.util.Collection;
 import java.util.List;
 
-import gregtech.api.interfaces.metatileentity.IMetaTileEntity;
-import gregtech.api.interfaces.tileentity.IGregTechTileEntity;
-import gregtech.api.util.TickDeferral;
-import mcp.mobius.waila.api.IWailaConfigHandler;
-import mcp.mobius.waila.api.IWailaDataAccessor;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.world.World;
 import net.minecraftforge.common.util.ForgeDirection;
+
+import gregtech.api.interfaces.metatileentity.IMetaTileEntity;
+import gregtech.api.interfaces.tileentity.IGregTechTileEntity;
+import mcp.mobius.waila.api.IWailaConfigHandler;
+import mcp.mobius.waila.api.IWailaDataAccessor;
 import tectech.thing.metaTileEntity.pipe.MTEBaseFactoryPipe;
 
 public class TestFactoryPipe extends MTEBaseFactoryPipe implements TestFactoryElement {
-    
+
     public TestFactoryPipe(int aID, String aName, String aNameRegional) {
         super(aID, aName, aNameRegional);
     }
@@ -33,16 +33,18 @@ public class TestFactoryPipe extends MTEBaseFactoryPipe implements TestFactoryEl
 
     @Override
     public void getWailaNBTData(EntityPlayerMP player, TileEntity tile, NBTTagCompound tag, World world, int x, int y,
-            int z) {
+        int z) {
         super.getWailaNBTData(player, tile, tag, world, x, y, z);
         tag.setString("network", network == null ? "null" : network.toString());
     }
 
     @Override
     public void getWailaBody(ItemStack itemStack, List<String> currenttip, IWailaDataAccessor accessor,
-            IWailaConfigHandler config) {
+        IWailaConfigHandler config) {
         super.getWailaBody(itemStack, currenttip, accessor, config);
-        currenttip.add("Network: " + accessor.getNBTData().getString("network"));
+        currenttip.add(
+            "Network: " + accessor.getNBTData()
+                .getString("network"));
     }
 
     @Override
@@ -95,6 +97,11 @@ public class TestFactoryPipe extends MTEBaseFactoryPipe implements TestFactoryEl
         }
     }
 
+    @Override
+    protected void checkActive() {
+        mIsActive = getBaseMetaTileEntity().getTimer() % 200 > 100;
+    }
+
     private TestFactoryNetwork network;
 
     @Override
@@ -119,11 +126,11 @@ public class TestFactoryPipe extends MTEBaseFactoryPipe implements TestFactoryEl
     public void onRemoval() {
         super.onRemoval();
 
-        TickDeferral.schedule(() -> TestFactoryGrid.INSTANCE.removeElement(this));
+        TestFactoryGrid.INSTANCE.removeElement(this);
     }
 
     @Override
     public void onColorChangeServer(byte aColor) {
-        TickDeferral.schedule(() -> TestFactoryGrid.INSTANCE.addElement(this));
+        TestFactoryGrid.INSTANCE.addElement(this);
     }
 }

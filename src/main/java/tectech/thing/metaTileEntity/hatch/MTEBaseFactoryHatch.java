@@ -2,6 +2,11 @@ package tectech.thing.metaTileEntity.hatch;
 
 import static gregtech.api.enums.Dyes.MACHINE_METAL;
 
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.ItemStack;
+import net.minecraftforge.common.util.ForgeDirection;
+import net.minecraftforge.fluids.FluidStack;
+
 import gregtech.api.enums.Dyes;
 import gregtech.api.enums.Textures.BlockIcons.CustomIcon;
 import gregtech.api.interfaces.ITexture;
@@ -9,13 +14,9 @@ import gregtech.api.interfaces.tileentity.IGregTechTileEntity;
 import gregtech.api.metatileentity.MetaTileEntity;
 import gregtech.api.metatileentity.implementations.MTEHatch;
 import gregtech.api.render.TextureFactory;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.item.ItemStack;
-import net.minecraftforge.common.util.ForgeDirection;
-import net.minecraftforge.fluids.FluidStack;
 
 public abstract class MTEBaseFactoryHatch extends MTEHatch {
-    
+
     public static final CustomIcon EM_D_ACTIVE = new CustomIcon("iconsets/OVERLAY_EM_D_ACTIVE");
     public static final CustomIcon EM_D_SIDES = new CustomIcon("iconsets/OVERLAY_EM_D_SIDES");
     public static final CustomIcon EM_D_CONN = new CustomIcon("iconsets/EM_DATA_CONN");
@@ -33,26 +34,18 @@ public abstract class MTEBaseFactoryHatch extends MTEHatch {
 
     @Override
     public ITexture[] getTexturesActive(ITexture baseTexture) {
-        return new ITexture[] {
-            baseTexture,
-            TextureFactory.builder()
-                .addIcon(EM_D_ACTIVE)
-                .setRGBA(Dyes.getModulation(getBaseMetaTileEntity().getColorization(), MACHINE_METAL.getRGBA()))
-                .build(),
-            TextureFactory.of(EM_D_CONN)
-        };
+        return new ITexture[] { baseTexture, TextureFactory.builder()
+            .addIcon(EM_D_ACTIVE)
+            .setRGBA(Dyes.getModulation(getBaseMetaTileEntity().getColorization(), MACHINE_METAL.getRGBA()))
+            .build(), TextureFactory.of(EM_D_CONN) };
     }
 
     @Override
     public ITexture[] getTexturesInactive(ITexture baseTexture) {
-        return new ITexture[] {
-            baseTexture,
-            TextureFactory.builder()
-                .addIcon(EM_D_SIDES)
-                .setRGBA(Dyes.getModulation(getBaseMetaTileEntity().getColorization(), MACHINE_METAL.getRGBA()))
-                .build(),
-            TextureFactory.of(EM_D_CONN)
-        };
+        return new ITexture[] { baseTexture, TextureFactory.builder()
+            .addIcon(EM_D_SIDES)
+            .setRGBA(Dyes.getModulation(getBaseMetaTileEntity().getColorization(), MACHINE_METAL.getRGBA()))
+            .build(), TextureFactory.of(EM_D_CONN) };
     }
 
     @Override

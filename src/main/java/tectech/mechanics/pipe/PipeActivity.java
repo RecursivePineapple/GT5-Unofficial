@@ -5,6 +5,9 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.function.Function;
 
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.world.World;
+
 import com.gtnewhorizon.gtnhlib.util.CoordinatePacker;
 
 import cpw.mods.fml.common.FMLCommonHandler;
@@ -13,20 +16,18 @@ import cpw.mods.fml.common.gameevent.TickEvent;
 import cpw.mods.fml.common.gameevent.TickEvent.Phase;
 import cpw.mods.fml.common.gameevent.TickEvent.Type;
 import cpw.mods.fml.common.network.simpleimpl.IMessage;
-import cpw.mods.fml.common.network.simpleimpl.IMessageHandler;
 import cpw.mods.fml.common.network.simpleimpl.MessageContext;
 import cpw.mods.fml.relauncher.Side;
+import eu.usrv.yamcore.network.client.AbstractClientMessageHandler;
 import gregtech.api.interfaces.metatileentity.IMetaTileEntity;
 import gregtech.api.interfaces.tileentity.IGregTechTileEntity;
 import it.unimi.dsi.fastutil.ints.IntBooleanPair;
 import it.unimi.dsi.fastutil.longs.LongArrayList;
 import it.unimi.dsi.fastutil.longs.LongList;
-import net.minecraft.client.Minecraft;
-import net.minecraft.world.World;
 import tectech.loader.NetworkDispatcher;
 
 public class PipeActivity {
-    
+
     public static final PipeActivity INSTANCE = new PipeActivity();
 
     private static final Map<IntBooleanPair, LongArrayList> updates = new HashMap<>();
@@ -54,13 +55,16 @@ public class PipeActivity {
     private static final int MAX_UPDATES_PER_PACKET = 30_000 / 8;
 
     public synchronized static void sendUpdates() {
-        var iter = updates.entrySet().iterator();
+        var iter = updates.entrySet()
+            .iterator();
 
         while (iter.hasNext()) {
             var e = iter.next();
 
-            int worldId = e.getKey().leftInt();
-            boolean isActive = e.getKey().rightBoolean();
+            int worldId = e.getKey()
+                .leftInt();
+            boolean isActive = e.getKey()
+                .rightBoolean();
             LongArrayList coords = e.getValue();
 
             for (int i = 0; i < coords.size(); i += MAX_UPDATES_PER_PACKET) {
@@ -79,7 +83,9 @@ public class PipeActivity {
     }
 
     public static void init() {
-        FMLCommonHandler.instance().bus().register(INSTANCE);
+        FMLCommonHandler.instance()
+            .bus()
+            .register(INSTANCE);
     }
 
     @SubscribeEvent
@@ -89,12 +95,12 @@ public class PipeActivity {
         }
     }
 
-    public static class Handler implements IMessageHandler<BatchedPipeActivityMessage, IMessage> {
-        @Override
-        public IMessage onMessage(BatchedPipeActivityMessage message, MessageContext ctx) {
-            if (ctx.side != Side.CLIENT) return null;
+    public static class Handler extends AbstractClientMessageHandler<BatchedPipeActivityMessage> {
 
-            World world = Minecraft.getMinecraft().theWorld;
+        @Override
+        public IMessage handleClientMessage(EntityPlayer player, BatchedPipeActivityMessage message,
+            MessageContext ctx) {
+            World world = player.worldObj;
 
             if (message.worldId != world.provider.dimensionId) return null;
 
@@ -104,13 +110,13 @@ public class PipeActivity {
                 int x = CoordinatePacker.unpackX(coord);
                 int y = CoordinatePacker.unpackY(coord);
                 int z = CoordinatePacker.unpackZ(coord);
-                
                 int chunkX = x >> 4;
                 int chunkZ = z >> 4;
 
                 // if this pipe's chunk isn't loaded, ignore it completely
                 if (!Objects.equals(chunkX, lastChunkX) || !Objects.equals(chunkZ, lastChunkZ)) {
-                    if (!world.getChunkProvider().chunkExists(chunkX, chunkZ)) {
+                    if (!world.getChunkProvider()
+                        .chunkExists(chunkX, chunkZ)) {
                         continue;
                     } else {
                         lastChunkX = chunkX;

@@ -3,16 +3,17 @@ package gregtech.api.factory;
 import java.util.HashMap;
 import java.util.function.Function;
 
+import net.minecraft.world.World;
+
 import org.joml.Vector4i;
 
 import com.gtnewhorizon.gtnhlib.util.ObjectPooler;
 
 import gregtech.api.interfaces.metatileentity.IMetaTileEntity;
 import gregtech.api.interfaces.tileentity.IGregTechTileEntity;
-import net.minecraft.world.World;
 
 public class BlockData<T> extends HashMap<Vector4i, T> {
-    
+
     private final ObjectPooler<Vector4i> pooler = new ObjectPooler<>(Vector4i::new);
 
     public T get(IMetaTileEntity imte) {

@@ -2,18 +2,18 @@ package gregtech.api.casing;
 
 import java.util.function.Supplier;
 
-import gtPlusPlus.core.block.ModBlocks;
-
 import net.minecraft.block.Block;
 
 import gregtech.api.GregTechAPI;
-
+import gtPlusPlus.core.block.ModBlocks;
 import tectech.thing.block.BlockQuantumGlass;
 import tectech.thing.casing.BlockGTCasingsTT;
 import tectech.thing.casing.TTCasingsContainer;
 
 public enum Casings implements ICasing {
 
+    // spotless:off
+    // I know these look weird, but I think it makes it easier to read
     TinItemPipeCasing
         (() -> GregTechAPI.sBlockCasings11, 0, 2112),
     BrassItemPipeCasing
@@ -89,6 +89,7 @@ public enum Casings implements ICasing {
     UltimateContainmentFieldGenerator
         (() -> TTCasingsContainer.sBlockCasingsTT, 14, BlockGTCasingsTT.texturePage),
     ;
+    // spotless:on
 
     public final Supplier<Block> blockGetter;
     public final int meta;
@@ -113,7 +114,8 @@ public enum Casings implements ICasing {
     @Override
     public int getTextureId() {
         if (textureOffset == -1) {
-            throw new UnsupportedOperationException("Casing " + name() + " does not have a casing texture; The result of getTextureId() is undefined.");
+            throw new UnsupportedOperationException(
+                "Casing " + name() + " does not have a casing texture; The result of getTextureId() is undefined.");
         }
 
         return textureOffset + meta;

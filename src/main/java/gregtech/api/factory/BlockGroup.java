@@ -3,14 +3,14 @@ package gregtech.api.factory;
 import java.lang.ref.WeakReference;
 import java.util.Iterator;
 
-import org.joml.Vector3i;
-import org.joml.Vector3ic;
-
 import net.minecraft.world.World;
 import net.minecraftforge.common.DimensionManager;
 
+import org.joml.Vector3i;
+import org.joml.Vector3ic;
+
 public class BlockGroup implements Iterable<Vector3ic> {
-    
+
     private int worldId;
     private WeakReference<World> world;
 

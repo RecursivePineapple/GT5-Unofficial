@@ -17,16 +17,23 @@ import gregtech.api.factory.IFactoryElement;
 import gregtech.api.factory.IFactoryGrid;
 import gregtech.api.factory.IFactoryNetwork;
 
-public abstract class StandardFactoryGrid<TSelf extends StandardFactoryGrid<TSelf, TElement, TNetwork>, TElement extends IFactoryElement<TElement, TNetwork, TSelf>, TNetwork extends IFactoryNetwork<TNetwork, TElement, TSelf>> implements IFactoryGrid<TSelf, TElement, TNetwork> {
-    
+/**
+ * This handles all network topology updates, and should be compatible with most pipe systems.
+ * A factory element should always register itself with this grid, even when it's not connected to anything.
+ */
+public abstract class StandardFactoryGrid<TSelf extends StandardFactoryGrid<TSelf, TElement, TNetwork>, TElement extends IFactoryElement<TElement, TNetwork, TSelf>, TNetwork extends IFactoryNetwork<TNetwork, TElement, TSelf>>
+    implements IFactoryGrid<TSelf, TElement, TNetwork> {
+
     public static final Logger LOGGER = LogManager.getLogger("Standard Factory Network");
 
     public final HashSet<TNetwork> networks = new HashSet<>();
     public final HashSet<TElement> vertices = new HashSet<>();
-    public final SetMultimap<TElement, TElement> edges = MultimapBuilder.hashKeys().hashSetValues().build();
+    public final SetMultimap<TElement, TElement> edges = MultimapBuilder.hashKeys()
+        .hashSetValues()
+        .build();
 
     protected StandardFactoryGrid() {
-        
+
     }
 
     @Override
@@ -48,10 +55,11 @@ public abstract class StandardFactoryGrid<TSelf extends StandardFactoryGrid<TSel
         LOGGER.info("Walked adjacent elements in " + (post - pre) / 1e3 + " us");
 
         if (networks.size() == 0) {
-            // there are no neighbours, or the neighbours didn't have a network somehow (which is an illegal state! boo!)
+            // there are no neighbours, or the neighbours didn't have a network somehow (which is an illegal state!
+            // boo!)
             TNetwork network = createNetwork();
             this.networks.add(network);
-            
+
             for (TElement e : discovered) {
                 if (e.getNetwork() != network) {
                     e.setNetwork(network);
@@ -60,7 +68,8 @@ public abstract class StandardFactoryGrid<TSelf extends StandardFactoryGrid<TSel
             }
         } else if (networks.size() == 1) {
             // there was one network adjacent, so we can just add all discovered elements to it if they aren't already
-            TNetwork network = networks.iterator().next();
+            TNetwork network = networks.iterator()
+                .next();
 
             for (TElement e : discovered) {
                 if (e.getNetwork() != network) {
@@ -77,7 +86,11 @@ public abstract class StandardFactoryGrid<TSelf extends StandardFactoryGrid<TSel
             while (iter.hasNext()) {
                 TNetwork network = iter.next();
 
-                if (network.getElements().size() > biggestNetwork.getElements().size()) biggestNetwork = network;
+                if (network.getElements()
+                    .size()
+                    > biggestNetwork.getElements()
+                        .size())
+                    biggestNetwork = network;
             }
 
             pre = System.nanoTime();
@@ -122,7 +135,8 @@ public abstract class StandardFactoryGrid<TSelf extends StandardFactoryGrid<TSel
         element.setNetwork(null);
 
         // the network doesn't have any elements left, there aren't any adjacent neighbours to fix
-        if (network.getElements().isEmpty()) {
+        if (network.getElements()
+            .isEmpty()) {
             network.onNetworkRemoved();
             networks.remove(network);
             return;
@@ -132,12 +146,14 @@ public abstract class StandardFactoryGrid<TSelf extends StandardFactoryGrid<TSel
             updateNeighbours(neighbour);
         }
 
-        // if there's only one neighbour, then this element is at the end of a chain and we can return early since we definitely didn't split a network
+        // if there's only one neighbour, then this element is at the end of a chain and we can return early since we
+        // definitely didn't split a network
         if (neighbours.size() <= 1) return;
 
         HashSet<HashSet<TElement>> neighbouringClumps = new HashSet<>();
 
-        // the list of all discovered elements; if one is in here, it means we've visited it already and can skip iterating its neighbours
+        // the list of all discovered elements; if one is in here, it means we've visited it already and can skip
+        // iterating its neighbours
         HashSet<TElement> discovered = new HashSet<>();
 
         long pre = System.nanoTime();
@@ -170,9 +186,9 @@ public abstract class StandardFactoryGrid<TSelf extends StandardFactoryGrid<TSel
                 for (TElement e : nn) {
                     network.removeElement(e);
                 }
-    
+
                 TNetwork newNetwork = createNetwork();
-                
+
                 for (TElement e : nn) {
                     e.setNetwork(newNetwork);
                     newNetwork.addElement(e);
@@ -182,14 +198,20 @@ public abstract class StandardFactoryGrid<TSelf extends StandardFactoryGrid<TSel
 
         long post = System.nanoTime();
 
-        LOGGER.info("Split network in " + (post - pre) / 1e3 + " us (added " + (neighbouringClumps.size() - 1) + " new networks)");
+        // temporary logging so that I can see what the performance is like
+        LOGGER.info(
+            "Split network in " + (post - pre) / 1e3
+                + " us (added "
+                + (neighbouringClumps.size() - 1)
+                + " new networks)");
     }
 
     @Override
     public void removeElementQuietly(TElement element) {
         if (!vertices.contains(element)) return;
 
-        element.getNetwork().removeElement(element);
+        element.getNetwork()
+            .removeElement(element);
         vertices.remove(element);
         element.setNetwork(null);
 
@@ -200,17 +222,21 @@ public abstract class StandardFactoryGrid<TSelf extends StandardFactoryGrid<TSel
 
     @Override
     public void subsume(TNetwork dest, TNetwork source) {
+        source.onNetworkSubsumedPre(dest);
+
         for (TElement element : new ArrayList<>(source.getElements())) {
             source.removeElement(element);
             element.setNetwork(dest);
             dest.addElement(element);
         }
 
+        source.onNetworkSubsumedPost(dest);
         source.onNetworkRemoved();
         this.networks.remove(source);
     }
 
-    private void walkAdjacency(TElement start, HashSet<TElement> discovered, HashSet<TNetwork> networks, boolean recurseIntoNetworked) {
+    private void walkAdjacency(TElement start, HashSet<TElement> discovered, HashSet<TNetwork> networks,
+        boolean recurseIntoNetworked) {
         LinkedList<TElement> queue = new LinkedList<>();
 
         queue.add(start);
@@ -252,9 +278,13 @@ public abstract class StandardFactoryGrid<TSelf extends StandardFactoryGrid<TSel
         for (TElement oldNeighbour : oldNeighbours) {
             if (!neighbours.contains(oldNeighbour)) {
                 updateNeighbours(oldNeighbour, updated);
-    
+
                 if (edges.containsEntry(oldNeighbour, element)) {
-                    GTMod.GT_FML_LOGGER.error("A factory element isn't following the graph adjacency contract. Edge B -> A was kept when edge A -> B was removed. A = " + element + ", B = " + oldNeighbour);
+                    GTMod.GT_FML_LOGGER.error(
+                        "A factory element isn't following the graph adjacency contract. Edge B -> A was kept when edge A -> B was removed. A = "
+                            + element
+                            + ", B = "
+                            + oldNeighbour);
                 }
 
                 oldNeighbour.onNeighbourRemoved(element);
@@ -265,9 +295,13 @@ public abstract class StandardFactoryGrid<TSelf extends StandardFactoryGrid<TSel
         for (TElement currentNeighbour : neighbours) {
             if (!oldNeighbours.contains(currentNeighbour)) {
                 updateNeighbours(currentNeighbour, updated);
-    
+
                 if (!edges.containsEntry(currentNeighbour, element)) {
-                    GTMod.GT_FML_LOGGER.error("A factory element isn't following the graph adjacency contract. Edge B -> A was not added when edge A -> B was added. A = " + element + ", B = " + currentNeighbour);
+                    GTMod.GT_FML_LOGGER.error(
+                        "A factory element isn't following the graph adjacency contract. Edge B -> A was not added when edge A -> B was added. A = "
+                            + element
+                            + ", B = "
+                            + currentNeighbour);
                 }
 
                 currentNeighbour.onNeighbourAdded(element);

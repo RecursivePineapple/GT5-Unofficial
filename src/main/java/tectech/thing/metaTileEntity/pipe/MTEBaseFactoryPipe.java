@@ -3,6 +3,16 @@ package tectech.thing.metaTileEntity.pipe;
 import static gregtech.api.enums.Dyes.MACHINE_METAL;
 import static gregtech.api.util.GTRecipeBuilder.SECONDS;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.AxisAlignedBB;
+import net.minecraft.util.EnumChatFormatting;
+import net.minecraft.world.World;
+import net.minecraftforge.common.util.ForgeDirection;
+
 import gregtech.GTMod;
 import gregtech.api.enums.Dyes;
 import gregtech.api.enums.Textures.BlockIcons.CustomIcon;
@@ -14,17 +24,10 @@ import gregtech.api.metatileentity.BaseMetaPipeEntity;
 import gregtech.api.metatileentity.MetaPipeEntity;
 import gregtech.api.render.TextureFactory;
 import gregtech.common.GTClient;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.AxisAlignedBB;
-import net.minecraft.util.EnumChatFormatting;
-import net.minecraft.world.World;
-import net.minecraftforge.common.util.ForgeDirection;
 import tectech.mechanics.pipe.IActivePipe;
 import tectech.mechanics.pipe.PipeActivity;
 
 public abstract class MTEBaseFactoryPipe extends MetaPipeEntity implements IActivePipe {
-    
     public static final IIconContainer EM_PIPE = new CustomIcon("iconsets/EM_DATA");
     public static final IIconContainer EM_BAR = new CustomIcon("iconsets/EM_BAR");
     public static final IIconContainer EM_BAR_ACTIVE = new CustomIcon("iconsets/EM_BAR_ACTIVE");
@@ -46,15 +49,26 @@ public abstract class MTEBaseFactoryPipe extends MetaPipeEntity implements IActi
     public abstract IMetaTileEntity newMetaEntity(IGregTechTileEntity aTileEntity);
 
     @Override
-    public ITexture[] getTexture(IGregTechTileEntity base, ForgeDirection side, int aConnections,
-        int colorIndex, boolean aConnected, boolean aRedstone) {
-        return new ITexture[] {
-            TextureFactory.of(EM_PIPE),
+    public ITexture[] getTexture(IGregTechTileEntity base, ForgeDirection side, int aConnections, int colorIndex,
+        boolean aConnected, boolean aRedstone) {
+
+        List<ITexture> textures = new ArrayList<>(2);
+
+        textures.add(
             TextureFactory.builder()
-                .addIcon((getActive() && ((BaseMetaPipeEntity)base).mTickTimer % 20 >= 10) ? EM_BAR_ACTIVE : EM_BAR)
+                .addIcon(EM_PIPE)
                 .setRGBA(Dyes.getModulation(colorIndex, MACHINE_METAL.getRGBA()))
-                .build(),
-        };
+                .build());
+
+        if (getActive()) {
+            textures.add(
+                TextureFactory.builder()
+                    .addIcon(EM_BAR)
+                    .setRGBA(Dyes.getModulation(colorIndex, MACHINE_METAL.getRGBA()))
+                    .build());
+        }
+
+        return textures.toArray(new ITexture[0]);
     }
 
     @Override
@@ -93,7 +107,7 @@ public abstract class MTEBaseFactoryPipe extends MetaPipeEntity implements IActi
 
     @Override
     public String[] getDescription() {
-        return new String[] { };
+        return new String[] {};
     }
 
     @Override
@@ -208,7 +222,8 @@ public abstract class MTEBaseFactoryPipe extends MetaPipeEntity implements IActi
                 if (isActive != prevActivity || aTick % (60 * SECONDS) == 0) {
                     prevActivity = isActive;
 
-                    PipeActivity.enqueueUpdate(base.getWorld(), base.getXCoord(), base.getYCoord(), base.getZCoord(), isActive);
+                    PipeActivity
+                        .enqueueUpdate(base.getWorld(), base.getXCoord(), base.getYCoord(), base.getZCoord(), isActive);
                 }
             }
         } else {
@@ -219,7 +234,7 @@ public abstract class MTEBaseFactoryPipe extends MetaPipeEntity implements IActi
     }
 
     protected void checkActive() {
-        mIsActive = true;
+        mIsActive = false;
     }
 
     @Override
@@ -235,7 +250,6 @@ public abstract class MTEBaseFactoryPipe extends MetaPipeEntity implements IActi
     @Override
     public String[] getInfoData() {
         return new String[] {
-            getActive() ? EnumChatFormatting.GREEN + "Active." : EnumChatFormatting.RED + "Not active."
-        };
+            getActive() ? EnumChatFormatting.GREEN + "Active." : EnumChatFormatting.RED + "Not active." };
     }
 }

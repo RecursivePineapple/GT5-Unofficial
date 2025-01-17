@@ -82,7 +82,8 @@ public abstract class MTEHatch extends MTEBasicTank implements ICraftingIconProv
                     if (aActive) {
                         return getTexturesActive(Textures.BlockIcons.casingTexturePages[mTexturePage][texturePointer]);
                     } else {
-                        return getTexturesInactive(Textures.BlockIcons.casingTexturePages[mTexturePage][texturePointer]);
+                        return getTexturesInactive(
+                            Textures.BlockIcons.casingTexturePages[mTexturePage][texturePointer]);
                     }
                 } else {
                     if (aActive) {
