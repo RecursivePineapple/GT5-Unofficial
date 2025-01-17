@@ -20,6 +20,14 @@ import java.util.stream.Collectors;
 
 import javax.annotation.Nonnull;
 
+import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.NBTTagList;
+import net.minecraft.util.EnumChatFormatting;
+import net.minecraft.util.StatCollector;
+import net.minecraftforge.common.util.ForgeDirection;
+import net.minecraftforge.fluids.FluidStack;
+
 import org.jetbrains.annotations.NotNull;
 import org.joml.Vector3f;
 
@@ -52,14 +60,6 @@ import gregtech.client.volumetric.LinearSound;
 import gregtech.common.tileentities.machines.MTEHatchInputME;
 import gregtech.loaders.load.BECRecipeLoader;
 import it.unimi.dsi.fastutil.objects.Object2LongOpenHashMap;
-
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagList;
-import net.minecraft.util.EnumChatFormatting;
-import net.minecraft.util.StatCollector;
-import net.minecraftforge.common.util.ForgeDirection;
-import net.minecraftforge.fluids.FluidStack;
 import tectech.mechanics.boseEinsteinCondensate.BECFactoryGrid;
 import tectech.mechanics.boseEinsteinCondensate.BECInventory;
 import tectech.mechanics.boseEinsteinCondensate.CondensateStack;
@@ -74,7 +74,7 @@ import tectech.thing.metaTileEntity.multi.base.Parameters;
 import tectech.thing.metaTileEntity.multi.structures.BECStructureDefinitions;
 
 public class MTEBECGenerator extends MTEBECMultiblockBase<MTEBECGenerator> implements ISoundLoopAware {
-    
+
     private List<CondensateStack> mOutputCondensate;
 
     private final LinearSound soundPos;
@@ -82,8 +82,7 @@ public class MTEBECGenerator extends MTEBECMultiblockBase<MTEBECGenerator> imple
     public MTEBECGenerator(int aID, String aName, String aNameRegional) {
         super(aID, aName, aNameRegional);
 
-        this.soundPos = new LinearSound()
-            .setCoords(0, 0, 2, 0, 0, 25)
+        this.soundPos = new LinearSound().setCoords(0, 0, 2, 0, 0, 25)
             .setCentre(2, 1, 10);
     }
 
@@ -111,7 +110,12 @@ public class MTEBECGenerator extends MTEBECMultiblockBase<MTEBECGenerator> imple
         structure.addCasing('D', ElectromagneticWaveguide);
         structure.addCasing('E', AdvancedFusionCoilII);
         structure.addCasingWithHatches('O', ElectromagneticallyIsolatedCasing, 2, 1, Arrays.asList(BECHatches.Hatch));
-        structure.addCasingWithHatches('1', ElectromagneticallyIsolatedCasing, 1, 16, Arrays.asList(InputBus, InputHatch, Energy, ExoticEnergy));
+        structure.addCasingWithHatches(
+            '1',
+            ElectromagneticallyIsolatedCasing,
+            1,
+            16,
+            Arrays.asList(InputBus, InputHatch, Energy, ExoticEnergy));
 
         return structure.buildStructure(definition);
     }
@@ -129,9 +133,7 @@ public class MTEBECGenerator extends MTEBECMultiblockBase<MTEBECGenerator> imple
         tt.addHatchLocationOverride(
             Arrays.asList(InputBus, InputHatch, Energy, ExoticEnergy),
             "Any " + ElectromagneticallyIsolatedCasing.getLocalizedName() + " in the first slice");
-        tt.addHatchLocationOverride(
-            BECHatches.Hatch,
-            "The centre casing in the last slice");
+        tt.addHatchLocationOverride(BECHatches.Hatch, "The centre casing in the last slice");
         tt.addAllCasingInfo(
             Arrays.asList(
                 ElectromagneticallyIsolatedCasing,
@@ -153,9 +155,11 @@ public class MTEBECGenerator extends MTEBECMultiblockBase<MTEBECGenerator> imple
 
     @Override
     protected void parametersInstantiation_EM() {
-        INameFunction<MTEBECGenerator> blockingModeName = (base, p) -> StatCollector.translateToLocal("gui.tooltips.appliedenergistics2.InterfaceBlockingMode");
-        IStatusFunction<MTEBECGenerator> blockingModeStatus = (base, p) -> LedStatus.fromLimitsInclusiveOuterBoundary(p.get(), 0, 0, 1, 1);
-    
+        INameFunction<MTEBECGenerator> blockingModeName = (base, p) -> StatCollector
+            .translateToLocal("gui.tooltips.appliedenergistics2.InterfaceBlockingMode");
+        IStatusFunction<MTEBECGenerator> blockingModeStatus = (base, p) -> LedStatus
+            .fromLimitsInclusiveOuterBoundary(p.get(), 0, 0, 1, 1);
+
         Parameters.Group hatch_0 = parametrization.getGroup(0);
         blockingMode = hatch_0.makeInParameter(0, 0, blockingModeName, blockingModeStatus);
     }
@@ -179,7 +183,9 @@ public class MTEBECGenerator extends MTEBECMultiblockBase<MTEBECGenerator> imple
             for (var mat : mOutputCondensate) {
                 if (mat == null) continue;
                 ret.append(EnumChatFormatting.AQUA)
-                    .append(mat.getPreview().getDisplayName())
+                    .append(
+                        mat.getPreview()
+                            .getDisplayName())
                     .append(EnumChatFormatting.WHITE)
                     .append(" x ")
                     .append(EnumChatFormatting.GOLD);
@@ -222,7 +228,7 @@ public class MTEBECGenerator extends MTEBECMultiblockBase<MTEBECGenerator> imple
         }
     }
 
-    //#endregion
+    // #endregion
 
     private boolean hasOutputSpace() {
         return true;
@@ -259,7 +265,9 @@ public class MTEBECGenerator extends MTEBECMultiblockBase<MTEBECGenerator> imple
     @Override
     @Nonnull
     public Collection<RecipeMap<?>> getAvailableRecipeMaps() {
-        return Arrays.asList(TecTechRecipeMaps.condensateCreationFromItemRecipes, TecTechRecipeMaps.condensateCreationFromFluidRecipes);
+        return Arrays.asList(
+            TecTechRecipeMaps.condensateCreationFromItemRecipes,
+            TecTechRecipeMaps.condensateCreationFromFluidRecipes);
     }
 
     @Override
@@ -293,7 +301,7 @@ public class MTEBECGenerator extends MTEBECMultiblockBase<MTEBECGenerator> imple
 
         int baseProcessingTime = getProcessingTime();
 
-        for(MTEHatch hatch : filterValidMTEs(getExoticAndNormalEnergyHatchList())) {
+        for (MTEHatch hatch : filterValidMTEs(getExoticAndNormalEnergyHatchList())) {
             if (hatch instanceof MTEHatchEnergyMulti multi) {
                 euQuota += V[multi.mTier] * multi.Amperes * baseProcessingTime;
             }
@@ -323,7 +331,7 @@ public class MTEBECGenerator extends MTEBECMultiblockBase<MTEBECGenerator> imple
 
                         long quotaRemaining = euQuota / cost;
                         long toRemove = Math.min(Math.min(quotaRemaining, slot.stackSize), Integer.MAX_VALUE);
-                        
+
                         if (toRemove == 0) {
                             continue;
                         }
@@ -367,7 +375,11 @@ public class MTEBECGenerator extends MTEBECMultiblockBase<MTEBECGenerator> imple
 
             return CheckRecipeResultRegistry.NO_RECIPE;
         } else {
-            mOutputCondensate = outputMaterials.isEmpty() ? null : outputMaterials.object2LongEntrySet().stream().map(e -> new CondensateStack(e.getKey(), e.getLongValue())).collect(Collectors.toList());
+            mOutputCondensate = outputMaterials.isEmpty() ? null
+                : outputMaterials.object2LongEntrySet()
+                    .stream()
+                    .map(e -> new CondensateStack(e.getKey(), e.getLongValue()))
+                    .collect(Collectors.toList());
             mMaxProgresstime = baseProcessingTime;
             mEfficiency = 10_000;
 
@@ -378,11 +390,12 @@ public class MTEBECGenerator extends MTEBECMultiblockBase<MTEBECGenerator> imple
         }
     }
 
-    private long tryDrainFluid(Object2LongOpenHashMap<Object> outputMaterials, long euQuota, MTEHatchInput inputHatch, FluidStack fluidStack) {
+    private long tryDrainFluid(Object2LongOpenHashMap<Object> outputMaterials, long euQuota, MTEHatchInput inputHatch,
+        FluidStack fluidStack) {
         GTRecipe recipe = TecTechRecipeMaps.condensateCreationFromFluidRecipes.findRecipeQuery()
             .fluids(new FluidStack(fluidStack.getFluid(), 1))
             .find();
-        
+
         if (recipe == null) {
             return 0;
         }
@@ -392,7 +405,7 @@ public class MTEBECGenerator extends MTEBECMultiblockBase<MTEBECGenerator> imple
         if (output == null) {
             return 0;
         }
-        
+
         long cost = BECRecipeLoader.getRecipeCost(recipe);
 
         long availableQuota = euQuota * 1000 / cost;

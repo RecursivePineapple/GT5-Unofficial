@@ -8,6 +8,11 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
+import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.NBTTagList;
+import net.minecraftforge.fluids.FluidStack;
+
 import org.jetbrains.annotations.Nullable;
 
 import bartworks.system.material.Werkstoff;
@@ -19,13 +24,9 @@ import gregtech.loaders.load.BECRecipeLoader.MaterialInfo;
 import gtPlusPlus.core.material.Material;
 import gtPlusPlus.core.util.Utils;
 import it.unimi.dsi.fastutil.Pair;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagList;
-import net.minecraftforge.fluids.FluidStack;
 
 public class CondensateStack {
-    
+
     public Object material;
     /** Amount in litres. */
     public long amount;
@@ -58,7 +59,10 @@ public class CondensateStack {
     }
 
     public static CondensateStack[] fromFluids(FluidStack... fluids) {
-        return Arrays.stream(fluids).map(CondensateStack::fromFluid).filter(x -> x != null).toArray(CondensateStack[]::new);
+        return Arrays.stream(fluids)
+            .map(CondensateStack::fromFluid)
+            .filter(x -> x != null)
+            .toArray(CondensateStack[]::new);
     }
 
     public static @Nullable CondensateStack fromStack(ItemStack stack) {
@@ -68,15 +72,22 @@ public class CondensateStack {
 
         if (matInfo == null) return null;
 
-        return new CondensateStack(matInfo.right().getMaterial(), stack.stackSize * matInfo.left().mMaterialAmount * L / M);
+        return new CondensateStack(
+            matInfo.right()
+                .getMaterial(),
+            stack.stackSize * matInfo.left().mMaterialAmount * L / M);
     }
 
     public static CondensateStack[] fromStacks(ItemStack... fluids) {
-        return Arrays.stream(fluids).map(CondensateStack::fromStack).filter(x -> x != null).toArray(CondensateStack[]::new);
+        return Arrays.stream(fluids)
+            .map(CondensateStack::fromStack)
+            .filter(x -> x != null)
+            .toArray(CondensateStack[]::new);
     }
 
     public ItemStack getPreview() {
-        return ItemCondensate.getForMaterial(getMaterialName(), amount > Integer.MAX_VALUE ? Integer.MAX_VALUE : (int) amount);
+        return ItemCondensate
+            .getForMaterial(getMaterialName(), amount > Integer.MAX_VALUE ? Integer.MAX_VALUE : (int) amount);
     }
 
     public String getMaterialName() {
@@ -142,13 +153,15 @@ public class CondensateStack {
         }
 
         if (material == null) return null;
-        
+
         long amount = tag.getLong("a");
 
         return new CondensateStack(material, amount);
     }
 
     public static ItemStack[] getPreviews(CondensateStack[] condensate) {
-        return Arrays.stream(condensate).map(CondensateStack::getPreview).toArray(ItemStack[]::new);
+        return Arrays.stream(condensate)
+            .map(CondensateStack::getPreview)
+            .toArray(ItemStack[]::new);
     }
 }

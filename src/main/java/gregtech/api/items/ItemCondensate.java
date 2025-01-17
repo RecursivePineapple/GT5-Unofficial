@@ -1,5 +1,10 @@
 package gregtech.api.items;
 
+import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.IIcon;
+import net.minecraftforge.client.MinecraftForgeClient;
+
 import bartworks.system.material.Werkstoff;
 import cpw.mods.fml.common.FMLCommonHandler;
 import gregtech.api.enums.Materials;
@@ -9,10 +14,6 @@ import gregtech.common.render.items.GeneratedMaterialRenderer;
 import gregtech.loaders.load.BECRecipeLoader;
 import gregtech.loaders.load.BECRecipeLoader.MaterialInfo;
 import gtPlusPlus.core.material.Material;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.IIcon;
-import net.minecraftforge.client.MinecraftForgeClient;
 
 public class ItemCondensate extends GTGenericItem implements IGT_ItemWithMaterialRenderer {
 
@@ -24,7 +25,9 @@ public class ItemCondensate extends GTGenericItem implements IGT_ItemWithMateria
 
         INSTANCE = this;
 
-        if (FMLCommonHandler.instance().getSide().isClient()) {
+        if (FMLCommonHandler.instance()
+            .getSide()
+            .isClient()) {
             MinecraftForgeClient.registerItemRenderer(this, RENDERER);
         }
     }
@@ -55,7 +58,7 @@ public class ItemCondensate extends GTGenericItem implements IGT_ItemWithMateria
         if (tag == null) return 0;
 
         MaterialInfo mat = BECRecipeLoader.findMaterialByName(tag.getString("material"));
-        
+
         if (mat != null) {
             if (mat.gtMat != null) return mat.gtMat.mMetaItemSubID;
             if (mat.gtppMat != null) return BECRecipeLoader.GTPP_IDS.getInt(mat.gtppMat) + 1000;
@@ -108,7 +111,7 @@ public class ItemCondensate extends GTGenericItem implements IGT_ItemWithMateria
 
         if (tag != null) {
             MaterialInfo mat = BECRecipeLoader.findMaterialByName(tag.getString("material"));
-            
+
             if (mat != null) {
                 if (mat.gtMat != null) return mat.gtMat.getRGBA();
                 if (mat.gtppMat != null) return mat.gtppMat.getRGBA();

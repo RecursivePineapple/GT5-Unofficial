@@ -6,12 +6,11 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
 
+import org.joml.Vector3f;
+
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
-
 import gregtech.api.interfaces.tileentity.IGregTechTileEntity;
-
-import org.joml.Vector3f;
 
 @SideOnly(Side.CLIENT)
 public class GTSoundLoop extends MovingSound {
@@ -20,7 +19,7 @@ public class GTSoundLoop extends MovingSound {
     private final boolean whileActive;
     private final boolean whileInactive;
     private final int worldID, machineX, machineY, machineZ;
-    
+
     private boolean fadeMe = false;
     private float targetVolume = 1, volumeRamp;
 

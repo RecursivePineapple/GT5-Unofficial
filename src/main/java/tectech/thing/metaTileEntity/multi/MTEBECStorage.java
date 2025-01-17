@@ -15,6 +15,11 @@ import java.util.stream.Collectors;
 
 import javax.annotation.Nonnull;
 
+import net.minecraft.client.Minecraft;
+import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.NBTTagList;
+import net.minecraft.util.EnumChatFormatting;
+
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector3f;
@@ -25,6 +30,8 @@ import com.gtnewhorizons.modularui.common.widget.DynamicPositionedColumn;
 import com.gtnewhorizons.modularui.common.widget.SlotWidget;
 import com.gtnewhorizons.modularui.common.widget.TextWidget;
 
+import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
 import gregtech.api.enums.GTValues;
 import gregtech.api.enums.SoundResource;
 import gregtech.api.enums.TierEU;
@@ -41,18 +48,8 @@ import gregtech.client.GTSoundLoop;
 import gregtech.client.ISoundLoopAware;
 import gregtech.client.volumetric.CircularSound;
 import gregtech.client.volumetric.LinearSound;
-
 import it.unimi.dsi.fastutil.Pair;
 import it.unimi.dsi.fastutil.objects.Object2LongOpenHashMap;
-
-import net.minecraft.client.Minecraft;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagList;
-import net.minecraft.util.EnumChatFormatting;
-
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
-
 import tectech.mechanics.boseEinsteinCondensate.BECFactoryGrid;
 import tectech.mechanics.boseEinsteinCondensate.BECInventory;
 import tectech.mechanics.boseEinsteinCondensate.CondensateStack;
@@ -63,7 +60,7 @@ import tectech.thing.metaTileEntity.multi.base.Parameters;
 import tectech.thing.metaTileEntity.multi.structures.BECStructureDefinitions;
 
 public class MTEBECStorage extends MTEBECMultiblockBase<MTEBECStorage> implements BECInventory, ISoundLoopAware {
-    
+
     private final Object2LongOpenHashMap<Object> mStoredCondensate = new Object2LongOpenHashMap<>();
 
     private final LinearSound pillarPos;
@@ -72,10 +69,8 @@ public class MTEBECStorage extends MTEBECMultiblockBase<MTEBECStorage> implement
     public MTEBECStorage(int aID, String aName, String aNameRegional) {
         super(aID, aName, aNameRegional);
 
-        pillarPos = new LinearSound()
-            .setCoords(0, 2, 7, 0, 14, 7);
-        torusPos = new CircularSound()
-            .setCoords(0, 8, 7, 0, 1, 0, 17);
+        pillarPos = new LinearSound().setCoords(0, 2, 7, 0, 14, 7);
+        torusPos = new CircularSound().setCoords(0, 8, 7, 0, 1, 0, 17);
     }
 
     protected MTEBECStorage(MTEBECStorage prototype) {
@@ -98,7 +93,8 @@ public class MTEBECStorage extends MTEBECMultiblockBase<MTEBECStorage> implement
     @Override
     public IStructureDefinition<MTEBECStorage> compile(String[][] definition) {
         structure.addCasing('A', SuperconductivePlasmaEnergyConduit);
-        structure.addCasingWithHatches('B', ElectromagneticallyIsolatedCasing, 1, 16, Arrays.asList(Energy, ExoticEnergy));
+        structure
+            .addCasingWithHatches('B', ElectromagneticallyIsolatedCasing, 1, 16, Arrays.asList(Energy, ExoticEnergy));
         structure.addCasing('C', FineStructureConstantManipulator);
         structure.addCasing('D', ElectromagneticWaveguide);
         structure.addCasing('E', AdvancedFusionCoilII);
@@ -129,7 +125,9 @@ public class MTEBECStorage extends MTEBECMultiblockBase<MTEBECStorage> implement
             stack.amount = 1;
 
             ret.append(EnumChatFormatting.AQUA)
-                .append(stack.getPreview().getDisplayName())
+                .append(
+                    stack.getPreview()
+                        .getDisplayName())
                 .append(EnumChatFormatting.WHITE)
                 .append(" x ")
                 .append(EnumChatFormatting.GOLD);
@@ -158,9 +156,7 @@ public class MTEBECStorage extends MTEBECMultiblockBase<MTEBECStorage> implement
                 ElectromagneticallyIsolatedCasing,
                 FineStructureConstantManipulator,
                 ElectromagneticWaveguide,
-                AdvancedFusionCoilII
-            )
-        );
+                AdvancedFusionCoilII));
 
         tt.toolTipFinisher(EnumChatFormatting.WHITE, 0, GTValues.AuthorPineapple);
 
@@ -179,17 +175,14 @@ public class MTEBECStorage extends MTEBECMultiblockBase<MTEBECStorage> implement
     protected void parametersInstantiation_EM() {
         Parameters.Group hatch0 = parametrization.getGroup(0);
         fieldStrength = hatch0.makeInParameter(
-            0, TierEU.LV,
+            0,
+            TierEU.LV,
             (t, iParameter) -> "Field Strength (EU/t)",
             (t, iParameter) -> iParameter.get() < 0 ? LedStatus.STATUS_TOO_LOW : LedStatus.STATUS_OK);
-        optimalCapacity = hatch0.makeOutParameter(
-            0, 0,
-            (t, iParameter) -> "Optimal Capacity (L)",
-            (t, iParameter) -> LedStatus.STATUS_OK);
-        amountStored = hatch0.makeOutParameter(
-            1, 0,
-            (t, iParameter) -> "Total Stored Condensate (L)",
-            (t, iParameter) -> {
+        optimalCapacity = hatch0
+            .makeOutParameter(0, 0, (t, iParameter) -> "Optimal Capacity (L)", (t, iParameter) -> LedStatus.STATUS_OK);
+        amountStored = hatch0
+            .makeOutParameter(1, 0, (t, iParameter) -> "Total Stored Condensate (L)", (t, iParameter) -> {
                 double ratio = amountStored.get() / optimalCapacity.get();
 
                 if (ratio < 0.5) return LedStatus.STATUS_OK;
@@ -213,7 +206,7 @@ public class MTEBECStorage extends MTEBECMultiblockBase<MTEBECStorage> implement
     public void loadNBTData(NBTTagCompound aNBT) {
         super.loadNBTData(aNBT);
 
-        List<CondensateStack> loaded = CondensateStack.load((NBTTagList)aNBT.getTag("condensate"));
+        List<CondensateStack> loaded = CondensateStack.load((NBTTagList) aNBT.getTag("condensate"));
 
         mStoredCondensate.clear();
         for (CondensateStack stack : loaded) {
@@ -247,16 +240,20 @@ public class MTEBECStorage extends MTEBECMultiblockBase<MTEBECStorage> implement
             BECFactoryGrid.INSTANCE.addElement(this);
         }
 
-        double stored = mStoredCondensate.values().longStream().mapToDouble(l -> l).sum();
+        double stored = mStoredCondensate.values()
+            .longStream()
+            .mapToDouble(l -> l)
+            .sum();
 
         amountStored.set(stored);
 
         if (stored > optimalCapacity) {
             IntFraction decay = new IntFraction(9, 10);
-    
+
             mStoredCondensate.replaceAll((mat, amount) -> decay.apply(amount));
-            
-            mStoredCondensate.values().rem(0);
+
+            mStoredCondensate.values()
+                .rem(0);
         }
 
         return CheckRecipeResultRegistry.SUCCESSFUL;
@@ -277,9 +274,7 @@ public class MTEBECStorage extends MTEBECMultiblockBase<MTEBECStorage> implement
 
     @Override
     public List<Pair<Class<?>, Object>> getComponents() {
-        return Arrays.asList(
-            Pair.of(BECInventory.class, this)
-        );
+        return Arrays.asList(Pair.of(BECInventory.class, this));
     }
 
     @Override
@@ -297,7 +292,10 @@ public class MTEBECStorage extends MTEBECMultiblockBase<MTEBECStorage> implement
             stack.amount = 0;
         }
 
-        double stored = mStoredCondensate.values().longStream().mapToDouble(l -> l).sum();
+        double stored = mStoredCondensate.values()
+            .longStream()
+            .mapToDouble(l -> l)
+            .sum();
 
         amountStored.set(stored);
     }
@@ -308,7 +306,7 @@ public class MTEBECStorage extends MTEBECMultiblockBase<MTEBECStorage> implement
 
         for (CondensateStack stack : stacks) {
             long stored = mStoredCondensate.getLong(stack.material);
-            
+
             if (stored == 0) {
                 consumedEverything = false;
                 continue;
@@ -328,7 +326,10 @@ public class MTEBECStorage extends MTEBECMultiblockBase<MTEBECStorage> implement
             if (stack.amount > 0) consumedEverything = false;
         }
 
-        double stored = mStoredCondensate.values().longStream().mapToDouble(l -> l).sum();
+        double stored = mStoredCondensate.values()
+            .longStream()
+            .mapToDouble(l -> l)
+            .sum();
 
         amountStored.set(stored);
 
@@ -341,16 +342,16 @@ public class MTEBECStorage extends MTEBECMultiblockBase<MTEBECStorage> implement
     protected void doActivitySound(SoundResource activitySound) {
         if (getBaseMetaTileEntity().isActive()) {
             // if (pillar == null) {
-            //     pillar = new GTSoundLoop(
-            //         SoundResource.GT_MACHINES_BEC_GENERATOR.resourceLocation,
-            //         getBaseMetaTileEntity(),
-            //         false,
-            //         true);
-            //     pillar.setVolume(2);
+            // pillar = new GTSoundLoop(
+            // SoundResource.GT_MACHINES_BEC_GENERATOR.resourceLocation,
+            // getBaseMetaTileEntity(),
+            // false,
+            // true);
+            // pillar.setVolume(2);
 
-            //     Minecraft.getMinecraft()
-            //         .getSoundHandler()
-            //         .playSound(pillar);
+            // Minecraft.getMinecraft()
+            // .getSoundHandler()
+            // .playSound(pillar);
             // }
 
             if (torus == null) {

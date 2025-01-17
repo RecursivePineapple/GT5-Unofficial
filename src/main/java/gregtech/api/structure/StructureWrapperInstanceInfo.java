@@ -8,11 +8,10 @@ import java.util.List;
 
 import net.minecraft.item.ItemStack;
 
-import gregtech.api.metatileentity.implementations.MTEEnhancedMultiBlockBase;
-
 import com.gtnewhorizon.structurelib.structure.ISurvivalBuildEnvironment;
 import com.gtnewhorizons.modularui.api.drawable.TextRenderer;
 
+import gregtech.api.metatileentity.implementations.MTEEnhancedMultiBlockBase;
 import it.unimi.dsi.fastutil.chars.Char2IntArrayMap;
 
 public class StructureWrapperInstanceInfo<MTE extends MTEEnhancedMultiBlockBase<?> & IStructureProvider<MTE>> {
@@ -33,6 +32,7 @@ public class StructureWrapperInstanceInfo<MTE extends MTEEnhancedMultiBlockBase<
 
     /**
      * Validates this structure. Currently only checks casing counts.
+     * 
      * @return True when valid.
      */
     public boolean validate() {
@@ -54,10 +54,11 @@ public class StructureWrapperInstanceInfo<MTE extends MTEEnhancedMultiBlockBase<
                     e.getValue().casing.getLocalizedName(),
                     minCasings,
                     presentCasings,
-                    RESET
-                );
+                    RESET);
 
-                lines.addAll(TextRenderer.getFontRenderer().listFormattedStringToWidth(error, ERROR_WRAP_WIDTH));
+                lines.addAll(
+                    TextRenderer.getFontRenderer()
+                        .listFormattedStringToWidth(error, ERROR_WRAP_WIDTH));
             }
         }
 

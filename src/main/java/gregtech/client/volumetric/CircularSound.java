@@ -2,16 +2,16 @@ package gregtech.client.volumetric;
 
 import net.minecraft.entity.player.EntityPlayer;
 
+import org.joml.Vector3f;
+
+import com.gtnewhorizon.structurelib.util.Vec3Impl;
+
 import gregtech.api.enums.GTValues;
 import gregtech.api.interfaces.tileentity.IGregTechTileEntity;
 import gregtech.api.metatileentity.implementations.MTEEnhancedMultiBlockBase;
 
-import com.gtnewhorizon.structurelib.util.Vec3Impl;
-
-import org.joml.Vector3f;
-
 public class CircularSound {
-    
+
     private Vec3Impl centre, normal;
     private float maxRange = 64f * 64f, radius;
 
@@ -38,14 +38,21 @@ public class CircularSound {
 
         IGregTechTileEntity igte = multi.getBaseMetaTileEntity();
 
-        double dist2 = l2(player.posX - igte.getXCoord(), player.posY - igte.getYCoord(), player.posZ - igte.getZCoord());
+        double dist2 = l2(
+            player.posX - igte.getXCoord(),
+            player.posY - igte.getYCoord(),
+            player.posZ - igte.getZCoord());
 
         if (dist2 > maxRange) return null;
 
         var machine = new Vector3f(igte.getXCoord(), igte.getYCoord(), igte.getZCoord());
 
-        var c = v(multi.getExtendedFacing().getWorldOffset(this.centre)).add(machine);
-        var n = v(multi.getExtendedFacing().getWorldOffset(this.normal));
+        var c = v(
+            multi.getExtendedFacing()
+                .getWorldOffset(this.centre)).add(machine);
+        var n = v(
+            multi.getExtendedFacing()
+                .getWorldOffset(this.normal));
 
         var p = new Vector3f((float) player.posX, (float) player.posY, (float) player.posZ);
 
@@ -55,9 +62,11 @@ public class CircularSound {
 
         if (q.equals(ZERO, 0.001f)) {
             if (n.maxComponent() == 1) {
-                q.set(n).cross(UP);
+                q.set(n)
+                    .cross(UP);
             } else {
-                q.set(n).cross(FORWARD);
+                q.set(n)
+                    .cross(FORWARD);
             }
         }
 

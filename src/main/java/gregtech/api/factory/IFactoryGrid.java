@@ -20,6 +20,7 @@ public interface IFactoryGrid<TSelf extends IFactoryGrid<TSelf, TElement, TNetwo
      * Use with caution.
      */
     public void addElementQuietly(TNetwork network, TElement element);
+
     /**
      * Removes an element and does potentially expensive network topology updates.
      */

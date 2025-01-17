@@ -38,7 +38,7 @@ public abstract class ItemCasingsAbstract extends ItemBlock {
         .addStringLocalization("gt.blastprooftooltip", "This Block is Blast Proof");
 
     public final BlockCasingsAbstract blockCasings;
-        
+
     public ItemCasingsAbstract(Block block) {
         super(block);
         setMaxDamage(0);

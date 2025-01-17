@@ -28,6 +28,7 @@ import tectech.mechanics.pipe.IActivePipe;
 import tectech.mechanics.pipe.PipeActivity;
 
 public abstract class MTEBaseFactoryPipe extends MetaPipeEntity implements IActivePipe {
+
     public static final IIconContainer EM_PIPE = new CustomIcon("iconsets/EM_DATA");
     public static final IIconContainer EM_BAR = new CustomIcon("iconsets/EM_BAR");
     public static final IIconContainer EM_BAR_ACTIVE = new CustomIcon("iconsets/EM_BAR_ACTIVE");

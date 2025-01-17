@@ -20,6 +20,7 @@ public interface IFactoryElement<TSelf extends IFactoryElement<TSelf, TNetwork, 
     void getNeighbours(Collection<TSelf> neighbours);
 
     TNetwork getNetwork();
+
     void setNetwork(TNetwork network);
 
     default void onNeighbourAdded(TSelf neighbour) {

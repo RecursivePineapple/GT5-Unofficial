@@ -8,6 +8,13 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
+import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.tileentity.TileEntity;
+import net.minecraft.world.World;
+import net.minecraftforge.common.util.ForgeDirection;
+
 import com.gtnewhorizon.structurelib.alignment.constructable.ISurvivalConstructable;
 import com.gtnewhorizon.structurelib.structure.IStructureDefinition;
 import com.gtnewhorizon.structurelib.structure.ISurvivalBuildEnvironment;
@@ -30,19 +37,14 @@ import gregtech.api.util.IGTHatchAdder;
 import gtPlusPlus.xmod.gregtech.common.blocks.textures.TexturesGtBlock;
 import mcp.mobius.waila.api.IWailaConfigHandler;
 import mcp.mobius.waila.api.IWailaDataAccessor;
-import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.world.World;
-import net.minecraftforge.common.util.ForgeDirection;
 import tectech.mechanics.boseEinsteinCondensate.BECFactoryElement;
 import tectech.mechanics.boseEinsteinCondensate.BECFactoryNetwork;
 import tectech.thing.CustomItemList;
 import tectech.thing.metaTileEntity.hatch.MTEHatchBEC;
 
-public abstract class MTEBECMultiblockBase<TSelf extends MTEBECMultiblockBase<TSelf>> extends TTMultiblockBase implements ISurvivalConstructable, BECFactoryElement, IStructureProvider<TSelf> {
-    
+public abstract class MTEBECMultiblockBase<TSelf extends MTEBECMultiblockBase<TSelf>> extends TTMultiblockBase
+    implements ISurvivalConstructable, BECFactoryElement, IStructureProvider<TSelf> {
+
     protected static final String STRUCTURE_PIECE_MAIN = "main";
 
     protected final List<BECFactoryElement> mBECHatches = new ArrayList<>();
@@ -103,15 +105,17 @@ public abstract class MTEBECMultiblockBase<TSelf extends MTEBECMultiblockBase<TS
 
         if (side == facing) {
             if (active) {
-                textures.add(TextureFactory.builder()
-                    .addIcon(getActiveTexture())
-                    .extFacing()
-                    .build());
+                textures.add(
+                    TextureFactory.builder()
+                        .addIcon(getActiveTexture())
+                        .extFacing()
+                        .build());
             } else {
-                textures.add(TextureFactory.builder()
-                    .addIcon(getInactiveTexture())
-                    .extFacing()
-                    .build());
+                textures.add(
+                    TextureFactory.builder()
+                        .addIcon(getInactiveTexture())
+                        .extFacing()
+                        .build());
             }
         }
 
@@ -171,13 +175,10 @@ public abstract class MTEBECMultiblockBase<TSelf extends MTEBECMultiblockBase<TS
     protected void drawTexts(DynamicPositionedColumn screenElements, SlotWidget inventorySlot) {
         super.drawTexts(screenElements, inventorySlot);
 
-        screenElements.widgets(
-            new FakeSyncWidget.StringSyncer(
-                () -> {
-                    structureInstanceInfo.validate();
-                    return structureInstanceInfo.getErrorMessage();
-                },
-                error -> errorMessage = error),
+        screenElements.widgets(new FakeSyncWidget.StringSyncer(() -> {
+            structureInstanceInfo.validate();
+            return structureInstanceInfo.getErrorMessage();
+        }, error -> errorMessage = error),
             TextWidget.dynamicString(() -> errorMessage)
                 .setTextAlignment(Alignment.CenterLeft)
                 .setEnabled(errorMessage != null && !errorMessage.isEmpty()));
@@ -185,16 +186,18 @@ public abstract class MTEBECMultiblockBase<TSelf extends MTEBECMultiblockBase<TS
 
     @Override
     public void getWailaNBTData(EntityPlayerMP player, TileEntity tile, NBTTagCompound tag, World world, int x, int y,
-            int z) {
+        int z) {
         super.getWailaNBTData(player, tile, tag, world, x, y, z);
         tag.setString("network", network == null ? "null" : network.toString());
     }
 
     @Override
     public void getWailaBody(ItemStack itemStack, List<String> currenttip, IWailaDataAccessor accessor,
-            IWailaConfigHandler config) {
+        IWailaConfigHandler config) {
         super.getWailaBody(itemStack, currenttip, accessor, config);
-        currenttip.add("Network: " + accessor.getNBTData().getString("network"));
+        currenttip.add(
+            "Network: " + accessor.getNBTData()
+                .getString("network"));
     }
 
     @Override
@@ -224,6 +227,7 @@ public abstract class MTEBECMultiblockBase<TSelf extends MTEBECMultiblockBase<TS
     public static enum BECHatches implements IHatchElement<MTEBECMultiblockBase<?>> {
 
         Hatch(MTEHatchBEC.class) {
+
             @Override
             public long count(MTEBECMultiblockBase<?> t) {
                 return t.mBECHatches.size();
@@ -245,7 +249,8 @@ public abstract class MTEBECMultiblockBase<TSelf extends MTEBECMultiblockBase<TS
         @Override
         public String getDisplayName() {
             return switch (this) {
-                case Hatch -> CustomItemList.becConnectorHatch.get(1).getDisplayName();
+                case Hatch -> CustomItemList.becConnectorHatch.get(1)
+                    .getDisplayName();
             };
         }
 

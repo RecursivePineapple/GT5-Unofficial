@@ -36,11 +36,12 @@ public class LiquidCondensateFrontend extends RecipeMapFrontend {
 
     @Override
     protected void drawDurationInfo(RecipeDisplayInfo recipeInfo) {
-        
+
     }
 
     @Override
     protected void drawEnergyInfo(RecipeDisplayInfo recipeInfo) {
-        recipeInfo.drawText(String.format("Quota Required: %s EU/L", formatNumbers(BECRecipeLoader.getRecipeCost(recipeInfo.recipe))));
+        recipeInfo.drawText(
+            String.format("Quota Required: %s EU/L", formatNumbers(BECRecipeLoader.getRecipeCost(recipeInfo.recipe))));
     }
 }

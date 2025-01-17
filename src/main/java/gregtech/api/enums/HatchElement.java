@@ -4,6 +4,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import net.minecraft.client.resources.I18n;
+
 import gregtech.api.interfaces.IHatchElement;
 import gregtech.api.interfaces.metatileentity.IMetaTileEntity;
 import gregtech.api.metatileentity.implementations.MTEHatchDynamo;
@@ -17,7 +19,6 @@ import gregtech.api.metatileentity.implementations.MTEHatchOutputBus;
 import gregtech.api.metatileentity.implementations.MTEMultiBlockBase;
 import gregtech.api.util.ExoticEnergyInputHelper;
 import gregtech.api.util.IGTHatchAdder;
-import net.minecraft.client.resources.I18n;
 
 public enum HatchElement implements IHatchElement<MTEMultiBlockBase> {
 
@@ -28,7 +29,8 @@ public enum HatchElement implements IHatchElement<MTEMultiBlockBase> {
             return t.mMufflerHatches.size();
         }
     },
-    Maintenance("GT5U.MBTT.MaintenanceHatch", MTEMultiBlockBase::addMaintenanceToMachineList, MTEHatchMaintenance.class) {
+    Maintenance("GT5U.MBTT.MaintenanceHatch", MTEMultiBlockBase::addMaintenanceToMachineList,
+        MTEHatchMaintenance.class) {
 
         @Override
         public long count(MTEMultiBlockBase t) {

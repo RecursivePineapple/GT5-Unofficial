@@ -1,7 +1,8 @@
 package tectech.mechanics.boseEinsteinCondensate;
 
-import gregtech.api.factory.IFactoryElement;
 import net.minecraftforge.common.util.ForgeDirection;
+
+import gregtech.api.factory.IFactoryElement;
 
 public interface BECFactoryElement extends IFactoryElement<BECFactoryElement, BECFactoryNetwork, BECFactoryGrid> {
 

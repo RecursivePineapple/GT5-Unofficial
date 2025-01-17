@@ -772,6 +772,7 @@ public class MultiblockTooltipBuilder {
 
     /**
      * Useful for maintaining the flow when you need to run an arbitrary operation on the builder.
+     * 
      * @param fn The operation.
      * @return Instance this method was called on.
      */

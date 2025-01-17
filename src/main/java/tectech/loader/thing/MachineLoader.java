@@ -2273,16 +2273,16 @@ public class MachineLoader implements Runnable {
             new MTEExoticModule(HeliofusionExoticizer.ID, "multimachine.em.exotic_module", "Heliofusion Exoticizer")
                 .getStackForm(1L));
         addItemTooltip(Machine_Multi_QuarkGluonPlasmaModule.get(1), GTValues.AuthorCloud);
-        Machine_Multi_BECGenerator.set(new MTEBECGenerator(
-            BoseEinsteinCondensateGenerator.ID,
-            "multimachine.em.bec-generator",
-            "Bose-Einstein Condensate Generation Apparatus"
-            ).getStackForm(1L));
-        Machine_Multi_BECStorage.set(new MTEBECStorage(
-            BoseEinsteinCondensateStorage.ID,
-            "multimachine.em.bec-storage",
-            "Bose-Einstein Condensate Containment Field"
-            ).getStackForm(1L));
+        Machine_Multi_BECGenerator.set(
+            new MTEBECGenerator(
+                BoseEinsteinCondensateGenerator.ID,
+                "multimachine.em.bec-generator",
+                "Bose-Einstein Condensate Generation Apparatus").getStackForm(1L));
+        Machine_Multi_BECStorage.set(
+            new MTEBECStorage(
+                BoseEinsteinCondensateStorage.ID,
+                "multimachine.em.bec-storage",
+                "Bose-Einstein Condensate Containment Field").getStackForm(1L));
 
         // ===================================================================================================
         // Hatches
@@ -2368,12 +2368,9 @@ public class MachineLoader implements Runnable {
             new MTEHatchCapacitor(CapacitorHatch.ID, "hatch.capacitor.tier.03", "Capacitor Hatch", 3).getStackForm(1L));
 
         becConnectorHatch.set(
-            new MTEHatchBEC(
-                BoseEinsteinCondensateHatch.ID,
-                "hatch.bec",
-                "Bose-Einstein Condensate Hatch",
-                10).getStackForm(1L));
-    
+            new MTEHatchBEC(BoseEinsteinCondensateHatch.ID, "hatch.bec", "Bose-Einstein Condensate Hatch", 10)
+                .getStackForm(1L));
+
         // ===================================================================================================
         // Pipes
         // ===================================================================================================
@@ -2388,7 +2385,9 @@ public class MachineLoader implements Runnable {
                 .set(new TestFactoryHatch(TestFactoryHatch.ID, "hatch.test", "Test Factory Hatch", 7).getStackForm(1));
         }
 
-        BECpipe.set(new MTEPipeBEC(BoseEinsteinCondensatePipe.ID, "pipe.bec", "Bose-Einstein Condensate Pipe").getStackForm(1L));
+        BECpipe.set(
+            new MTEPipeBEC(BoseEinsteinCondensatePipe.ID, "pipe.bec", "Bose-Einstein Condensate Pipe")
+                .getStackForm(1L));
 
         LASERpipeBlock.set(
             new MTEPipeBlockEnergy(LaserVacuumPipeCasing.ID, "pipe.energystream.block", "Laser Vacuum Pipe Casing")
@@ -2396,7 +2395,11 @@ public class MachineLoader implements Runnable {
         DATApipeBlock.set(
             new MTEPipeBlockData(OpticalFiberCableCasing.ID, "pipe.datastream.block", "Optical Fiber Cable Casing")
                 .getStackForm(1L));
-        BECpipeBlock.set(new MTEPipeBlockBEC(BoseEinsteinCondensatePipeBlock.ID, "pipe.bec.block", "Bose-Einstein Condensate Pipe Casing").getStackForm(1L));
+        BECpipeBlock.set(
+            new MTEPipeBlockBEC(
+                BoseEinsteinCondensatePipeBlock.ID,
+                "pipe.bec.block",
+                "Bose-Einstein Condensate Pipe Casing").getStackForm(1L));
 
         // ===================================================================================================
         // Single Blocks

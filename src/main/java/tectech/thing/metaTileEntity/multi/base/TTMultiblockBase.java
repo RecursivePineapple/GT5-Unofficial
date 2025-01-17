@@ -976,7 +976,7 @@ public abstract class TTMultiblockBase extends MTEExtendedPowerMultiBlockBase<TT
                 parametersStatusesWrite_EM(busy);
             } catch (NoSuchMethodError e) {
                 GTMod.GT_FML_LOGGER.info("Caught exception that was probably thrown because of a hotswap", e);
-    
+
                 Arrays.fill(parametrization.groups, null);
                 parametrization.parameterInArrayList.clear();
                 parametrization.parameterOutArrayList.clear();
@@ -984,7 +984,7 @@ public abstract class TTMultiblockBase extends MTEExtendedPowerMultiBlockBase<TT
                 Arrays.fill(parametrization.eParamsOutStatus, LedStatus.STATUS_UNUSED);
 
                 parametersInstantiation_EM();
-    
+
                 parametersStatusesWrite_EM(busy);
             }
         }
@@ -1641,7 +1641,7 @@ public abstract class TTMultiblockBase extends MTEExtendedPowerMultiBlockBase<TT
     }
 
     protected void onEnergyDrained(long consumedEU, long eut, long amperes) {
-        
+
     }
 
     // new method
@@ -2190,14 +2190,16 @@ public abstract class TTMultiblockBase extends MTEExtendedPowerMultiBlockBase<TT
                 return t.eUncertainHatches.size();
             }
         },
-        EnergyMulti("GT5U.MBTT.ExoticEnergyHatch", TTMultiblockBase::addEnergyInputToMachineList, MTEHatchEnergyMulti.class) {
+        EnergyMulti("GT5U.MBTT.ExoticEnergyHatch", TTMultiblockBase::addEnergyInputToMachineList,
+            MTEHatchEnergyMulti.class) {
 
             @Override
             public long count(TTMultiblockBase t) {
                 return t.eEnergyMulti.size();
             }
         },
-        DynamoMulti("GT5U.MBTT.ExoticEnergyDynamo", TTMultiblockBase::addDynamoToMachineList, MTEHatchDynamoMulti.class) {
+        DynamoMulti("GT5U.MBTT.ExoticEnergyDynamo", TTMultiblockBase::addDynamoToMachineList,
+            MTEHatchDynamoMulti.class) {
 
             @Override
             public long count(TTMultiblockBase t) {
@@ -2224,7 +2226,8 @@ public abstract class TTMultiblockBase extends MTEExtendedPowerMultiBlockBase<TT
         private final IGTHatchAdder<TTMultiblockBase> adder;
 
         @SafeVarargs
-        HatchElement(String name, IGTHatchAdder<TTMultiblockBase> adder, Class<? extends IMetaTileEntity>... mteClasses) {
+        HatchElement(String name, IGTHatchAdder<TTMultiblockBase> adder,
+            Class<? extends IMetaTileEntity>... mteClasses) {
             this.name = name;
             this.mteClasses = Collections.unmodifiableList(Arrays.asList(mteClasses));
             this.adder = adder;

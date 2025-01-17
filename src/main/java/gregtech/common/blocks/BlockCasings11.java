@@ -1,6 +1,5 @@
 package gregtech.common.blocks;
 
-
 import java.util.function.Supplier;
 
 import net.minecraft.block.Block;
@@ -8,7 +7,6 @@ import net.minecraft.client.resources.I18n;
 import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.IIcon;
 import net.minecraft.world.IBlockAccess;
-
 import net.minecraftforge.common.util.ForgeDirection;
 
 import cpw.mods.fml.relauncher.Side;
@@ -34,7 +32,7 @@ public class BlockCasings11 extends BlockCasingsAbstract {
         register(5, ItemList.Casing_Item_Pipe_Quantium, "Quantium Item Pipe Casing", tierTooltip(6));
         register(6, ItemList.Casing_Item_Pipe_Fluxed_Electrum, "Fluxed Electrum Item Pipe Casing", tierTooltip(7));
         register(7, ItemList.Casing_Item_Pipe_Black_Plutonium, "Black Plutonium Item Pipe Casing", tierTooltip(8));
-        
+
         register(8, ItemList.Casing_Item_BEC1, "Coherence-preserving Plasma Conduit", "gt.casing11.8.tooltip");
         register(9, ItemList.Casing_Item_BEC2, "Electromagnetically-isolated Casing", "gt.casing11.9.tooltip");
         register(10, ItemList.Casing_Item_BEC3, "Fine-structure Constant Manipulator", "gt.casing11.10.tooltip");
@@ -84,7 +82,7 @@ public class BlockCasings11 extends BlockCasingsAbstract {
         if (block != this) return 0;
 
         int meta = world.getBlockMetadata(x, y, z);
-        
+
         return switch (meta) {
             case 9 -> includeSimilar ? 1 : 0;
             case 10 -> includeSimilar ? 2 : 0;
@@ -95,28 +93,29 @@ public class BlockCasings11 extends BlockCasingsAbstract {
 
     @SideOnly(Side.CLIENT)
     private IIcon getCTMIcon(IBlockAccess world, int x, int y, int z, ForgeDirection side) {
-        int x1 = getCTMPriority(world, x + 1, y, z, true),
-            x2 = getCTMPriority(world, x - 1, y, z, true),
+        int x1 = getCTMPriority(world, x + 1, y, z, true), x2 = getCTMPriority(world, x - 1, y, z, true),
             y1 = getCTMPriority(world, x, y + 1, z, side.offsetY != 0),
-            y2 = getCTMPriority(world, x, y - 1, z, side.offsetY != 0),
-            z1 = getCTMPriority(world, x, y, z + 1, true),
+            y2 = getCTMPriority(world, x, y - 1, z, side.offsetY != 0), z1 = getCTMPriority(world, x, y, z + 1, true),
             z2 = getCTMPriority(world, x, y, z - 1, true);
 
         return switch (side) {
             case UP, DOWN -> {
                 int max = GTUtility.max(x1, x2, z1, z2);
-                
-                yield max == x1 || max == x2 ? Textures.BlockIcons.BEC1.getIcon() : Textures.BlockIcons.BEC1_90.getIcon();
+
+                yield max == x1 || max == x2 ? Textures.BlockIcons.BEC1.getIcon()
+                    : Textures.BlockIcons.BEC1_90.getIcon();
             }
             case EAST, WEST -> {
                 int max = GTUtility.max(y1, y2, z1, z2);
-                
-                yield max == z1 || max == z2 || max == 0 ? Textures.BlockIcons.BEC1.getIcon() : Textures.BlockIcons.BEC1_90.getIcon();
+
+                yield max == z1 || max == z2 || max == 0 ? Textures.BlockIcons.BEC1.getIcon()
+                    : Textures.BlockIcons.BEC1_90.getIcon();
             }
             case NORTH, SOUTH -> {
                 int max = GTUtility.max(x1, x2, y1, y2);
-                
-                yield max == x1 || max == x2 ? Textures.BlockIcons.BEC1.getIcon() : Textures.BlockIcons.BEC1_90.getIcon();
+
+                yield max == x1 || max == x2 ? Textures.BlockIcons.BEC1.getIcon()
+                    : Textures.BlockIcons.BEC1_90.getIcon();
             }
             default -> Textures.BlockIcons.BEC1.getIcon();
         };

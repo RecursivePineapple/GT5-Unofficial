@@ -9,16 +9,15 @@ import java.util.function.ToIntFunction;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.item.ItemStack;
 
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.Multimap;
+
 import gregtech.api.casing.ICasing;
 import gregtech.api.enums.HatchElement;
 import gregtech.api.interfaces.IHatchElement;
 import gregtech.api.metatileentity.implementations.MTEEnhancedMultiBlockBase;
 import gregtech.api.util.GTUtility;
 import gregtech.api.util.MultiblockTooltipBuilder;
-
-import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.Multimap;
-
 import it.unimi.dsi.fastutil.Pair;
 import it.unimi.dsi.fastutil.chars.CharArrayList;
 import it.unimi.dsi.fastutil.chars.CharComparator;
@@ -29,7 +28,8 @@ import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import it.unimi.dsi.fastutil.objects.ObjectArraySet;
 import tectech.thing.metaTileEntity.multi.base.TTMultiblockBase;
 
-public class MultiblockTooltipBuilder2<MTE extends MTEEnhancedMultiBlockBase<?> & IStructureProvider<MTE>> extends MultiblockTooltipBuilder {
+public class MultiblockTooltipBuilder2<MTE extends MTEEnhancedMultiBlockBase<?> & IStructureProvider<MTE>>
+    extends MultiblockTooltipBuilder {
 
     public final StructureWrapper<MTE> structure;
 
@@ -67,12 +67,14 @@ public class MultiblockTooltipBuilder2<MTE extends MTEEnhancedMultiBlockBase<?> 
         return this;
     }
 
-    public MultiblockTooltipBuilder2<MTE> addHatchLocationOverride(IHatchElement<? super MTE> hatch, String newLocation) {
+    public MultiblockTooltipBuilder2<MTE> addHatchLocationOverride(IHatchElement<? super MTE> hatch,
+        String newLocation) {
         hatchInfoOverrides.put(hatch, newLocation);
         return this;
     }
 
-    public MultiblockTooltipBuilder2<MTE> addHatchLocationOverride(Collection<IHatchElement<? super MTE>> hatches, String newLocation) {
+    public MultiblockTooltipBuilder2<MTE> addHatchLocationOverride(Collection<IHatchElement<? super MTE>> hatches,
+        String newLocation) {
         for (var hatch : hatches) {
             hatchInfoOverrides.put(hatch, newLocation);
         }
@@ -98,7 +100,9 @@ public class MultiblockTooltipBuilder2<MTE extends MTEEnhancedMultiBlockBase<?> 
         if (info == null) info = I18n.format("mm.structure.hatch-info", casing.getLocalizedName());
 
         if (dots != null && dots.length > 0) {
-            info += I18n.format("mm.structure.hatch-dots", String.join(", ", GTUtility.mapToList(new IntArrayList(dots), i -> i.toString())));
+            info += I18n.format(
+                "mm.structure.hatch-dots",
+                String.join(", ", GTUtility.mapToList(new IntArrayList(dots), i -> i.toString())));
         }
 
         if (override != null) {
@@ -239,7 +243,9 @@ public class MultiblockTooltipBuilder2<MTE extends MTEEnhancedMultiBlockBase<?> 
             Comparator<Pair<ICasing, IHatchElement<? super MTE>>> customComparator = Comparator
                 .nullsFirst(Comparator.comparing(p -> hatchNameOverrides.get(p.right())));
 
-            hatchesSorted.sort(Comparator.comparingInt(comparator).thenComparing(customComparator));
+            hatchesSorted.sort(
+                Comparator.comparingInt(comparator)
+                    .thenComparing(customComparator));
         }
 
         for (var hatch : hatchesSorted) {

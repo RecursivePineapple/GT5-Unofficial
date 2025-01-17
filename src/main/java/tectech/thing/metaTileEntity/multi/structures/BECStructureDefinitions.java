@@ -2,6 +2,8 @@ package tectech.thing.metaTileEntity.multi.structures;
 
 public class BECStructureDefinitions {
 
+    // spotless:off
+
     //#region Generator
 
     public static final String[][] BEC_GENERATOR = {{
@@ -1548,4 +1550,6 @@ public class BECStructureDefinitions {
     }};
 
     //#endregion
+
+    // spotless:on
 }

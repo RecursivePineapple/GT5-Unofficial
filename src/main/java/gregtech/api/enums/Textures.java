@@ -6,11 +6,11 @@ import static gregtech.api.enums.Mods.HodgePodge;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.mitchej123.hodgepodge.textures.IPatchedTextureAtlasSprite;
-
 import net.minecraft.client.renderer.texture.TextureMap;
 import net.minecraft.util.IIcon;
 import net.minecraft.util.ResourceLocation;
+
+import com.mitchej123.hodgepodge.textures.IPatchedTextureAtlasSprite;
 
 import gregtech.api.GregTechAPI;
 import gregtech.api.interfaces.IIconContainer;

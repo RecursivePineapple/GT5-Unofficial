@@ -30,7 +30,6 @@ import gregtech.api.enums.Textures;
 import gregtech.api.items.GTGenericBlock;
 import gregtech.api.render.TextureFactory;
 import gregtech.api.util.GTLanguageManager;
-
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import it.unimi.dsi.fastutil.objects.ObjectList;
 
@@ -169,13 +168,15 @@ public abstract class BlockCasingsAbstract extends GTGenericBlock
         register(meta, handle, defaultLocalName, (Supplier<String>) null);
     }
 
-    protected void register(int meta, @Nullable ItemList handle, @Nonnull String defaultLocalName, @Nonnull String tooltipLangKey) {
+    protected void register(int meta, @Nullable ItemList handle, @Nonnull String defaultLocalName,
+        @Nonnull String tooltipLangKey) {
         register(meta, handle, defaultLocalName, () -> I18n.format(tooltipLangKey));
     }
 
-    protected void register(int meta, @Nullable ItemList handle, @Nonnull String defaultLocalName, @Nullable Supplier<String> tooltip) {
+    protected void register(int meta, @Nullable ItemList handle, @Nonnull String defaultLocalName,
+        @Nullable Supplier<String> tooltip) {
         GTLanguageManager.addStringLocalization(getUnlocalizedName() + "." + meta + ".name", defaultLocalName);
-        
+
         if (handle != null) {
             handle.set(new ItemStack(this, 1, meta));
         }

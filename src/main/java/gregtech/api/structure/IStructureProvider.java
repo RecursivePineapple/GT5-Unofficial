@@ -1,8 +1,8 @@
 package gregtech.api.structure;
 
-import gregtech.api.metatileentity.implementations.MTEEnhancedMultiBlockBase;
-
 import com.gtnewhorizon.structurelib.structure.IStructureDefinition;
+
+import gregtech.api.metatileentity.implementations.MTEEnhancedMultiBlockBase;
 
 public interface IStructureProvider<MTE extends MTEEnhancedMultiBlockBase<?> & IStructureProvider<MTE>> {
 

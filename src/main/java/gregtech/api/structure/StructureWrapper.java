@@ -8,6 +8,13 @@ import java.util.Objects;
 
 import net.minecraft.item.ItemStack;
 
+import org.joml.Vector3i;
+
+import com.gtnewhorizon.structurelib.structure.IStructureDefinition;
+import com.gtnewhorizon.structurelib.structure.IStructureElement;
+import com.gtnewhorizon.structurelib.structure.ISurvivalBuildEnvironment;
+import com.gtnewhorizon.structurelib.structure.StructureDefinition;
+
 import gregtech.GTMod;
 import gregtech.api.casing.ICasing;
 import gregtech.api.enums.GTValues;
@@ -16,14 +23,6 @@ import gregtech.api.interfaces.tileentity.IGregTechTileEntity;
 import gregtech.api.metatileentity.implementations.MTEEnhancedMultiBlockBase;
 import gregtech.api.util.HatchElementBuilder;
 import gregtech.api.util.MultiblockTooltipBuilder;
-
-import com.gtnewhorizon.structurelib.structure.IStructureDefinition;
-import com.gtnewhorizon.structurelib.structure.IStructureElement;
-import com.gtnewhorizon.structurelib.structure.ISurvivalBuildEnvironment;
-import com.gtnewhorizon.structurelib.structure.StructureDefinition;
-
-import org.joml.Vector3i;
-
 import it.unimi.dsi.fastutil.Pair;
 import it.unimi.dsi.fastutil.chars.Char2IntArrayMap;
 import it.unimi.dsi.fastutil.chars.Char2ObjectArrayMap;
@@ -90,8 +89,8 @@ public class StructureWrapper<MTE extends MTEEnhancedMultiBlockBase<?> & IStruct
 
             if (offset == null) {
                 throw new IllegalStateException(
-                    "Structure definition for " + provider + " did not contain a tilde! This is required so that the wrapper knows where the controller is."
-                );
+                    "Structure definition for " + provider
+                        + " did not contain a tilde! This is required so that the wrapper knows where the controller is.");
             }
 
             structureDefinition = provider.compile(definitionText);
@@ -138,8 +137,7 @@ public class StructureWrapper<MTE extends MTEEnhancedMultiBlockBase<?> & IStruct
             offset.x,
             offset.y,
             offset.z,
-            !instance.mMachine
-        );
+            !instance.mMachine);
     }
 
     public void construct(MTE instance, ItemStack trigger, boolean hintsOnly) {
@@ -173,8 +171,7 @@ public class StructureWrapper<MTE extends MTEEnhancedMultiBlockBase<?> & IStruct
             offset.x,
             offset.y,
             offset.z,
-            hintsOnly
-        );
+            hintsOnly);
     }
 
     public int survivalConstruct(MTE instance, ItemStack trigger, int elementBudget, ISurvivalBuildEnvironment env) {
@@ -196,7 +193,8 @@ public class StructureWrapper<MTE extends MTEEnhancedMultiBlockBase<?> & IStruct
         }
     }
 
-    private int survivalConstructImpl(MTE instance, ItemStack trigger, int elementBudget, ISurvivalBuildEnvironment env) {
+    private int survivalConstructImpl(MTE instance, ItemStack trigger, int elementBudget,
+        ISurvivalBuildEnvironment env) {
         final IGregTechTileEntity tTile = instance.getBaseMetaTileEntity();
         int built = structureDefinition.survivalBuild(
             instance,
@@ -212,8 +210,7 @@ public class StructureWrapper<MTE extends MTEEnhancedMultiBlockBase<?> & IStruct
             offset.z,
             elementBudget,
             env,
-            false
-        );
+            false);
 
         if (built > 0) instance.checkStructure(true, tTile);
 
@@ -226,9 +223,9 @@ public class StructureWrapper<MTE extends MTEEnhancedMultiBlockBase<?> & IStruct
         if (casing.maxHatches > 0) {
             final IntBinaryOperator sum = Integer::sum;
 
-            IStructureElement<MTE> adder = onElementPass(instance -> {
-                instance.getWrapperInstanceInfo().actualCasingCounts.mergeInt(c, 1, sum);
-            }, casing.casing.asElement());
+            IStructureElement<MTE> adder = onElementPass(
+                instance -> { instance.getWrapperInstanceInfo().actualCasingCounts.mergeInt(c, 1, sum); },
+                casing.casing.asElement());
 
             return HatchElementBuilder.<MTE>builder()
                 .atLeast(casing.hatches)
@@ -284,7 +281,8 @@ public class StructureWrapper<MTE extends MTEEnhancedMultiBlockBase<?> & IStruct
     }
 
     @SuppressWarnings("unchecked")
-    public StructureWrapper<MTE> addCasingWithHatches(char c, ICasing casing, int dot, int maxHatches, List<IHatchElement<? super MTE>> hatches) {
+    public StructureWrapper<MTE> addCasingWithHatches(char c, ICasing casing, int dot, int maxHatches,
+        List<IHatchElement<? super MTE>> hatches) {
         Objects.requireNonNull(casing);
         Objects.requireNonNull(hatches);
 
@@ -318,21 +316,12 @@ public class StructureWrapper<MTE extends MTEEnhancedMultiBlockBase<?> & IStruct
     }
 
     public StructureWrapper<MTE> addCasingInfoExact(MultiblockTooltipBuilder tt, ICasing casing) {
-        tt.addCasingInfoExactly(
-            casing.getLocalizedName(),
-            getCasingMax(casing),
-            false
-        );
+        tt.addCasingInfoExactly(casing.getLocalizedName(), getCasingMax(casing), false);
         return this;
     }
 
     public StructureWrapper<MTE> addCasingInfoRange(MultiblockTooltipBuilder tt, ICasing casing) {
-        tt.addCasingInfoRange(
-            casing.getLocalizedName(),
-            getCasingMin(casing),
-            getCasingMax(casing),
-            false
-        );
+        tt.addCasingInfoRange(casing.getLocalizedName(), getCasingMin(casing), getCasingMax(casing), false);
         return this;
     }
 

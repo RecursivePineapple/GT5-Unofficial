@@ -7,7 +7,8 @@ import org.jetbrains.annotations.Nullable;
 
 public interface BECInventory {
 
-    @Nullable List<CondensateStack> getContents();
+    @Nullable
+    List<CondensateStack> getContents();
 
     void addCondensate(Collection<CondensateStack> stacks);
 

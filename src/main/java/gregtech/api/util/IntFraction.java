@@ -3,11 +3,11 @@ package gregtech.api.util;
 import gtPlusPlus.core.util.math.MathUtils;
 
 public class IntFraction {
-    
+
     public long numerator = 1, denominator = 1;
 
     public IntFraction() {
-        
+
     }
 
     public IntFraction(long numerator, long denominator) {
@@ -44,7 +44,7 @@ public class IntFraction {
             this.numerator /= gcd;
             this.denominator /= gcd;
         }
-        
+
         return this;
     }
 

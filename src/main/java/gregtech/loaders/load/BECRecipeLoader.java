@@ -10,9 +10,11 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 
-import org.jetbrains.annotations.Nullable;
+import net.minecraft.item.ItemStack;
+import net.minecraftforge.fluids.Fluid;
+import net.minecraftforge.fluids.FluidStack;
 
-import com.google.common.collect.ImmutableList;
+import org.jetbrains.annotations.Nullable;
 
 import bartworks.system.material.Werkstoff;
 import bartworks.system.material.WerkstoffLoader;
@@ -30,17 +32,15 @@ import gtPlusPlus.core.util.Utils;
 import it.unimi.dsi.fastutil.Pair;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
-import net.minecraft.item.ItemStack;
-import net.minecraftforge.fluids.Fluid;
-import net.minecraftforge.fluids.FluidStack;
 import tectech.mechanics.boseEinsteinCondensate.CondensateStack;
 import tectech.recipe.TecTechRecipeMaps;
 
 public class BECRecipeLoader {
-    
+
     private static final int EU_COST_PER_UNIT = (int) TierEU.RECIPE_UV, EU_COST_PER_LITRE = (int) TierEU.RECIPE_HV;
 
     public static class MaterialInfo {
+
         public final String name;
         public Materials gtMat;
         public Material gtppMat;
@@ -116,8 +116,18 @@ public class BECRecipeLoader {
 
         @Override
         public String toString() {
-            return "MaterialInfo [name=" + name + ", gtMat=" + gtMat + ", gtppMat=" + gtppMat + ", bartMat=" + bartMat
-                    + ", getInputFluids()=" + getInputFluids() + ", getOutputFluid()=" + getOutputFluid() + "]";
+            return "MaterialInfo [name=" + name
+                + ", gtMat="
+                + gtMat
+                + ", gtppMat="
+                + gtppMat
+                + ", bartMat="
+                + bartMat
+                + ", getInputFluids()="
+                + getInputFluids()
+                + ", getOutputFluid()="
+                + getOutputFluid()
+                + "]";
         }
     }
 
@@ -135,7 +145,8 @@ public class BECRecipeLoader {
     }
 
     private static MaterialInfo getMaterial(Material gtpp) {
-        return MATS_BY_NAME.computeIfAbsent(Utils.sanitizeString(gtpp.getUnlocalizedName()), x -> new MaterialInfo(gtpp));
+        return MATS_BY_NAME
+            .computeIfAbsent(Utils.sanitizeString(gtpp.getUnlocalizedName()), x -> new MaterialInfo(gtpp));
     }
 
     private static MaterialInfo getMaterial(Werkstoff bart) {
@@ -150,7 +161,7 @@ public class BECRecipeLoader {
                 getMaterial(mat).gtMat = mat;
             }
         }
-        
+
         for (Material mat : Material.mMaterialMap) {
             GTPP_IDS.put(mat, GTPP_IDS.size());
 
@@ -165,7 +176,13 @@ public class BECRecipeLoader {
             for (Fluid fluid : mat.getInputFluids()) {
                 MaterialInfo prev = FLUID_MATS.remove(fluid);
                 if (prev != null && prev != mat) {
-                    GTMod.GT_FML_LOGGER.warn("Re-detected fluid " + fluid + " for material " + mat + " (was " + prev + ", which will be ignored)");
+                    GTMod.GT_FML_LOGGER.warn(
+                        "Re-detected fluid " + fluid
+                            + " for material "
+                            + mat
+                            + " (was "
+                            + prev
+                            + ", which will be ignored)");
                 }
 
                 FLUID_MATS.put(fluid, mat);
@@ -176,13 +193,14 @@ public class BECRecipeLoader {
     private static void loadCreationRecipes() {
         HashSet<ItemId> added = new HashSet<>();
 
-        for (GTRecipe recipe : RecipeMaps.fluidExtractionRecipes.getBackend().getAllRecipes()) {
+        for (GTRecipe recipe : RecipeMaps.fluidExtractionRecipes.getBackend()
+            .getAllRecipes()) {
             if (recipe.mFluidOutputs.length == 1 && recipe.mOutputs.length == 0) continue;
 
             if (!added.add(ItemId.create(recipe.mInputs[0]))) continue;
 
             CondensateStack output = CondensateStack.fromFluid(recipe.mFluidOutputs[0]);
-    
+
             if (output == null) continue;
 
             CondensateStack[] outputs = new CondensateStack[] { output };
@@ -196,18 +214,21 @@ public class BECRecipeLoader {
                 .addTo(TecTechRecipeMaps.condensateCreationFromItemRecipes);
         }
 
-        for (GTRecipe recipe : RecipeMaps.arcFurnaceRecipes.getBackend().getAllRecipes()) {
+        for (GTRecipe recipe : RecipeMaps.arcFurnaceRecipes.getBackend()
+            .getAllRecipes()) {
             if (recipe.mInputs.length != 1 && recipe.mOutputs.length != 1) continue;
 
             if (!added.add(ItemId.create(recipe.mInputs[0]))) continue;
 
             Pair<OrePrefixes, MaterialInfo> input = findMaterialForStack(recipe.mInputs[0]);
             Pair<OrePrefixes, MaterialInfo> output = findMaterialForStack(recipe.mOutputs[0]);
-            
+
             if (input == null || output == null || input.right() != output.right()) continue;
 
             CondensateStack outputCondensate = CondensateStack.fromStack(recipe.mOutputs[0]);
-            Objects.requireNonNull(outputCondensate, () -> "Expected " + recipe.mOutputs[0] + "; '" + output.right().name + "' to return valid condensate");
+            Objects.requireNonNull(
+                outputCondensate,
+                () -> "Expected " + recipe.mOutputs[0] + "; '" + output.right().name + "' to return valid condensate");
             CondensateStack[] outputs = { outputCondensate };
 
             GTValues.RA.stdBuilder()

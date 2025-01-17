@@ -47,6 +47,7 @@ public class BlockGroup implements Iterable<Vector3ic> {
         int total = coords.length / 3;
 
         return new Iterator<Vector3ic>() {
+
             int counter = 0;
 
             @Override

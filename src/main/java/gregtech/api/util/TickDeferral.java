@@ -11,13 +11,15 @@ import cpw.mods.fml.relauncher.Side;
 import gregtech.GTMod;
 
 public class TickDeferral {
-    
+
     private static ArrayList<Runnable> nextTick = new ArrayList<>(), thisTick = new ArrayList<>();
 
     private static final TickDeferral INSTANCE = new TickDeferral();
 
     private TickDeferral() {
-        FMLCommonHandler.instance().bus().register(this);
+        FMLCommonHandler.instance()
+            .bus()
+            .register(this);
     }
 
     public static synchronized void schedule(Runnable runnable) {
