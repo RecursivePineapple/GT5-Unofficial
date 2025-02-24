@@ -91,7 +91,15 @@ public enum HatchElement implements IHatchElement<MTEMultiBlockBase> {
             return t.getExoticEnergyHatches()
                 .size();
         }
-    },;
+    },
+    MultiAmpEnergy(MTEMultiBlockBase::addMultiAmpEnergyInputToMachineList) {
+
+        @Override
+        public long count(MTEMultiBlockBase t) {
+            return t.getExoticEnergyHatches()
+                .size();
+        }
+    };
 
     private final String name;
     private final List<Class<? extends IMetaTileEntity>> mteClasses;

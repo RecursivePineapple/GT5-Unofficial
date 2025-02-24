@@ -177,9 +177,6 @@ public abstract class GTProxy implements IGTMod, IFuelHandler {
         OreGenEvent.GenerateMinable.EventType.LAPIS,
         OreGenEvent.GenerateMinable.EventType.QUARTZ);
     public final HashSet<ItemStack> mRegisteredOres = new HashSet<>(10000);
-    public final ArrayList<String> mSoundNames = new ArrayList<>();
-    public final ArrayList<ItemStack> mSoundItems = new ArrayList<>();
-    public final ArrayList<Integer> mSoundCounts = new ArrayList<>();
     private final Collection<OreDictEventContainer> mEvents = new HashSet<>();
     private final Collection<String> mIgnoredItems = new HashSet<>(
         Arrays.asList(
@@ -582,7 +579,7 @@ public abstract class GTProxy implements IGTMod, IFuelHandler {
     public int mPollutionHighPressureLavaBoilerPerSecond = 20;
     public int mPollutionHighPressureCoalBoilerPerSecond = 30;
     public int mPollutionBaseDieselGeneratorPerSecond = 200;
-    public double[] mPollutionDieselGeneratorReleasedByTier = new double[] { 0.1, 1.0, 0.9, 0.8 };
+    public double[] mPollutionDieselGeneratorReleasedByTier = new double[] { 0.1, 1.0, 0.9, 0.8, 0.7, 0.6 };
     public int mPollutionBaseGasTurbinePerSecond = 200;
     public double[] mPollutionGasTurbineReleasedByTier = new double[] { 0.1, 1.0, 0.9, 0.8, 0.7, 0.6 };
     public final GTUODimensionList mUndergroundOil = new GTUODimensionList();
@@ -989,7 +986,7 @@ public abstract class GTProxy implements IGTMod, IFuelHandler {
         GTModHandler.sNonReplaceableItems.add(GTModHandler.getIC2Item("cfPack", 1L, 32767));
         // GTModHandler.sNonReplaceableItems.add(GTModHandler.getIC2Item("jetpack", 1L, 32767));
         GTModHandler.sNonReplaceableItems.add(GTModHandler.getIC2Item("treetap", 1L, 32767));
-        GTModHandler.sNonReplaceableItems.add(GTModHandler.getIC2Item("weedEx", 1L, 32767));
+        GTModHandler.sNonReplaceableItems.add(ItemList.IC2_Spray_WeedEx.getWithDamage(1L, 32767));
         GTModHandler.sNonReplaceableItems.add(GTModHandler.getIC2Item("staticBoots", 1L, 32767));
         GTModHandler.sNonReplaceableItems.add(GTModHandler.getIC2Item("compositeArmor", 1L, 32767));
         GTModHandler.sNonReplaceableItems.add(GTModHandler.getIC2Item("hazmatHelmet", 1L, 32767));
@@ -1293,11 +1290,11 @@ public abstract class GTProxy implements IGTMod, IFuelHandler {
                 GTModHandler.addCraftingRecipe(
                     GTOreDictUnificator.get(OrePrefixes.dustSmall, aMaterial, 4L),
                     tBits,
-                    new Object[] { " X ", 'X', OrePrefixes.dust.get(aMaterial) });
+                    new Object[] { " X ", "   ", "   ", 'X', OrePrefixes.dust.get(aMaterial) });
                 GTModHandler.addCraftingRecipe(
                     GTOreDictUnificator.get(OrePrefixes.dustTiny, aMaterial, 9L),
                     tBits,
-                    new Object[] { "X  ", 'X', OrePrefixes.dust.get(aMaterial) });
+                    new Object[] { "X  ", "   ", "   ", 'X', OrePrefixes.dust.get(aMaterial) });
                 GTModHandler.addCraftingRecipe(
                     GTOreDictUnificator.get(OrePrefixes.dust, aMaterial, 1L),
                     tBits,

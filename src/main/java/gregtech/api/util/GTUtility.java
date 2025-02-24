@@ -35,6 +35,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.IllegalFormatException;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
@@ -94,6 +95,7 @@ import net.minecraft.util.IIcon;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.StatCollector;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
@@ -155,6 +157,7 @@ import gregtech.api.interfaces.IDebugableBlock;
 import gregtech.api.interfaces.IHasIndexedTexture;
 import gregtech.api.interfaces.IProjectileItem;
 import gregtech.api.interfaces.ITexture;
+import gregtech.api.interfaces.metatileentity.IMetaTileEntity;
 import gregtech.api.interfaces.tileentity.IBasicEnergyContainer;
 import gregtech.api.interfaces.tileentity.ICoverable;
 import gregtech.api.interfaces.tileentity.IGregTechDeviceInformation;
@@ -173,6 +176,7 @@ import gregtech.api.recipe.RecipeMaps;
 import gregtech.api.threads.RunnableSound;
 import gregtech.api.util.extensions.ArrayExt;
 import gregtech.common.blocks.BlockOresAbstract;
+import gregtech.common.items.ItemIntegratedCircuit;
 import gregtech.common.pollution.Pollution;
 import ic2.api.recipe.IRecipeInput;
 import ic2.api.recipe.RecipeInputItemStack;
@@ -451,6 +455,12 @@ public class GTUtility {
             .ordinal();
     }
 
+    /**
+     * Gets the voltage tier corresponding to an amount of EU, capped to 15 (MAX+)
+     *
+     * @param l The amount of EU
+     * @return Corresponding voltage tier in the range 0-15
+     */
     public static byte getTier(long l) {
         if (l > V[14]) return 15;
         if (l <= V[0]) return 0;
@@ -461,6 +471,18 @@ public class GTUtility {
         int log2L = 64 - Long.numberOfLeadingZeros(l - 1);
 
         return (byte) ((log2L - 2) / 2);
+    }
+
+    /**
+     * Gets the voltage tier corresponding to an amount of EU
+     *
+     * @param l The amount of EU
+     * @return Corresponding voltage tier
+     */
+    public static int getTierExtended(long l) {
+        if (l <= V[0]) return 0;
+        int log2L = 64 - Long.numberOfLeadingZeros(l - 1);
+        return ((log2L - 2) / 2);
     }
 
     public static long getAmperageForTier(long voltage, byte tier) {
@@ -3063,9 +3085,8 @@ public class GTUtility {
         return isStackInList(new GTItemStack(aStack), aList);
     }
 
-    public static boolean isStackInList(GTItemStack aStack, Collection<GTItemStack> aList) {
-        return aStack != null
-            && (aList.contains(aStack) || aList.contains(new GTItemStack(aStack.mItem, aStack.mStackSize, W)));
+    public static boolean isStackInList(@Nonnull GTItemStack aStack, @Nonnull Collection<GTItemStack> aList) {
+        return aList.contains(aStack) || aList.contains(new GTItemStack(aStack.mItem, aStack.mStackSize, W));
     }
 
     /**
@@ -3781,10 +3802,18 @@ public class GTUtility {
         return rEUAmount;
     }
 
+    /**
+     * @deprecated Use standard translation with {@link StatCollector}.
+     */
+    @Deprecated
     public static String trans(String aKey, String aEnglish) {
         return GTLanguageManager.addStringLocalization("Interaction_DESCRIPTION_Index_" + aKey, aEnglish);
     }
 
+    /**
+     * @deprecated Use standard translation with {@link StatCollector}.
+     */
+    @Deprecated
     public static String getTrans(String aKey) {
         return GTLanguageManager.getTranslation("Interaction_DESCRIPTION_Index_" + aKey);
     }
@@ -3808,54 +3837,57 @@ public class GTUtility {
 
     /**
      * This Function determines the direction a Block gets when being Wrenched. returns -1 if invalid. Even though that
-     * could never happen.
+     * could never happen. Normalizes values into the range [0.0f, 1.0f].
      */
     public static ForgeDirection determineWrenchingSide(ForgeDirection side, float aX, float aY, float aZ) {
+        float modX = (aX % 1.0f + 1.0f) % 1.0f;
+        float modY = (aY % 1.0f + 1.0f) % 1.0f;
+        float modZ = (aZ % 1.0f + 1.0f) % 1.0f;
         ForgeDirection tBack = side.getOpposite();
         switch (side) {
             case DOWN, UP -> {
-                if (aX < 0.25) {
-                    if (aZ < 0.25) return tBack;
-                    if (aZ > 0.75) return tBack;
+                if (modX < 0.25) {
+                    if (modZ < 0.25) return tBack;
+                    if (modZ > 0.75) return tBack;
                     return WEST;
                 }
-                if (aX > 0.75) {
-                    if (aZ < 0.25) return tBack;
-                    if (aZ > 0.75) return tBack;
+                if (modX > 0.75) {
+                    if (modZ < 0.25) return tBack;
+                    if (modZ > 0.75) return tBack;
                     return EAST;
                 }
-                if (aZ < 0.25) return NORTH;
-                if (aZ > 0.75) return SOUTH;
+                if (modZ < 0.25) return NORTH;
+                if (modZ > 0.75) return SOUTH;
                 return side;
             }
             case NORTH, SOUTH -> {
-                if (aX < 0.25) {
-                    if (aY < 0.25) return tBack;
-                    if (aY > 0.75) return tBack;
+                if (modX < 0.25) {
+                    if (modY < 0.25) return tBack;
+                    if (modY > 0.75) return tBack;
                     return WEST;
                 }
-                if (aX > 0.75) {
-                    if (aY < 0.25) return tBack;
-                    if (aY > 0.75) return tBack;
+                if (modX > 0.75) {
+                    if (modY < 0.25) return tBack;
+                    if (modY > 0.75) return tBack;
                     return EAST;
                 }
-                if (aY < 0.25) return DOWN;
-                if (aY > 0.75) return UP;
+                if (modY < 0.25) return DOWN;
+                if (modY > 0.75) return UP;
                 return side;
             }
             case WEST, EAST -> {
-                if (aZ < 0.25) {
-                    if (aY < 0.25) return tBack;
-                    if (aY > 0.75) return tBack;
+                if (modZ < 0.25) {
+                    if (modY < 0.25) return tBack;
+                    if (modY > 0.75) return tBack;
                     return NORTH;
                 }
-                if (aZ > 0.75) {
-                    if (aY < 0.25) return tBack;
-                    if (aY > 0.75) return tBack;
+                if (modZ > 0.75) {
+                    if (modY < 0.25) return tBack;
+                    if (modY > 0.75) return tBack;
                     return SOUTH;
                 }
-                if (aY < 0.25) return DOWN;
-                if (aY > 0.75) return UP;
+                if (modY < 0.25) return DOWN;
+                if (modY > 0.75) return UP;
                 return side;
             }
         }
@@ -3885,6 +3917,20 @@ public class GTUtility {
 
     public static String formatNumbers(double aNumber) {
         return getDecimalFormat().format(aNumber);
+    }
+
+    /**
+     * {@link String#format} without throwing exception. Falls back to {@code format} without {@code args}.
+     * Since it suppresses errors, it should be used only when inputs are unreliable,
+     * e.g. processing text input by player, or processing placeholders in localization entries.
+     */
+    @Nonnull
+    public static String formatStringSafe(@Nonnull String format, Object... args) {
+        try {
+            return String.format(format, args);
+        } catch (IllegalFormatException ignored) {
+            return format;
+        }
     }
 
     /*
@@ -3929,6 +3975,13 @@ public class GTUtility {
 
     public static ItemStack getIntegratedCircuit(int config) {
         return ItemList.Circuit_Integrated.getWithDamage(0, config);
+    }
+
+    /**
+     * @return A list of every integrated circuit, excluding zero. Do not modify the ItemStacks!
+     */
+    public static List<ItemStack> getAllIntegratedCircuits() {
+        return ItemIntegratedCircuit.NON_ZERO_VARIANTS;
     }
 
     public static float getBlockHardnessAt(World aWorld, int aX, int aY, int aZ) {
@@ -4021,6 +4074,14 @@ public class GTUtility {
     public static <T extends Collection<E>, E extends MetaTileEntity> ValidMTEList<T, E> validMTEList(
         T metaTileEntities) {
         return new ValidMTEList<>(metaTileEntities);
+    }
+
+    @Nullable
+    public static IMetaTileEntity getMetaTileEntity(TileEntity tileEntity) {
+        if (tileEntity instanceof IGregTechTileEntity gtTE && gtTE.canAccessData()) {
+            return gtTE.getMetaTileEntity();
+        }
+        return null;
     }
 
     public static ForgeDirection getSideFromPlayerFacing(Entity player) {
@@ -4792,6 +4853,12 @@ public class GTUtility {
         public int size() {
             return size;
         }
+    }
+
+    public static String[] breakLines(String... lines) {
+        return Arrays.stream(lines)
+            .flatMap(s -> Arrays.stream(s.split("\\\\n")))
+            .toArray(String[]::new);
     }
 
     @AutoValue

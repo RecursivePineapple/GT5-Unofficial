@@ -99,7 +99,6 @@ import tectech.thing.metaTileEntity.hatch.MTEHatchDataInput;
 import tectech.thing.metaTileEntity.hatch.MTEHatchDataOutput;
 import tectech.thing.metaTileEntity.hatch.MTEHatchDynamoMulti;
 import tectech.thing.metaTileEntity.hatch.MTEHatchEnergyMulti;
-import tectech.thing.metaTileEntity.hatch.MTEHatchParam;
 import tectech.thing.metaTileEntity.hatch.MTEHatchUncertainty;
 import tectech.thing.metaTileEntity.multi.base.render.TTRenderedExtendedFacingTexture;
 import tectech.util.CommonValues;
@@ -125,7 +124,6 @@ public abstract class TTMultiblockBase extends MTEExtendedPowerMultiBlockBase<TT
     // tho)
 
     // HATCHES!!!, should be added and removed in check machine
-    protected ArrayList<MTEHatchParam> eParamHatches = new ArrayList<>();
     protected ArrayList<MTEHatchUncertainty> eUncertainHatches = new ArrayList<>();
     // multi amp hatches in/out
     protected ArrayList<MTEHatchEnergyMulti> eEnergyMulti = new ArrayList<>();
@@ -939,31 +937,6 @@ public abstract class TTMultiblockBase extends MTEExtendedPowerMultiBlockBase<TT
             return;
         }
         boolean busy = mMaxProgresstime > 0;
-        if (busy) { // write from buffer to hatches only
-            for (MTEHatchParam hatch : validMTEList(eParamHatches)) {
-                if (hatch.param < 0) {
-                    continue;
-                }
-                int hatchId = hatch.param;
-                if (parametrization.groups[hatchId] != null && parametrization.groups[hatchId].updateWhileRunning) {
-                    parametrization.iParamsIn[hatchId] = hatch.value0D;
-                    parametrization.iParamsIn[hatchId + 10] = hatch.value1D;
-                }
-                hatch.input0D = parametrization.iParamsOut[hatchId];
-                hatch.input1D = parametrization.iParamsOut[hatchId + 10];
-            }
-        } else { // if has nothing to do update all
-            for (MTEHatchParam hatch : validMTEList(eParamHatches)) {
-                if (hatch.param < 0) {
-                    continue;
-                }
-                int hatchId = hatch.param;
-                parametrization.iParamsIn[hatchId] = hatch.value0D;
-                parametrization.iParamsIn[hatchId + 10] = hatch.value1D;
-                hatch.input0D = parametrization.iParamsOut[hatchId];
-                hatch.input1D = parametrization.iParamsOut[hatchId + 10];
-            }
-        }
         for (MTEHatchUncertainty uncertainty : eUncertainHatches) {
             eCertainStatus = uncertainty.update(eCertainMode);
         }
@@ -1168,8 +1141,8 @@ public abstract class TTMultiblockBase extends MTEExtendedPowerMultiBlockBase<TT
                 }
             }
 
-            aBaseMetaTileEntity.setErrorDisplayID(
-                aBaseMetaTileEntity.getErrorDisplayID() & -512 | (mWrench ? 0 : 1)
+            setErrorDisplayID(
+                getErrorDisplayID() & -512 | (mWrench ? 0 : 1)
                     | (mScrewdriver ? 0 : 2)
                     | (mSoftHammer ? 0 : 4)
                     | (mHardHammer ? 0 : 8)
@@ -1232,14 +1205,9 @@ public abstract class TTMultiblockBase extends MTEExtendedPowerMultiBlockBase<TT
             hatch.getBaseMetaTileEntity()
                 .setActive(false);
         }
-        for (MTEHatchParam hatch : validMTEList(eParamHatches)) {
-            hatch.getBaseMetaTileEntity()
-                .setActive(false);
-        }
 
         eUncertainHatches.clear();
         eEnergyMulti.clear();
-        eParamHatches.clear();
         eDynamoMulti.clear();
         eOutputData.clear();
         eInputData.clear();
@@ -1257,10 +1225,6 @@ public abstract class TTMultiblockBase extends MTEExtendedPowerMultiBlockBase<TT
         }
 
         for (MTEHatchUncertainty hatch : validMTEList(eUncertainHatches)) {
-            hatch.getBaseMetaTileEntity()
-                .setActive(true);
-        }
-        for (MTEHatchParam hatch : validMTEList(eParamHatches)) {
             hatch.getBaseMetaTileEntity()
                 .setActive(true);
         }
@@ -1773,9 +1737,6 @@ public abstract class TTMultiblockBase extends MTEExtendedPowerMultiBlockBase<TT
         if (aMetaTileEntity instanceof MTEHatchMuffler) {
             return mMufflerHatches.add((MTEHatchMuffler) aMetaTileEntity);
         }
-        if (aMetaTileEntity instanceof MTEHatchParam) {
-            return eParamHatches.add((MTEHatchParam) aMetaTileEntity);
-        }
         if (aMetaTileEntity instanceof MTEHatchUncertainty) {
             return eUncertainHatches.add((MTEHatchUncertainty) aMetaTileEntity);
         }
@@ -1831,9 +1792,6 @@ public abstract class TTMultiblockBase extends MTEExtendedPowerMultiBlockBase<TT
         }
         if (aMetaTileEntity instanceof MTEHatchMuffler) {
             return mMufflerHatches.add((MTEHatchMuffler) aMetaTileEntity);
-        }
-        if (aMetaTileEntity instanceof MTEHatchParam) {
-            return eParamHatches.add((MTEHatchParam) aMetaTileEntity);
         }
         if (aMetaTileEntity instanceof MTEHatchUncertainty) {
             return eUncertainHatches.add((MTEHatchUncertainty) aMetaTileEntity);
@@ -2038,10 +1996,6 @@ public abstract class TTMultiblockBase extends MTEExtendedPowerMultiBlockBase<TT
         if (aMetaTileEntity == null) {
             return false;
         }
-        if (aMetaTileEntity instanceof MTEHatchParam) {
-            ((MTEHatch) aMetaTileEntity).updateTexture(aBaseCasingIndex);
-            return eParamHatches.add((MTEHatchParam) aMetaTileEntity);
-        }
         return false;
     }
 
@@ -2073,10 +2027,6 @@ public abstract class TTMultiblockBase extends MTEExtendedPowerMultiBlockBase<TT
         if (aMetaTileEntity instanceof MTEHatchMaintenance) {
             ((MTEHatch) aMetaTileEntity).updateTexture(aBaseCasingIndex);
             return mMaintenanceHatches.add((MTEHatchMaintenance) aMetaTileEntity);
-        }
-        if (aMetaTileEntity instanceof MTEHatchParam) {
-            ((MTEHatch) aMetaTileEntity).updateTexture(aBaseCasingIndex);
-            return eParamHatches.add((MTEHatchParam) aMetaTileEntity);
         }
         if (aMetaTileEntity instanceof MTEHatchUncertainty) {
             ((MTEHatch) aMetaTileEntity).updateTexture(aBaseCasingIndex);
@@ -2176,13 +2126,6 @@ public abstract class TTMultiblockBase extends MTEExtendedPowerMultiBlockBase<TT
 
     public enum HatchElement implements IHatchElement<TTMultiblockBase> {
 
-        Param("GT5U.MBTT.Param", TTMultiblockBase::addParametrizerToMachineList, MTEHatchParam.class) {
-
-            @Override
-            public long count(TTMultiblockBase t) {
-                return t.eParamHatches.size();
-            }
-        },
         Uncertainty("GT5U.MBTT.Uncertainty", TTMultiblockBase::addUncertainToMachineList, MTEHatchUncertainty.class) {
 
             @Override
