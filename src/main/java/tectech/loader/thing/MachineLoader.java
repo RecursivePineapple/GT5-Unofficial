@@ -13,8 +13,10 @@ import static gregtech.api.enums.MetaTileEntityIDs.BasicTeslaTransceiver1by1;
 import static gregtech.api.enums.MetaTileEntityIDs.BasicTeslaTransceiver2by2;
 import static gregtech.api.enums.MetaTileEntityIDs.BasicTeslaTransceiver3by3;
 import static gregtech.api.enums.MetaTileEntityIDs.BasicTeslaTransceiver4by4;
+import static gregtech.api.enums.MetaTileEntityIDs.BoseEinsteinCondensateAssembler;
 import static gregtech.api.enums.MetaTileEntityIDs.BoseEinsteinCondensateGenerator;
 import static gregtech.api.enums.MetaTileEntityIDs.BoseEinsteinCondensateHatch;
+import static gregtech.api.enums.MetaTileEntityIDs.BoseEinsteinCondensateIONode;
 import static gregtech.api.enums.MetaTileEntityIDs.BoseEinsteinCondensatePipe;
 import static gregtech.api.enums.MetaTileEntityIDs.BoseEinsteinCondensatePipeBlock;
 import static gregtech.api.enums.MetaTileEntityIDs.BoseEinsteinCondensateStorage;
@@ -324,7 +326,9 @@ import static tectech.thing.CustomItemList.Machine_BuckConverter_ZPM;
 import static tectech.thing.CustomItemList.Machine_DebugGenny;
 import static tectech.thing.CustomItemList.Machine_DebugPollutor;
 import static tectech.thing.CustomItemList.Machine_DebugWriter;
+import static tectech.thing.CustomItemList.Machine_Multi_BECAssembler;
 import static tectech.thing.CustomItemList.Machine_Multi_BECGenerator;
+import static tectech.thing.CustomItemList.Machine_Multi_BECIONode;
 import static tectech.thing.CustomItemList.Machine_Multi_BECStorage;
 import static tectech.thing.CustomItemList.Machine_Multi_Computer;
 import static tectech.thing.CustomItemList.Machine_Multi_DataBank;
@@ -648,6 +652,7 @@ import tectech.thing.metaTileEntity.hatch.MTEHatchWirelessDataItemsInput;
 import tectech.thing.metaTileEntity.hatch.MTEHatchWirelessDataItemsOutput;
 import tectech.thing.metaTileEntity.hatch.MTEHatchWirelessMulti;
 import tectech.thing.metaTileEntity.multi.MTEActiveTransformer;
+import tectech.thing.metaTileEntity.multi.MTEBECAssembler;
 import tectech.thing.metaTileEntity.multi.MTEBECGenerator;
 import tectech.thing.metaTileEntity.multi.MTEBECStorage;
 import tectech.thing.metaTileEntity.multi.MTEDataBank;
@@ -658,6 +663,7 @@ import tectech.thing.metaTileEntity.multi.MTENetworkSwitch;
 import tectech.thing.metaTileEntity.multi.MTEQuantumComputer;
 import tectech.thing.metaTileEntity.multi.MTEResearchStation;
 import tectech.thing.metaTileEntity.multi.MTETeslaTower;
+import tectech.thing.metaTileEntity.multi.bec.MTEBECIONode;
 import tectech.thing.metaTileEntity.multi.godforge.MTEExoticModule;
 import tectech.thing.metaTileEntity.multi.godforge.MTEForgeOfGods;
 import tectech.thing.metaTileEntity.multi.godforge.MTEMoltenModule;
@@ -2275,6 +2281,16 @@ public class MachineLoader implements Runnable {
                 BoseEinsteinCondensateStorage.ID,
                 "multimachine.em.bec-storage",
                 "Bose-Einstein Condensate Containment Field").getStackForm(1L));
+        Machine_Multi_BECAssembler.set(
+            new MTEBECAssembler(
+                BoseEinsteinCondensateAssembler.ID,
+                "multimachine.em.bec-assembler",
+                "Bose-Einstein Condensate Observation Array").getStackForm(1L));
+        Machine_Multi_BECIONode.set(
+            new MTEBECIONode(
+                BoseEinsteinCondensateIONode.ID,
+                "multimachine.em.bec-io-node",
+                "Observation Array Teleportation Node").getStackForm(1L));
 
         // ===================================================================================================
         // Hatches
@@ -2355,7 +2371,7 @@ public class MachineLoader implements Runnable {
         }
 
         BECpipe.set(
-            new MTEPipeBEC(BoseEinsteinCondensatePipe.ID, "pipe.bec", "Bose-Einstein Condensate Pipe")
+            new MTEPipeBEC(BoseEinsteinCondensatePipe.ID, "pipe.bec", "Bose-Einstein Condensate Conduit")
                 .getStackForm(1L));
 
         LASERpipeBlock.set(
@@ -2368,7 +2384,7 @@ public class MachineLoader implements Runnable {
             new MTEPipeBlockBEC(
                 BoseEinsteinCondensatePipeBlock.ID,
                 "pipe.bec.block",
-                "Bose-Einstein Condensate Pipe Casing").getStackForm(1L));
+                "Bose-Einstein Condensate Conduit Casing").getStackForm(1L));
 
         // ===================================================================================================
         // Single Blocks

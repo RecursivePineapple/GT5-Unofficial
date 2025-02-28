@@ -24,13 +24,14 @@ import gregtech.api.recipe.check.SingleRecipeCheck;
 import gregtech.api.util.GTRecipe;
 import gregtech.api.util.OverclockCalculator;
 import gregtech.api.util.ParallelHelper;
+import gregtech.common.tileentities.machines.IDualInputHatchAware;
 import gregtech.common.tileentities.machines.IDualInputInventory;
 
 /**
  * Logic class to calculate result of recipe check from inputs, based on recipemap.
  */
 @SuppressWarnings({ "unused", "UnusedReturnValue" })
-public class ProcessingLogic {
+public class ProcessingLogic implements IDualInputHatchAware {
 
     // Traits
     protected IVoidable machine;
@@ -116,26 +117,32 @@ public class ProcessingLogic {
         return this;
     }
 
-    public boolean craftingPatternHandler(IDualInputInventory slot) {
+    public boolean setCurrentDualInputInventory(IDualInputInventory slot) {
         if (craftingPatternRecipeCache.containsKey(slot)) {
             craftingPattern = slot;
             return true;
         }
 
         GTDualInputs inputs = slot.getPatternInputs();
+
         setInputItems(inputs.inputItems);
         setInputFluids(inputs.inputFluid);
+
         Set<GTRecipe> recipes = findRecipeMatches(getCurrentRecipeMap()).collect(Collectors.toSet());
+
         setInputItems();
         setInputFluids();
+
         if (!recipes.isEmpty()) {
             craftingPatternRecipeCache.put(slot, recipes);
             craftingPattern = slot;
             return true;
         }
+
         return false;
     }
 
+    @Override
     public void clearCraftingPatternRecipeCache(IDualInputInventory slot) {
         craftingPatternRecipeCache.remove(slot);
     }
@@ -327,13 +334,16 @@ public class ProcessingLogic {
 
         if (craftingPattern != null) {
             Set<GTRecipe> matchedRecipes = craftingPatternRecipeCache.get(craftingPattern);
+
             for (GTRecipe matchedRecipe : matchedRecipes) {
                 if (matchedRecipe.maxParallelCalculatedByInputs(1, inputFluids, inputItems) == 1) {
                     CalculationResult foundResult = validateAndCalculateRecipe(matchedRecipe);
                     return foundResult.checkRecipeResult;
                 }
             }
+
             craftingPattern = null;
+
             return CheckRecipeResultRegistry.NO_RECIPE;
         }
 

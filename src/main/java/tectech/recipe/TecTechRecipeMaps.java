@@ -5,7 +5,6 @@ import java.util.Comparator;
 import java.util.List;
 
 import com.gtnewhorizons.modularui.common.widget.ProgressBar;
-
 import gregtech.api.gui.modularui.GTUITextures;
 import gregtech.api.items.ItemCondensate;
 import gregtech.api.recipe.RecipeMap;
@@ -102,10 +101,9 @@ public class TecTechRecipeMaps {
                 .setHeight(100))
         .build();
 
-    public static final RecipeMap<RecipeMapBackend> condensateCreationFromItemRecipes = RecipeMapBuilder
-        .of("gt.recipe.create-condensate-item")
+    public static final RecipeMap<BECRecipeMapBackend> condensateCreationFromItemRecipes = RecipeMapBuilder
+        .of("gt.recipe.create-condensate-item", BECRecipeMapBackend::new)
         .maxIO(1, 1, 0, 0)
-        .disableOptimize()
         .logo(TecTechUITextures.PICTURE_TECTECH_LOGO)
         .logoSize(18, 18)
         .logoPos(151, 63)
@@ -114,10 +112,9 @@ public class TecTechRecipeMaps {
         .neiHandlerInfo(builder -> builder.setDisplayStack(ItemCondensate.getForMaterial("Steel", 0)))
         .neiRecipeComparator(Comparator.comparingLong(BECRecipeLoader::getRecipeCost))
         .build();
-    public static final RecipeMap<RecipeMapBackend> condensateCreationFromFluidRecipes = RecipeMapBuilder
-        .of("gt.recipe.create-condensate-fluid")
+    public static final RecipeMap<BECRecipeMapBackend> condensateCreationFromFluidRecipes = RecipeMapBuilder
+        .of("gt.recipe.create-condensate-fluid", BECRecipeMapBackend::new)
         .maxIO(0, 1, 1, 0)
-        .disableOptimize()
         .logo(TecTechUITextures.PICTURE_TECTECH_LOGO)
         .logoSize(18, 18)
         .logoPos(151, 63)
@@ -126,15 +123,25 @@ public class TecTechRecipeMaps {
         .neiHandlerInfo(builder -> builder.setDisplayStack(ItemCondensate.getForMaterial("Deuterium", 0)))
         .neiRecipeComparator(Comparator.comparingLong(BECRecipeLoader::getRecipeCost))
         .build();
-    public static final RecipeMap<RecipeMapBackend> condensateLiquificationRecipes = RecipeMapBuilder
-        .of("gt.recipe.liquify-condensate")
+    public static final RecipeMap<BECRecipeMapBackend> condensateLiquificationRecipes = RecipeMapBuilder
+        .of("gt.recipe.liquify-condensate", BECRecipeMapBackend::new)
         .maxIO(1, 0, 0, 1)
-        .disableOptimize()
         .logo(TecTechUITextures.PICTURE_TECTECH_LOGO)
         .logoSize(18, 18)
         .logoPos(151, 63)
         .neiRecipeBackgroundSize(170, 90)
         .frontend(LiquidCondensateFrontend::new)
+        .neiHandlerInfo(builder -> builder.setDisplayStack(ItemCondensate.getForMaterial("Water", 0)))
+        .neiRecipeComparator(Comparator.comparingLong(BECRecipeLoader::getRecipeCost))
+        .build();
+    public static final RecipeMap<BECRecipeMapBackend> condensateAssemblingRecipes = RecipeMapBuilder
+        .of("gt.recipe.assemble-condensate", BECRecipeMapBackend::new)
+        .maxIO(16, 1, 4, 0)
+        .logo(TecTechUITextures.PICTURE_TECTECH_LOGO)
+        .logoSize(18, 18)
+        .logoPos(151, 63)
+        .neiRecipeBackgroundSize(170, 90)
+        .frontend(BECRecipeMapFrontend::new)
         .neiHandlerInfo(builder -> builder.setDisplayStack(ItemCondensate.getForMaterial("Water", 0)))
         .neiRecipeComparator(Comparator.comparingLong(BECRecipeLoader::getRecipeCost))
         .build();

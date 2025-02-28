@@ -14,6 +14,41 @@ public enum Casings implements ICasing {
 
     // spotless:off
     // I know these look weird, but I think it makes it easier to read
+
+    ThermalProcessingCasing
+        (() -> ModBlocks.blockCasings2Misc, 0, 80),
+    HastelloyNSealantBlock
+        (() -> ModBlocks.blockCasings2Misc, 1, 80),
+    HastelloyXStructuralBlock
+        (() -> ModBlocks.blockCasings2Misc, 2, 80),
+    IncoloyDSFluidContainmentBlock
+        (() -> ModBlocks.blockCasings2Misc, 3, 80),
+    // for some reason, a couple of these casings don't register their textures
+    // instead, block casings 5 uses these indices
+    // why? idk, blame alk or something
+    WashPlantCasing
+        (() -> ModBlocks.blockCasings2Misc, 4, -1),
+    IndustrialSieveCasing
+        (() -> ModBlocks.blockCasings2Misc, 5, 80),
+    LargeSieveGrate
+        (() -> ModBlocks.blockCasings2Misc, 6, 80),
+    VanadiumRedoxPowerCellEV
+        (() -> ModBlocks.blockCasings2Misc, 7, 80),
+    SubStationExternalCasing
+        (() -> ModBlocks.blockCasings2Misc, 8, 80),
+    CyclotronCoil
+        (() -> ModBlocks.blockCasings2Misc, 9, 80),
+    CyclotronOuterCasing
+        (() -> ModBlocks.blockCasings2Misc, 10, -1),
+    ThermalContainmentCasing
+        (() -> ModBlocks.blockCasings2Misc, 11, -1),
+    BulkProductionFrame
+        (() -> ModBlocks.blockCasings2Misc, 12, -1),
+    CuttingFactoryFrame
+        (() -> ModBlocks.blockCasings2Misc, 13, 80),
+    SterileFarmCasing
+        (() -> ModBlocks.blockCasings2Misc, 15, 80),
+
     TinItemPipeCasing
         (() -> GregTechAPI.sBlockCasings11, 0, 2112),
     BrassItemPipeCasing

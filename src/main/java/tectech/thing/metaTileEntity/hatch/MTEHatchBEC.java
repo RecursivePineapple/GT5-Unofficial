@@ -80,7 +80,7 @@ public class MTEHatchBEC extends MTEBaseFactoryHatch implements BECFactoryElemen
 
     @Override
     public BECFactoryElement.ConnectionType getConnectionOnSide(ForgeDirection side) {
-        return side == getBaseMetaTileEntity().getFrontFacing() ? BECFactoryElement.ConnectionType.CONNECTED
+        return side == getBaseMetaTileEntity().getFrontFacing() ? BECFactoryElement.ConnectionType.CONNECTABLE
             : BECFactoryElement.ConnectionType.NONE;
     }
 

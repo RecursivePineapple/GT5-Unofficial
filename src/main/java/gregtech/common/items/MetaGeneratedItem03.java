@@ -253,14 +253,21 @@ import static gregtech.common.items.IDMetaItem03.White_Dwarf_Shape_Extruder_Wire
 import static gregtech.common.items.IDMetaItem03.WovenKevlar;
 import static gregtech.common.items.IDMetaItem03.ZPM_Coil;
 
+import java.util.List;
+
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.ItemStack;
+
 import gregtech.api.covers.CoverRegistry;
 import gregtech.api.enums.GTValues;
 import gregtech.api.enums.ItemList;
 import gregtech.api.enums.Materials;
+import gregtech.api.enums.NaniteTier;
 import gregtech.api.enums.OrePrefixes;
 import gregtech.api.enums.SubTag;
 import gregtech.api.enums.TCAspects;
 import gregtech.api.items.MetaGeneratedItemX32;
+import gregtech.api.objects.ItemData;
 import gregtech.api.render.TextureFactory;
 import gregtech.api.util.GTOreDictUnificator;
 import gregtech.common.covers.CoverMetricsTransmitter;
@@ -1488,5 +1495,20 @@ public class MetaGeneratedItem03 extends MetaGeneratedItemX32 {
         return aDoShowAllItems || pref.contains("nanite")
             || pref.contains("rawore")
             || pref.contains("platesuperdense");
+    }
+
+    @Override
+    protected void addAdditionalToolTips(List<String> aList, ItemStack aStack, EntityPlayer aPlayer) {
+        super.addAdditionalToolTips(aList, aStack, aPlayer);
+
+        ItemData data = GTOreDictUnificator.getItemData(aStack);
+
+        if (data != null && data.mPrefix == OrePrefixes.nanite) {
+            NaniteTier tier = NaniteTier.fromStack(aStack);
+
+            if (tier != null) {
+                aList.add(net.minecraft.util.StatCollector.translateToLocalFormatted("gt.tooltip.nanite-tier", tier.tier));
+            }
+        }
     }
 }

@@ -1792,6 +1792,7 @@ public enum MetaTileEntityIDs {
     BoseEinsteinCondensateGenerator(15550),
     BoseEinsteinCondensateStorage(15551),
     BoseEinsteinCondensateAssembler(15552),
+    BoseEinsteinCondensateIONode(15553),
     BasicTeslaTransceiver1by1(16000),
     AdvancedTeslaTransceiver1by1(16001),
     EpycTeslaTransceiver1by1(16002),

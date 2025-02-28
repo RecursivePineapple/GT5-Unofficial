@@ -12,8 +12,11 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.world.World;
 import net.minecraftforge.common.util.ForgeDirection;
 
+import gregtech.api.enums.Dyes;
+import gregtech.api.interfaces.ITexture;
 import gregtech.api.interfaces.metatileentity.IMetaTileEntity;
 import gregtech.api.interfaces.tileentity.IGregTechTileEntity;
+import gregtech.api.render.TextureFactory;
 import gregtech.common.covers.CoverInfo;
 import gregtech.common.covers.CoverShutter;
 import mcp.mobius.waila.api.IWailaConfigHandler;
@@ -41,6 +44,29 @@ public class MTEPipeBEC extends MTEBaseFactoryPipe implements BECFactoryElement 
         return new MTEPipeBEC(this);
     }
 
+    @Override
+    public ITexture[] getTexture(IGregTechTileEntity base, ForgeDirection side, int aConnections, int colorIndex,
+        boolean aConnected, boolean aRedstone) {
+
+        List<ITexture> textures = new ArrayList<>(2);
+
+        textures.add(
+            TextureFactory.builder()
+                .addIcon(EM_PIPE)
+                .setRGBA(Dyes.getModulation(colorIndex, new short[] { 0x81, 0xCA, 0xED, 0 }))
+                .build());
+
+        if (getActive()) {
+            textures.add(
+                TextureFactory.builder()
+                    .addIcon(EM_BAR)
+                    .setRGBA(Dyes.getModulation(colorIndex, new short[] { 0x81, 0xCA, 0xED, 0 }))
+                    .build());
+        }
+
+        return textures.toArray(new ITexture[0]);
+    }
+
     private boolean wasAllowedToWork = false;
 
     @Override
@@ -53,7 +79,7 @@ public class MTEPipeBEC extends MTEBaseFactoryPipe implements BECFactoryElement 
             boolean hasShutter = false;
 
             for (ForgeDirection side : ForgeDirection.VALID_DIRECTIONS) {
-                if (base.getCoverBehaviorAtSideNew(side) instanceof CoverShutter) {
+                if (base.getCoverInfoAtSide(side).getCoverBehavior() instanceof CoverShutter) {
                     hasShutter = true;
                     break;
                 }
@@ -89,7 +115,7 @@ public class MTEPipeBEC extends MTEBaseFactoryPipe implements BECFactoryElement 
 
         if (cover != null && cover.getCoverBehavior() instanceof CoverShutter shutter) {
             if (shutter.letsEnergyIn(side, cover.getCoverID(), cover.getCoverData(), getBaseMetaTileEntity())) {
-                return ConnectionType.CONNECTED;
+                return ConnectionType.CONNECTABLE;
             }
 
             if (shutter.alwaysLookConnected(side, cover.getCoverID(), cover.getCoverData(), getBaseMetaTileEntity())) {
@@ -98,7 +124,7 @@ public class MTEPipeBEC extends MTEBaseFactoryPipe implements BECFactoryElement 
 
             return ConnectionType.NONE;
         } else {
-            return ConnectionType.CONNECTED;
+            return ConnectionType.CONNECTABLE;
         }
     }
 
@@ -112,8 +138,8 @@ public class MTEPipeBEC extends MTEBaseFactoryPipe implements BECFactoryElement 
             if (base.getTileEntityAtSide(dir) instanceof IGregTechTileEntity igte) {
                 if (igte.getColorization() == base.getColorization()) {
                     if (igte.getMetaTileEntity() instanceof BECFactoryElement element) {
-                        if (this.getConnectionOnSide(dir) == ConnectionType.CONNECTED) {
-                            if (element.getConnectionOnSide(dir.getOpposite()) == ConnectionType.CONNECTED) {
+                        if (this.getConnectionOnSide(dir) == ConnectionType.CONNECTABLE) {
+                            if (element.getConnectionOnSide(dir.getOpposite()) == ConnectionType.CONNECTABLE) {
                                 neighbours.add(element);
                             }
                         }
@@ -218,6 +244,8 @@ public class MTEPipeBEC extends MTEBaseFactoryPipe implements BECFactoryElement 
 
     @Override
     public void onColorChangeServer(byte aColor) {
-        BECFactoryGrid.INSTANCE.addElement(this);
+        if (getBaseMetaTileEntity() != null && getBaseMetaTileEntity().getTimer() > 0) {
+            BECFactoryGrid.INSTANCE.addElement(this);
+        }
     }
 }

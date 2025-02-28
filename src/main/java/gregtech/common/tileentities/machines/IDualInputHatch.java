@@ -23,5 +23,5 @@ public interface IDualInputHatch {
 
     ItemStack[] getSharedItems();
 
-    void setProcessingLogic(ProcessingLogic pl);
+    void addProcessingLogic(ProcessingLogic pl);
 }

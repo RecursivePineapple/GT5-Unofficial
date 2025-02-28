@@ -221,7 +221,7 @@ GT5U.MS.multismelting=Multi smelting
 gt.casing.tiertooltip=Casing Tier: %s
 
 gt.casing11.8.tooltip=§b§lPrevents observation. Just don't look at it too hard.
-gt.casing11.9.tooltip=§b§l
+gt.casing11.9.tooltip=§b§lPulsar-proof!
 gt.casing11.10.tooltip=§b§lVacuum decay not included.
 
 # Machine types
@@ -367,6 +367,7 @@ gt.recipe.purificationplantquarkextractor=Baryonic Perfection
 gt.recipe.quantumcomputer=QC Components
 gt.recipe.create-condensate-item=Condensate Generation (Items)
 gt.recipe.create-condensate-fluid=Condensate Generation (Fluids)
+gt.recipe.assemble-condensate=Condensate Assembling
 gt.recipe.liquify-condensate=Condensate Liquification
 
 # Recipe categories
@@ -379,6 +380,9 @@ gt.recipe.category.alloy_smelter_molding=Alloy Smelter Molding
 gt.recipe.category.forge_hammer_recycling=Forge Hammer Recycling
 gt.recipe.category.tic_part_extruding=TiC Part Extruding
 gt.recipe.category.tic_bolt_molding=TiC Bolt Molding
+
+# Misc Tooltips
+gt.tooltip.nanite-tier=Nanite Tier: %s
 
 GT5U.machines.tier=Tier
 GT5U.machines.workarea=Work Area
@@ -731,6 +735,7 @@ GT5U.gui.text.pulse_mode=Pulse Mode
 GT5U.gui.text.power_panel=Power Control Panel
 GT5U.gui.text.too_uncertain=Too Uncertain.
 GT5U.gui.text.invalid_parameters=Invalid Parameters.
+GT5U.gui.text.no_bec_assembler=Condensate Observation Array Offline
 GT5U.item.programmed_circuit.select.header=Reprogram Circuit
 
 GT5U.gui.config.client=Client

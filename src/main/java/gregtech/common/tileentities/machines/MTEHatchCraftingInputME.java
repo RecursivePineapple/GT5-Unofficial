@@ -867,7 +867,7 @@ public class MTEHatchCraftingInputME extends MTEHatchInputBus
     }
 
     @Override
-    public void setProcessingLogic(ProcessingLogic pl) {
+    public void addProcessingLogic(ProcessingLogic pl) {
         if (!processingLogics.contains(pl)) {
             processingLogics.add(Objects.requireNonNull(pl));
         }

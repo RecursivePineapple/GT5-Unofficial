@@ -315,7 +315,7 @@ public class MTEHatchCraftingInputSlave extends MTEHatchInputBus implements IDua
     }
 
     @Override
-    public void setProcessingLogic(ProcessingLogic pl) {
-        if (getMaster() != null) getMaster().setProcessingLogic(pl);
+    public void addProcessingLogic(ProcessingLogic pl) {
+        if (getMaster() != null) getMaster().addProcessingLogic(pl);
     }
 }

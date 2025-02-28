@@ -507,6 +507,29 @@ public class GTUtility {
         return GTValues.TIER_COLORS[tier] + GTValues.VN[tier] + EnumChatFormatting.RESET;
     }
 
+    public static final String BLACK = EnumChatFormatting.BLACK.toString();
+    public static final String DARK_BLUE = EnumChatFormatting.DARK_BLUE.toString();
+    public static final String DARK_GREEN = EnumChatFormatting.DARK_GREEN.toString();
+    public static final String DARK_AQUA = EnumChatFormatting.DARK_AQUA.toString();
+    public static final String DARK_RED = EnumChatFormatting.DARK_RED.toString();
+    public static final String DARK_PURPLE = EnumChatFormatting.DARK_PURPLE.toString();
+    public static final String GOLD = EnumChatFormatting.GOLD.toString();
+    public static final String GRAY = EnumChatFormatting.GRAY.toString();
+    public static final String DARK_GRAY = EnumChatFormatting.DARK_GRAY.toString();
+    public static final String BLUE = EnumChatFormatting.BLUE.toString();
+    public static final String GREEN = EnumChatFormatting.GREEN.toString();
+    public static final String AQUA = EnumChatFormatting.AQUA.toString();
+    public static final String RED = EnumChatFormatting.RED.toString();
+    public static final String LIGHT_PURPLE = EnumChatFormatting.LIGHT_PURPLE.toString();
+    public static final String YELLOW = EnumChatFormatting.YELLOW.toString();
+    public static final String WHITE = EnumChatFormatting.WHITE.toString();
+    public static final String OBFUSCATED = EnumChatFormatting.OBFUSCATED.toString();
+    public static final String BOLD = EnumChatFormatting.BOLD.toString();
+    public static final String STRIKETHROUGH = EnumChatFormatting.STRIKETHROUGH.toString();
+    public static final String UNDERLINE = EnumChatFormatting.UNDERLINE.toString();
+    public static final String ITALIC = EnumChatFormatting.ITALIC.toString();
+    public static final String RESET = EnumChatFormatting.RESET.toString();
+
     /**
      * @return e.g. {@code " (LV)"}
      */
@@ -2416,6 +2439,22 @@ public class GTUtility {
         return out;
     }
 
+    public static <T> int findIndex(T[] array, T value) {
+        for (int i = 0; i < array.length; i++) {
+            if (array[i] == value) return i;
+        }
+
+        return -1;
+    }
+
+    public static <T> T getIndexSafe(T[] array, int index) {
+        return array == null || index < 0 || index >= array.length ? null : array[index];
+    }
+
+    public static <T> T getIndexSafe(List<T> list, int index) {
+        return list == null || index < 0 || index >= list.size() ? null : list.get(index);
+    }
+
     public static Block getBlockFromStack(ItemStack itemStack) {
         if (isStackInvalid(itemStack)) return Blocks.air;
         return getBlockFromItem(itemStack.getItem());
@@ -3931,6 +3970,10 @@ public class GTUtility {
         } catch (IllegalFormatException ignored) {
             return format;
         }
+    }
+
+    public static String translate(String key, Object... parameters) {
+        return StatCollector.translateToLocalFormatted(key, parameters);
     }
 
     /*

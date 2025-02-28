@@ -1,6 +1,7 @@
 package tectech.thing.metaTileEntity.multi.base;
 
 import static gregtech.api.casing.Casings.MolecularCasing;
+import static gregtech.api.util.GTUtility.filterValidMTEs;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -23,17 +24,29 @@ import com.gtnewhorizons.modularui.common.widget.DynamicPositionedColumn;
 import com.gtnewhorizons.modularui.common.widget.FakeSyncWidget;
 import com.gtnewhorizons.modularui.common.widget.SlotWidget;
 import com.gtnewhorizons.modularui.common.widget.TextWidget;
-
+import cpw.mods.fml.common.FMLCommonHandler;
+import cpw.mods.fml.relauncher.Side;
 import gregtech.api.interfaces.IHatchElement;
 import gregtech.api.interfaces.IIconContainer;
+import gregtech.api.interfaces.IRecipeInput;
 import gregtech.api.interfaces.ITexture;
+import gregtech.api.interfaces.ITransaction;
 import gregtech.api.interfaces.metatileentity.IMetaTileEntity;
 import gregtech.api.interfaces.tileentity.IGregTechTileEntity;
+import gregtech.api.metatileentity.implementations.MTEHatchInputBus;
+import gregtech.api.recipe.check.CheckRecipeResult;
+import gregtech.api.recipe.check.CheckRecipeResultRegistry;
 import gregtech.api.render.TextureFactory;
 import gregtech.api.structure.IStructureProvider;
 import gregtech.api.structure.StructureWrapper;
 import gregtech.api.structure.StructureWrapperInstanceInfo;
+import gregtech.api.util.GTUtility;
 import gregtech.api.util.IGTHatchAdder;
+import gregtech.common.tileentities.machines.IDualInputHatchAware;
+import gregtech.common.tileentities.machines.IDualInputInventory;
+import gregtech.common.tileentities.machines.MTEHatchCraftingInputME;
+import gregtech.common.tileentities.machines.MTEHatchCraftingInputSlave;
+import gregtech.common.tileentities.machines.MTEHatchInputBusME;
 import gtPlusPlus.xmod.gregtech.common.blocks.textures.TexturesGtBlock;
 import mcp.mobius.waila.api.IWailaConfigHandler;
 import mcp.mobius.waila.api.IWailaDataAccessor;
@@ -43,7 +56,7 @@ import tectech.thing.CustomItemList;
 import tectech.thing.metaTileEntity.hatch.MTEHatchBEC;
 
 public abstract class MTEBECMultiblockBase<TSelf extends MTEBECMultiblockBase<TSelf>> extends TTMultiblockBase
-    implements ISurvivalConstructable, BECFactoryElement, IStructureProvider<TSelf> {
+    implements ISurvivalConstructable, BECFactoryElement, IStructureProvider<TSelf>, IDualInputHatchAware {
 
     protected static final String STRUCTURE_PIECE_MAIN = "main";
 
@@ -179,7 +192,7 @@ public abstract class MTEBECMultiblockBase<TSelf extends MTEBECMultiblockBase<TS
             structureInstanceInfo.validate();
             return structureInstanceInfo.getErrorMessage();
         }, error -> errorMessage = error),
-            TextWidget.dynamicString(() -> errorMessage)
+            TextWidget.dynamicString(() -> errorMessage == null ? "" : errorMessage)
                 .setTextAlignment(Alignment.CenterLeft)
                 .setEnabled(errorMessage != null && !errorMessage.isEmpty()));
     }
@@ -224,7 +237,15 @@ public abstract class MTEBECMultiblockBase<TSelf extends MTEBECMultiblockBase<TS
         return ConnectionType.NONE;
     }
 
-    public static enum BECHatches implements IHatchElement<MTEBECMultiblockBase<?>> {
+    protected boolean isServerSide() {
+        IGregTechTileEntity igte = getBaseMetaTileEntity();
+
+        if (igte == null || igte.isDead()) return FMLCommonHandler.instance().getSide() == Side.SERVER;
+
+        return igte.isServerSide();
+    }
+
+    public enum BECHatches implements IHatchElement<MTEBECMultiblockBase<?>> {
 
         Hatch(MTEHatchBEC.class) {
 

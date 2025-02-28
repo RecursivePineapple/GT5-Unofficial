@@ -46,6 +46,7 @@ public abstract class MTEHatchNonConsumableBase extends MTEHatch implements IMEM
     private int itemCount = 0;
     private boolean isOutputSlotLocked = true;
     private Map<IMEMonitorHandlerReceiver<IAEItemStack>, Object> listeners = null;
+    private boolean changed = false;
 
     public MTEHatchNonConsumableBase(int ID, String name, String nameRegional, int tier, String description) {
         super(ID, name, nameRegional, tier, 3, new String[] { description, "Will keep its contents when broken" });
@@ -70,6 +71,10 @@ public abstract class MTEHatchNonConsumableBase extends MTEHatch implements IMEM
     }
 
     protected void setItemStack(ItemStack stack) {
+        if (itemStack != stack) {
+            changed = true;
+        }
+
         itemStack = stack;
     }
 
@@ -80,6 +85,14 @@ public abstract class MTEHatchNonConsumableBase extends MTEHatch implements IMEM
     @Override
     public void setItemCount(int amount) {
         itemCount = amount;
+    }
+
+    public boolean hasChanged() {
+        return changed;
+    }
+
+    public void unmarkChanged() {
+        changed = false;
     }
 
     protected abstract int getItemCapacity();

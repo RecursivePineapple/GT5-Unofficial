@@ -312,7 +312,7 @@ public class MTEMultiSolidifier extends MTEExtendedPowerMultiBlockBase<MTEMultiS
             }
 
             @Override
-            public boolean craftingPatternHandler(IDualInputInventory slot) {
+            public boolean setCurrentDualInputInventory(IDualInputInventory slot) {
                 if (craftingPatternRecipeCache.containsKey(slot)) {
                     craftingPattern = slot;
                     return true;

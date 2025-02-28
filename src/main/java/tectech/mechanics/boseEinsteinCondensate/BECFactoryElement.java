@@ -6,11 +6,16 @@ import gregtech.api.factory.IFactoryElement;
 
 public interface BECFactoryElement extends IFactoryElement<BECFactoryElement, BECFactoryNetwork, BECFactoryGrid> {
 
-    public static enum ConnectionType {
-        CONNECTED,
+    enum ConnectionType {
+        CONNECTABLE,
         VISUAL_ONLY,
         NONE,
     }
 
-    public ConnectionType getConnectionOnSide(ForgeDirection side);
+    ConnectionType getConnectionOnSide(ForgeDirection side);
+
+    /** Elements that should be present in the routing map should return true here. */
+    default boolean impactsRouting() {
+        return false;
+    }
 }

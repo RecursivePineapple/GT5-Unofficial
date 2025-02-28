@@ -92,7 +92,7 @@ public enum HatchElement implements IHatchElement<MTEMultiBlockBase> {
                 .size();
         }
     },
-    MultiAmpEnergy(MTEMultiBlockBase::addMultiAmpEnergyInputToMachineList) {
+    MultiAmpEnergy("GT5U.MBTT.ExoticEnergyHatch", MTEMultiBlockBase::addMultiAmpEnergyInputToMachineList) {
 
         @Override
         public long count(MTEMultiBlockBase t) {

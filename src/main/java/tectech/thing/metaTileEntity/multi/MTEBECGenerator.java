@@ -50,8 +50,7 @@ import gregtech.api.recipe.RecipeMap;
 import gregtech.api.recipe.check.CheckRecipeResult;
 import gregtech.api.recipe.check.CheckRecipeResultRegistry;
 import gregtech.api.structure.MultiblockTooltipBuilder2;
-import gregtech.api.util.GTRecipe;
-import gregtech.api.util.GTRecipeConstants;
+import gregtech.api.util.GTBECRecipe;
 import gregtech.api.util.GTUtility;
 import gregtech.api.util.MultiblockTooltipBuilder;
 import gregtech.client.GTSoundLoop;
@@ -315,36 +314,28 @@ public class MTEBECGenerator extends MTEBECMultiblockBase<MTEBECGenerator> imple
             for (int i = inputBus.getSizeInventory() - 1; i >= 0; i--) {
                 ItemStack slot = inputBus.getStackInSlot(i);
 
-                if (slot != null) {
-                    GTRecipe recipe = TecTechRecipeMaps.condensateCreationFromItemRecipes.findRecipeQuery()
-                        .items(slot)
-                        .find();
+                if (slot == null) continue;
 
-                    if (recipe != null) {
-                        CondensateStack[] output = recipe.getMetadata(GTRecipeConstants.CONDENSATE_OUTPUTS);
+                GTBECRecipe recipe = (GTBECRecipe) TecTechRecipeMaps.condensateCreationFromItemRecipes.findRecipeQuery()
+                    .items(slot)
+                    .find();
 
-                        if (output == null) {
-                            continue;
-                        }
+                if (recipe == null) continue;
 
-                        long cost = BECRecipeLoader.getRecipeCost(recipe);
+                long cost = BECRecipeLoader.getRecipeCost(recipe);
 
-                        long quotaRemaining = euQuota / cost;
-                        long toRemove = Math.min(Math.min(quotaRemaining, slot.stackSize), Integer.MAX_VALUE);
+                long quotaRemaining = euQuota / cost;
+                long toRemove = Math.min(Math.min(quotaRemaining, slot.stackSize), Integer.MAX_VALUE);
 
-                        if (toRemove == 0) {
-                            continue;
-                        }
+                if (toRemove == 0) continue;
 
-                        inputBus.decrStackSize(i, (int) toRemove);
+                inputBus.decrStackSize(i, (int) toRemove);
 
-                        euQuota -= cost * toRemove;
+                euQuota -= cost * toRemove;
 
-                        for (CondensateStack stack : output) {
-                            long toAdd = toRemove * stack.amount;
-                            outputMaterials.merge(stack.material, toAdd, Long::sum);
-                        }
-                    }
+                for (CondensateStack stack : recipe.mCOutput) {
+                    long toAdd = toRemove * stack.amount;
+                    outputMaterials.merge(stack.material, toAdd, Long::sum);
                 }
             }
         }
@@ -392,17 +383,11 @@ public class MTEBECGenerator extends MTEBECMultiblockBase<MTEBECGenerator> imple
 
     private long tryDrainFluid(Object2LongOpenHashMap<Object> outputMaterials, long euQuota, MTEHatchInput inputHatch,
         FluidStack fluidStack) {
-        GTRecipe recipe = TecTechRecipeMaps.condensateCreationFromFluidRecipes.findRecipeQuery()
+        GTBECRecipe recipe = (GTBECRecipe) TecTechRecipeMaps.condensateCreationFromFluidRecipes.findRecipeQuery()
             .fluids(new FluidStack(fluidStack.getFluid(), 1))
             .find();
 
         if (recipe == null) {
-            return 0;
-        }
-
-        CondensateStack[] output = recipe.getMetadata(GTRecipeConstants.CONDENSATE_OUTPUTS);
-
-        if (output == null) {
             return 0;
         }
 
@@ -421,8 +406,8 @@ public class MTEBECGenerator extends MTEBECMultiblockBase<MTEBECGenerator> imple
 
         FluidStack drained = inputHatch.drain(ForgeDirection.UNKNOWN, new FluidStack(fluidStack, (int) toDrain), true);
 
-        for (CondensateStack stack : output) {
-            outputMaterials.merge(stack, (long) drained.amount, Long::sum);
+        for (CondensateStack stack : recipe.mCOutput) {
+            outputMaterials.merge(stack.material, (long) drained.amount, Long::sum);
         }
 
         return euQuota;

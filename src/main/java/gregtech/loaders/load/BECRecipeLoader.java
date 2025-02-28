@@ -2,13 +2,9 @@ package gregtech.loaders.load;
 
 import static gregtech.api.enums.GTValues.L;
 import static gregtech.api.util.GTRecipeConstants.CONDENSATE_EU_COST;
-import static gregtech.api.util.GTRecipeConstants.CONDENSATE_INPUTS;
-import static gregtech.api.util.GTRecipeConstants.CONDENSATE_OUTPUTS;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Objects;
 
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.fluids.Fluid;
@@ -22,11 +18,12 @@ import gregtech.GTMod;
 import gregtech.api.GregTechAPI;
 import gregtech.api.enums.GTValues;
 import gregtech.api.enums.Materials;
+import gregtech.api.enums.NaniteTier;
 import gregtech.api.enums.OrePrefixes;
 import gregtech.api.enums.TierEU;
-import gregtech.api.recipe.RecipeMaps;
+import gregtech.api.util.GTOreDictUnificator;
 import gregtech.api.util.GTRecipe;
-import gregtech.api.util.GTUtility.ItemId;
+import gregtech.api.util.GTRecipeConstants;
 import gtPlusPlus.core.material.Material;
 import gtPlusPlus.core.util.Utils;
 import it.unimi.dsi.fastutil.Pair;
@@ -37,7 +34,7 @@ import tectech.recipe.TecTechRecipeMaps;
 
 public class BECRecipeLoader {
 
-    private static final int EU_COST_PER_UNIT = (int) TierEU.RECIPE_UV, EU_COST_PER_LITRE = (int) TierEU.RECIPE_HV;
+    private static final int EU_COST_PER_UNIT = (int) TierEU.RECIPE_UV;
 
     public static class MaterialInfo {
 
@@ -138,6 +135,7 @@ public class BECRecipeLoader {
     public static void run() {
         loadMaterials();
         loadCreationRecipes();
+        loadAssemblyRecipes();
     }
 
     private static MaterialInfo getMaterial(Materials gt) {
@@ -191,80 +189,56 @@ public class BECRecipeLoader {
     }
 
     private static void loadCreationRecipes() {
-        HashSet<ItemId> added = new HashSet<>();
+        for (Materials mat : Materials.values()) {
+            if (mat == null) continue;
 
-        for (GTRecipe recipe : RecipeMaps.fluidExtractionRecipes.getBackend()
-            .getAllRecipes()) {
-            if (recipe.mFluidOutputs.length == 1 && recipe.mOutputs.length == 0) continue;
+            ItemStack ingot = mat.getIngots(1);
+            FluidStack molten = mat.getMolten(144L);
 
-            if (!added.add(ItemId.create(recipe.mInputs[0]))) continue;
+            if (ingot != null && molten != null) {
+                CondensateStack output = CondensateStack.fromFluid(molten);
 
-            CondensateStack output = CondensateStack.fromFluid(recipe.mFluidOutputs[0]);
+                if (output == null) continue;
 
-            if (output == null) continue;
+                CondensateStack[] outputs = new CondensateStack[] { output };
 
-            CondensateStack[] outputs = new CondensateStack[] { output };
-
-            GTValues.RA.stdBuilder()
-                .itemInputs(recipe.mInputs[0])
-                .itemOutputs(CondensateStack.getPreviews(outputs))
-                .metadata(CONDENSATE_OUTPUTS, outputs)
-                .eut(EU_COST_PER_UNIT * output.amount / L)
-                .duration(1)
-                .addTo(TecTechRecipeMaps.condensateCreationFromItemRecipes);
-        }
-
-        for (GTRecipe recipe : RecipeMaps.arcFurnaceRecipes.getBackend()
-            .getAllRecipes()) {
-            if (recipe.mInputs.length != 1 && recipe.mOutputs.length != 1) continue;
-
-            if (!added.add(ItemId.create(recipe.mInputs[0]))) continue;
-
-            Pair<OrePrefixes, MaterialInfo> input = findMaterialForStack(recipe.mInputs[0]);
-            Pair<OrePrefixes, MaterialInfo> output = findMaterialForStack(recipe.mOutputs[0]);
-
-            if (input == null || output == null || input.right() != output.right()) continue;
-
-            CondensateStack outputCondensate = CondensateStack.fromStack(recipe.mOutputs[0]);
-            Objects.requireNonNull(
-                outputCondensate,
-                () -> "Expected " + recipe.mOutputs[0] + "; '" + output.right().name + "' to return valid condensate");
-            CondensateStack[] outputs = { outputCondensate };
-
-            GTValues.RA.stdBuilder()
-                .itemInputs(recipe.mInputs[0])
-                .itemOutputs(CondensateStack.getPreviews(outputs))
-                .metadata(CONDENSATE_OUTPUTS, outputs)
-                .eut(EU_COST_PER_UNIT * outputCondensate.amount / L)
-                .duration(1)
-                .addTo(TecTechRecipeMaps.condensateCreationFromItemRecipes);
-        }
-
-        for (MaterialInfo mat : MATS_BY_NAME.values()) {
-            CondensateStack[] condensate = { new CondensateStack(mat.getMaterial(), 1) };
-
-            Fluid output = mat.getOutputFluid();
-
-            if (output != null) {
                 GTValues.RA.stdBuilder()
-                    .itemInputs(CondensateStack.getPreviews(condensate))
-                    .fluidOutputs(new FluidStack(output, 1))
-                    .metadata(CONDENSATE_INPUTS, condensate)
-                    .eut(EU_COST_PER_LITRE)
+                    .itemInputs(ingot)
+                    .itemOutputs(CondensateStack.getPreviews(outputs))
+                    .fluidOutputs(molten)
+                    .eut(EU_COST_PER_UNIT * output.amount / L)
                     .duration(1)
-                    .addTo(TecTechRecipeMaps.condensateLiquificationRecipes);
-            }
-
-            for (Fluid input : mat.getInputFluids()) {
-                GTValues.RA.stdBuilder()
-                    .fluidInputs(new FluidStack(input, 1))
-                    .itemOutputs(CondensateStack.getPreviews(condensate))
-                    .metadata(CONDENSATE_OUTPUTS, condensate)
-                    .eut(EU_COST_PER_LITRE)
-                    .duration(1)
-                    .addTo(TecTechRecipeMaps.condensateCreationFromFluidRecipes);
+                    .addTo(TecTechRecipeMaps.condensateCreationFromItemRecipes);
             }
         }
+    }
+
+    private static void loadAssemblyRecipes() {
+        GTValues.RA.stdBuilder()
+            .itemInputs(
+                GTOreDictUnificator.get(OrePrefixes.ingot, Materials.Iron, 2L),
+                GTOreDictUnificator.get(OrePrefixes.ingot, Materials.Iron, 2L),
+                GTOreDictUnificator.get(OrePrefixes.ingot, Materials.Iron, 2L),
+                GTOreDictUnificator.get(OrePrefixes.ingot, Materials.Iron, 2L),
+                GTOreDictUnificator.get(OrePrefixes.ingot, Materials.Iron, 2L),
+                GTOreDictUnificator.get(OrePrefixes.ingot, Materials.Iron, 2L),
+                GTOreDictUnificator.get(OrePrefixes.ingot, Materials.Iron, 2L),
+                GTOreDictUnificator.get(OrePrefixes.ingot, Materials.Iron, 2L))
+            .fluidInputs(Materials.Copper.getMolten(144L))
+            .itemOutputs(GTOreDictUnificator.get(OrePrefixes.plate, Materials.Iron, 2L))
+            .metadata(GTRecipeConstants.NANITE_TIERS, new NaniteTier[] {
+                NaniteTier.Carbon,
+                NaniteTier.Carbon,
+                NaniteTier.Carbon,
+                NaniteTier.Carbon,
+                NaniteTier.Neutronium,
+                NaniteTier.Silver,
+                NaniteTier.Gold,
+                NaniteTier.Neutronium,
+            })
+            .eut(144)
+            .duration(200)
+            .addTo(TecTechRecipeMaps.condensateAssemblingRecipes);
     }
 
     public static long getRecipeCost(GTRecipe recipe) {

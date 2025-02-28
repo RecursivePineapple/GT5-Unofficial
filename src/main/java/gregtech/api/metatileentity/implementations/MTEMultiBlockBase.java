@@ -21,7 +21,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.function.LongConsumer;
 import java.util.stream.Collectors;
 
 import javax.annotation.Nonnull;
@@ -624,31 +623,35 @@ public abstract class MTEMultiBlockBase extends MetaTileEntity
                 if (!polluteEnvironment(getPollutionPerTick(mInventory[1]))) {
                     stopMachine(ShutDownReasonRegistry.POLLUTION_FAIL);
                 }
-                if (mMaxProgresstime > 0 && ++mProgresstime >= mMaxProgresstime) {
-                    if (mOutputItems != null) {
-                        for (ItemStack tStack : mOutputItems) {
-                            if (tStack != null) {
-                                addOutput(tStack);
+                if (mMaxProgresstime > 0) {
+                    incrementProgressTime();
+
+                    if (mProgresstime >= mMaxProgresstime) {
+                        if (mOutputItems != null) {
+                            for (ItemStack tStack : mOutputItems) {
+                                if (tStack != null) {
+                                    addOutput(tStack);
+                                }
                             }
+                            mOutputItems = null;
                         }
+                        if (mOutputFluids != null) {
+                            addFluidOutputs(mOutputFluids);
+                            mOutputFluids = null;
+                        }
+                        mEfficiency = Math.max(
+                            0,
+                            Math.min(
+                                mEfficiency + mEfficiencyIncrease,
+                                getMaxEfficiency(mInventory[1]) - ((getIdealStatus() - getRepairStatus()) * 1000)));
                         mOutputItems = null;
-                    }
-                    if (mOutputFluids != null) {
-                        addFluidOutputs(mOutputFluids);
-                        mOutputFluids = null;
-                    }
-                    mEfficiency = Math.max(
-                        0,
-                        Math.min(
-                            mEfficiency + mEfficiencyIncrease,
-                            getMaxEfficiency(mInventory[1]) - ((getIdealStatus() - getRepairStatus()) * 1000)));
-                    mOutputItems = null;
-                    mProgresstime = 0;
-                    mMaxProgresstime = 0;
-                    mEfficiencyIncrease = 0;
-                    mLastWorkingTick = mTotalRunTime;
-                    if (aBaseMetaTileEntity.isAllowedToWork()) {
-                        checkRecipe();
+                        mProgresstime = 0;
+                        mMaxProgresstime = 0;
+                        mEfficiencyIncrease = 0;
+                        mLastWorkingTick = mTotalRunTime;
+                        if (aBaseMetaTileEntity.isAllowedToWork()) {
+                            checkRecipe();
+                        }
                     }
                 }
             }
@@ -665,6 +668,10 @@ public abstract class MTEMultiBlockBase extends MetaTileEntity
                 if (mMaxProgresstime <= 0) mEfficiency = Math.max(0, mEfficiency - 1000);
             }
         }
+    }
+
+    protected void incrementProgressTime() {
+        mProgresstime++;
     }
 
     public boolean polluteEnvironment(int aPollutionLevel) {
@@ -922,7 +929,7 @@ public abstract class MTEMultiBlockBase extends MetaTileEntity
             for (var it = dualInputHatch.inventories(); it.hasNext();) {
                 IDualInputInventory slot = it.next();
 
-                if (!slot.isEmpty() && processingLogic.craftingPatternHandler(slot)) {
+                if (!slot.isEmpty() && processingLogic.setCurrentDualInputInventory(slot)) {
 
                     processingLogic.setInputItems(ArrayUtils.addAll(sharedItems, slot.getItemInputs()));
                     processingLogic.setInputFluids(slot.getFluidInputs());
@@ -1755,7 +1762,7 @@ public abstract class MTEMultiBlockBase extends MetaTileEntity
         }
         if (aMetaTileEntity instanceof IDualInputHatch hatch) {
             hatch.updateCraftingIcon(this.getMachineCraftingIcon());
-            hatch.setProcessingLogic(processingLogic);
+            hatch.addProcessingLogic(processingLogic);
             return mDualInputHatches.add(hatch);
         }
         if (aMetaTileEntity instanceof ISmartInputHatch hatch) {
@@ -2783,30 +2790,7 @@ public abstract class MTEMultiBlockBase extends MetaTileEntity
     protected String generateCurrentRecipeInfoString() {
         StringBuffer ret = new StringBuffer(EnumChatFormatting.WHITE + "Progress: ");
 
-        numberFormat.setMinimumFractionDigits(2);
-        numberFormat.setMaximumFractionDigits(2);
-        numberFormat.format((double) mProgresstime / 20, ret);
-        ret.append("s / ");
-        numberFormat.format((double) mMaxProgresstime / 20, ret);
-        ret.append("s (");
-        numberFormat.setMinimumFractionDigits(1);
-        numberFormat.setMaximumFractionDigits(1);
-        numberFormat.format((double) mProgresstime / mMaxProgresstime * 100, ret);
-        ret.append("%)\n");
-        numberFormat.setMinimumFractionDigits(0);
-        numberFormat.setMaximumFractionDigits(2);
-
-        LongConsumer appendRate = (amount) -> {
-            double processPerTick = (double) amount / mMaxProgresstime * 20;
-            ret.append(" (");
-            if (processPerTick > 1) {
-                numberFormat.format(Math.round(processPerTick * 10) / 10.0, ret);
-                ret.append("/s)");
-            } else {
-                numberFormat.format(Math.round(1 / processPerTick * 10) / 10.0, ret);
-                ret.append("s/ea)");
-            }
-        };
+        generateRecipeProgressString(ret);
 
         int lines = 0;
         int MAX_LINES = 10;
@@ -2830,7 +2814,7 @@ public abstract class MTEMultiBlockBase extends MetaTileEntity
                     .append(EnumChatFormatting.GOLD);
                 numberFormat.format(entry.getValue(), ret);
                 ret.append(EnumChatFormatting.WHITE);
-                appendRate.accept(entry.getValue());
+                generateRate(ret, entry.getValue());
                 ret.append('\n');
             }
         }
@@ -2854,11 +2838,38 @@ public abstract class MTEMultiBlockBase extends MetaTileEntity
                 numberFormat.format(entry.getValue(), ret);
                 ret.append("L")
                     .append(EnumChatFormatting.WHITE);
-                appendRate.accept(entry.getValue());
+                generateRate(ret, entry.getValue());
                 ret.append('\n');
             }
         }
         return ret.toString();
+    }
+
+    protected void generateRecipeProgressString(StringBuffer ret) {
+        numberFormat.setMinimumFractionDigits(2);
+        numberFormat.setMaximumFractionDigits(2);
+        numberFormat.format((double) getProgresstime() / 20, ret);
+        ret.append("s / ");
+        numberFormat.format((double) mMaxProgresstime / 20, ret);
+        ret.append("s (");
+        numberFormat.setMinimumFractionDigits(1);
+        numberFormat.setMaximumFractionDigits(1);
+        numberFormat.format((double) getProgresstime() / mMaxProgresstime * 100, ret);
+        ret.append("%)\n");
+        numberFormat.setMinimumFractionDigits(0);
+        numberFormat.setMaximumFractionDigits(2);
+    }
+
+    protected void generateRate(StringBuffer ret, double amount) {
+        double processPerTick = amount / mMaxProgresstime * 20;
+        ret.append(" (");
+        if (processPerTick > 1) {
+            numberFormat.format(Math.round(processPerTick * 10) / 10.0, ret);
+            ret.append("/s)");
+        } else {
+            numberFormat.format(Math.round(1 / processPerTick * 10) / 10.0, ret);
+            ret.append("s/ea)");
+        }
     }
 
     protected void drawTexts(DynamicPositionedColumn screenElements, SlotWidget inventorySlot) {

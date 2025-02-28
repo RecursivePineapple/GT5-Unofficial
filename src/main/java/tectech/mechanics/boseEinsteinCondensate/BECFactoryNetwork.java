@@ -1,15 +1,16 @@
 package tectech.mechanics.boseEinsteinCondensate;
 
-import gregtech.api.enums.Materials;
+import java.util.HashSet;
+
+import com.google.common.collect.MultimapBuilder;
+import com.google.common.collect.SetMultimap;
 import gregtech.api.factory.standard.StandardFactoryNetwork;
-import it.unimi.dsi.fastutil.objects.Object2LongOpenHashMap;
 
 public class BECFactoryNetwork extends StandardFactoryNetwork<BECFactoryNetwork, BECFactoryElement, BECFactoryGrid> {
 
-    public Object2LongOpenHashMap<Materials> getStoredCondensate() {
-        Object2LongOpenHashMap<Materials> condensate = new Object2LongOpenHashMap<>();
-
-        return condensate;
-    }
+    public final HashSet<BECFactoryElement> routingVertices = new HashSet<>();
+    public final SetMultimap<BECFactoryElement, BECFactoryElement> routingEdges = MultimapBuilder.hashKeys()
+        .hashSetValues()
+        .build();
 
 }

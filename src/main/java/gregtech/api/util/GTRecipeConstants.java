@@ -19,6 +19,7 @@ import org.apache.commons.lang3.ArrayUtils;
 import cpw.mods.fml.common.registry.GameRegistry;
 import gregtech.api.enums.GTValues;
 import gregtech.api.enums.Materials;
+import gregtech.api.enums.NaniteTier;
 import gregtech.api.enums.OrePrefixes;
 import gregtech.api.interfaces.IRecipeMap;
 import gregtech.api.objects.ItemData;
@@ -264,11 +265,8 @@ public class GTRecipeConstants {
     public static final RecipeMetadataKey<Integer> EU_MULTIPLIER = SimpleRecipeMetadataKey
         .create(Integer.class, "eu_multiplier");
 
-    public static final RecipeMetadataKey<CondensateStack[]> CONDENSATE_INPUTS = SimpleRecipeMetadataKey
-        .create(CondensateStack[].class, "condensate_inputs");
-
-    public static final RecipeMetadataKey<CondensateStack[]> CONDENSATE_OUTPUTS = SimpleRecipeMetadataKey
-        .create(CondensateStack[].class, "condensate_outputs");
+    public static final RecipeMetadataKey<NaniteTier[]> NANITE_TIERS = SimpleRecipeMetadataKey
+        .create(NaniteTier[].class, "nanite_tiers");
 
     public static final RecipeMetadataKey<Long> CONDENSATE_EU_COST = SimpleRecipeMetadataKey
         .create(Long.class, "condensate_eu_cost");
