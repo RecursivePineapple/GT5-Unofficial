@@ -34,6 +34,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.IllegalFormatException;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
@@ -456,6 +457,18 @@ public class GTUtility {
         int log2L = 64 - Long.numberOfLeadingZeros(l - 1);
 
         return (byte) ((log2L - 2) / 2);
+    }
+
+    /**
+     * Gets the voltage tier corresponding to an amount of EU
+     *
+     * @param l The amount of EU
+     * @return Corresponding voltage tier
+     */
+    public static int getTierExtended(long l) {
+        if (l <= V[0]) return 0;
+        int log2L = 64 - Long.numberOfLeadingZeros(l - 1);
+        return ((log2L - 2) / 2);
     }
 
     public static long getAmperageForTier(long voltage, byte tier) {
@@ -3857,6 +3870,20 @@ public class GTUtility {
 
     public static String formatNumbers(double aNumber) {
         return getDecimalFormat().format(aNumber);
+    }
+
+    /**
+     * {@link String#format} without throwing exception. Falls back to {@code format} without {@code args}.
+     * Since it suppresses errors, it should be used only when inputs are unreliable,
+     * e.g. processing text input by player, or processing placeholders in localization entries.
+     */
+    @Nonnull
+    public static String formatStringSafe(@Nonnull String format, Object... args) {
+        try {
+            return String.format(format, args);
+        } catch (IllegalFormatException ignored) {
+            return format;
+        }
     }
 
     /*

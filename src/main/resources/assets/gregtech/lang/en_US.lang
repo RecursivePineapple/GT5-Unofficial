@@ -587,6 +587,8 @@ GT5U.gui.text.missing_item=§7Missing required item: §b%s§f
 GT5U.gui.text.ph_sensor=pH threshold
 GT5U.gui.text.critical_ph_value=pH exceeded critical value.
 GT5U.gui.text.heat_sensor=Heat threshold
+GT5U.gui.text.static_mode=Static Mode
+GT5U.gui.text.pulse_mode=Pulse Mode
 GT5U.item.programmed_circuit.select.header=Reprogram Circuit
 
 GT5U.gui.config.client=Client
@@ -796,6 +798,10 @@ GT5U.waila.drone_downlink.connectionCount=Connection Count:
 GT5U.waila.drone_downlink.droneLevel=Drone Level:
 GT5U.waila.producing=Producing:
 GT5U.waila.producing.andmore=  And %d More...
+GT5U.waila.generating.on=Generating Energy
+GT5U.waila.generating.off=Not Generating
+GT5U.waila.status.insufficient_energy=Status: Insufficient energy
+GT5U.waila.status.obstructed_steam_vent=Status: Obstructed steam vent
 
 
 achievement.flintpick=First Tools
