@@ -838,7 +838,7 @@ public class MTEHatchCraftingInputME extends MTEHatchInputBus
                 try {
                     originalPattern.refund(getProxy(), getRequest());
                     for (ProcessingLogic pl : processingLogics) {
-                        pl.clearCraftingPatternRecipeCache(originalPattern);
+                        pl.removeCraftingPatternRecipeCache(originalPattern);
                     }
                 } catch (GridAccessException ignored) {}
                 internalInventory[index] = null;
@@ -877,7 +877,7 @@ public class MTEHatchCraftingInputME extends MTEHatchInputBus
         for (ProcessingLogic pl : processingLogics) {
             for (PatternSlot sl : internalInventory) {
                 if (sl == null) continue;
-                pl.clearCraftingPatternRecipeCache(sl);
+                pl.removeCraftingPatternRecipeCache(sl);
             }
         }
     }

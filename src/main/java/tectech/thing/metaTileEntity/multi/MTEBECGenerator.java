@@ -24,7 +24,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.util.EnumChatFormatting;
-import net.minecraft.util.StatCollector;
 import net.minecraftforge.common.util.ForgeDirection;
 import net.minecraftforge.fluids.FluidStack;
 
@@ -36,7 +35,6 @@ import com.gtnewhorizons.modularui.api.math.Alignment;
 import com.gtnewhorizons.modularui.common.widget.DynamicPositionedColumn;
 import com.gtnewhorizons.modularui.common.widget.SlotWidget;
 import com.gtnewhorizons.modularui.common.widget.TextWidget;
-
 import gregtech.api.enums.GTValues;
 import gregtech.api.enums.SoundResource;
 import gregtech.api.interfaces.ITexture;
@@ -65,11 +63,7 @@ import tectech.mechanics.boseEinsteinCondensate.CondensateStack;
 import tectech.recipe.TecTechRecipeMaps;
 import tectech.thing.CustomItemList;
 import tectech.thing.metaTileEntity.hatch.MTEHatchEnergyMulti;
-import tectech.thing.metaTileEntity.multi.base.INameFunction;
-import tectech.thing.metaTileEntity.multi.base.IStatusFunction;
-import tectech.thing.metaTileEntity.multi.base.LedStatus;
 import tectech.thing.metaTileEntity.multi.base.MTEBECMultiblockBase;
-import tectech.thing.metaTileEntity.multi.base.Parameters;
 import tectech.thing.metaTileEntity.multi.structures.BECStructureDefinitions;
 
 public class MTEBECGenerator extends MTEBECMultiblockBase<MTEBECGenerator> implements ISoundLoopAware {
@@ -150,19 +144,6 @@ public class MTEBECGenerator extends MTEBECMultiblockBase<MTEBECGenerator> imple
         return ElectromagneticallyIsolatedCasing.getCasingTexture();
     }
 
-    protected Parameters.Group.ParameterIn blockingMode;
-
-    @Override
-    protected void parametersInstantiation_EM() {
-        INameFunction<MTEBECGenerator> blockingModeName = (base, p) -> StatCollector
-            .translateToLocal("gui.tooltips.appliedenergistics2.InterfaceBlockingMode");
-        IStatusFunction<MTEBECGenerator> blockingModeStatus = (base, p) -> LedStatus
-            .fromLimitsInclusiveOuterBoundary(p.get(), 0, 0, 1, 1);
-
-        Parameters.Group hatch_0 = parametrization.getGroup(0);
-        blockingMode = hatch_0.makeInParameter(0, 0, blockingModeName, blockingModeStatus);
-    }
-
     @Override
     protected void drawTexts(DynamicPositionedColumn screenElements, SlotWidget inventorySlot) {
         super.drawTexts(screenElements, inventorySlot);
@@ -229,11 +210,6 @@ public class MTEBECGenerator extends MTEBECMultiblockBase<MTEBECGenerator> imple
 
     // #endregion
 
-    private boolean hasOutputSpace() {
-        return true;
-        // return blockingMode.get() == 0 || mBECOutput.getNetwork().get;
-    }
-
     @Override
     public void outputAfterRecipe_EM() {
         if (mOutputCondensate != null && !mOutputCondensate.isEmpty()) {
@@ -286,19 +262,11 @@ public class MTEBECGenerator extends MTEBECMultiblockBase<MTEBECGenerator> imple
         modifySoundLoop(loop);
     }
 
-    private int getProcessingTime() {
-        return 1 * SECONDS;
-    }
-
     @Override
     protected @NotNull CheckRecipeResult checkProcessing_EM() {
-        if (!hasOutputSpace()) {
-            return CheckRecipeResultRegistry.ITEM_OUTPUT_FULL;
-        }
-
         long euQuota = 0;
 
-        int baseProcessingTime = getProcessingTime();
+        int baseProcessingTime = 1 * SECONDS;
 
         for (MTEHatch hatch : filterValidMTEs(getExoticAndNormalEnergyHatchList())) {
             if (hatch instanceof MTEHatchEnergyMulti multi) {
@@ -335,7 +303,7 @@ public class MTEBECGenerator extends MTEBECMultiblockBase<MTEBECGenerator> imple
 
                 for (CondensateStack stack : recipe.mCOutput) {
                     long toAdd = toRemove * stack.amount;
-                    outputMaterials.merge(stack.material, toAdd, Long::sum);
+                    outputMaterials.addTo(stack.material, toAdd);
                 }
             }
         }
@@ -366,8 +334,7 @@ public class MTEBECGenerator extends MTEBECMultiblockBase<MTEBECGenerator> imple
 
             return CheckRecipeResultRegistry.NO_RECIPE;
         } else {
-            mOutputCondensate = outputMaterials.isEmpty() ? null
-                : outputMaterials.object2LongEntrySet()
+            mOutputCondensate = outputMaterials.object2LongEntrySet()
                     .stream()
                     .map(e -> new CondensateStack(e.getKey(), e.getLongValue()))
                     .collect(Collectors.toList());
@@ -407,7 +374,7 @@ public class MTEBECGenerator extends MTEBECMultiblockBase<MTEBECGenerator> imple
         FluidStack drained = inputHatch.drain(ForgeDirection.UNKNOWN, new FluidStack(fluidStack, (int) toDrain), true);
 
         for (CondensateStack stack : recipe.mCOutput) {
-            outputMaterials.merge(stack.material, (long) drained.amount, Long::sum);
+            outputMaterials.addTo(stack.material, drained.amount);
         }
 
         return euQuota;

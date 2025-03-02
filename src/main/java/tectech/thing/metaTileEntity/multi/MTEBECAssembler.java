@@ -62,8 +62,6 @@ public class MTEBECAssembler extends MTEBECMultiblockBase<MTEBECAssembler> imple
     private NaniteTier currentNaniteTier;
     private int availableNanites;
 
-    private boolean needsRebalance = false;
-
     public MTEBECAssembler(int aID, String aName, String aNameRegional) {
         super(aID, aName, aNameRegional);
     }
@@ -160,12 +158,9 @@ public class MTEBECAssembler extends MTEBECMultiblockBase<MTEBECAssembler> imple
                 }
             }
 
-            if (nanitesChanged || needsRebalance) {
+            if (nanitesChanged) {
                 currentNaniteTier = null;
                 availableNanites = 0;
-                needsRebalance = false;
-
-                igte.setActive(false);
 
                 for (MTEHatchNanite hatch : naniteHatches) {
                     NaniteTier tier = NaniteTier.fromStack(hatch.getItemStack());
@@ -178,8 +173,6 @@ public class MTEBECAssembler extends MTEBECMultiblockBase<MTEBECAssembler> imple
 
                     availableNanites += hatch.getItemCount();
                 }
-
-                List<MTEBECIONode> workingNodes = new ArrayList<>();
 
                 Iterator<MTEBECIONode> iter = ioNodes.iterator();
 
@@ -197,41 +190,24 @@ public class MTEBECAssembler extends MTEBECMultiblockBase<MTEBECAssembler> imple
                         continue;
                     }
 
-                    node.setNaniteShare(null, 0);
-
-                    if (node.hasWork()) {
-                        workingNodes.add(node);
-                    }
+                    // intentionally share the same nanite count between every io node even though it doesn't make
+                    // physical sense so that proper automation is incentivized even more
+                    node.setNaniteShare(currentNaniteTier, availableNanites);
                 }
 
-                if (!workingNodes.isEmpty()) {
-                    for (var node : once(new MTEBECIONode.IntDivisionIterator(availableNanites, workingNodes.size()).zip(workingNodes.iterator()))) {
-                        igte.setActive(true);
-
-                        node.right().setNaniteShare(currentNaniteTier, node.leftInt());
-                    }
-                }
+                igte.setActive(!ioNodes.isEmpty());
             }
         }
     }
 
-    private static <T> Iterable<T> once(Iterator<T> iter) {
-        return () -> iter;
-    }
-
-    public void markNeedsRebalance() {
-        needsRebalance = true;
-    }
-
     public void addIONode(MTEBECIONode node) {
         ioNodes.add(node);
-        needsRebalance = true;
+        node.setNaniteShare(currentNaniteTier, availableNanites);
     }
 
     public void removeIONode(MTEBECIONode node) {
         ioNodes.remove(node);
         node.setNaniteShare(null, 0);
-        needsRebalance = true;
     }
 
     @Override

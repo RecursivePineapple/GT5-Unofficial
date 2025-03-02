@@ -24,14 +24,13 @@ import gregtech.api.recipe.check.SingleRecipeCheck;
 import gregtech.api.util.GTRecipe;
 import gregtech.api.util.OverclockCalculator;
 import gregtech.api.util.ParallelHelper;
-import gregtech.common.tileentities.machines.IDualInputHatchAware;
 import gregtech.common.tileentities.machines.IDualInputInventory;
 
 /**
  * Logic class to calculate result of recipe check from inputs, based on recipemap.
  */
 @SuppressWarnings({ "unused", "UnusedReturnValue" })
-public class ProcessingLogic implements IDualInputHatchAware {
+public class ProcessingLogic {
 
     // Traits
     protected IVoidable machine;
@@ -142,8 +141,7 @@ public class ProcessingLogic implements IDualInputHatchAware {
         return false;
     }
 
-    @Override
-    public void clearCraftingPatternRecipeCache(IDualInputInventory slot) {
+    public void removeCraftingPatternRecipeCache(IDualInputInventory slot) {
         craftingPatternRecipeCache.remove(slot);
     }
 

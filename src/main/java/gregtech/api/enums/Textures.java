@@ -105,6 +105,9 @@ public class Textures {
         BEC3,
         BEC4,
 
+        OVERLAY_HATCH_NANITE_DETECTOR,
+        OVERLAY_HATCH_NANITE_DETECTOR_GLOW,
+
         BLOCK_STEELEAF,
         BLOCK_ICHORIUM,
         BLOCK_FIRESTONE,

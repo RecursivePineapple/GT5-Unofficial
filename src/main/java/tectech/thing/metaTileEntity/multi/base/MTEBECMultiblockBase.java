@@ -1,7 +1,6 @@
 package tectech.thing.metaTileEntity.multi.base;
 
 import static gregtech.api.casing.Casings.MolecularCasing;
-import static gregtech.api.util.GTUtility.filterValidMTEs;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -28,25 +27,14 @@ import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.relauncher.Side;
 import gregtech.api.interfaces.IHatchElement;
 import gregtech.api.interfaces.IIconContainer;
-import gregtech.api.interfaces.IRecipeInput;
 import gregtech.api.interfaces.ITexture;
-import gregtech.api.interfaces.ITransaction;
 import gregtech.api.interfaces.metatileentity.IMetaTileEntity;
 import gregtech.api.interfaces.tileentity.IGregTechTileEntity;
-import gregtech.api.metatileentity.implementations.MTEHatchInputBus;
-import gregtech.api.recipe.check.CheckRecipeResult;
-import gregtech.api.recipe.check.CheckRecipeResultRegistry;
 import gregtech.api.render.TextureFactory;
 import gregtech.api.structure.IStructureProvider;
 import gregtech.api.structure.StructureWrapper;
 import gregtech.api.structure.StructureWrapperInstanceInfo;
-import gregtech.api.util.GTUtility;
 import gregtech.api.util.IGTHatchAdder;
-import gregtech.common.tileentities.machines.IDualInputHatchAware;
-import gregtech.common.tileentities.machines.IDualInputInventory;
-import gregtech.common.tileentities.machines.MTEHatchCraftingInputME;
-import gregtech.common.tileentities.machines.MTEHatchCraftingInputSlave;
-import gregtech.common.tileentities.machines.MTEHatchInputBusME;
 import gtPlusPlus.xmod.gregtech.common.blocks.textures.TexturesGtBlock;
 import mcp.mobius.waila.api.IWailaConfigHandler;
 import mcp.mobius.waila.api.IWailaDataAccessor;
@@ -56,7 +44,7 @@ import tectech.thing.CustomItemList;
 import tectech.thing.metaTileEntity.hatch.MTEHatchBEC;
 
 public abstract class MTEBECMultiblockBase<TSelf extends MTEBECMultiblockBase<TSelf>> extends TTMultiblockBase
-    implements ISurvivalConstructable, BECFactoryElement, IStructureProvider<TSelf>, IDualInputHatchAware {
+    implements ISurvivalConstructable, BECFactoryElement, IStructureProvider<TSelf> {
 
     protected static final String STRUCTURE_PIECE_MAIN = "main";
 
@@ -123,11 +111,23 @@ public abstract class MTEBECMultiblockBase<TSelf extends MTEBECMultiblockBase<TS
                         .addIcon(getActiveTexture())
                         .extFacing()
                         .build());
+                textures.add(
+                    TextureFactory.builder()
+                        .addIcon(getActiveTextureGlow())
+                        .extFacing()
+                        .glow()
+                        .build());
             } else {
                 textures.add(
                     TextureFactory.builder()
                         .addIcon(getInactiveTexture())
                         .extFacing()
+                        .build());
+                textures.add(
+                    TextureFactory.builder()
+                        .addIcon(getInactiveTextureGlow())
+                        .extFacing()
+                        .glow()
                         .build());
             }
         }
@@ -140,11 +140,19 @@ public abstract class MTEBECMultiblockBase<TSelf extends MTEBECMultiblockBase<TS
     }
 
     protected IIconContainer getActiveTexture() {
-        return TexturesGtBlock.Overlay_Machine_Controller_Advanced_Active;
+        return TexturesGtBlock.oMCAAdvancedEBFActive;
+    }
+
+    protected IIconContainer getActiveTextureGlow() {
+        return TexturesGtBlock.oMCAAdvancedEBFActiveGlow;
     }
 
     protected IIconContainer getInactiveTexture() {
-        return TexturesGtBlock.Overlay_Machine_Controller_Advanced;
+        return TexturesGtBlock.oMCAAdvancedEBF;
+    }
+
+    protected IIconContainer getInactiveTextureGlow() {
+        return TexturesGtBlock.oMCAAdvancedEBFGlow;
     }
 
     @Override
@@ -248,7 +256,6 @@ public abstract class MTEBECMultiblockBase<TSelf extends MTEBECMultiblockBase<TS
     public enum BECHatches implements IHatchElement<MTEBECMultiblockBase<?>> {
 
         Hatch(MTEHatchBEC.class) {
-
             @Override
             public long count(MTEBECMultiblockBase<?> t) {
                 return t.mBECHatches.size();
@@ -270,8 +277,7 @@ public abstract class MTEBECMultiblockBase<TSelf extends MTEBECMultiblockBase<TS
         @Override
         public String getDisplayName() {
             return switch (this) {
-                case Hatch -> CustomItemList.becConnectorHatch.get(1)
-                    .getDisplayName();
+                case Hatch -> CustomItemList.becConnectorHatch.getDisplayName();
             };
         }
 

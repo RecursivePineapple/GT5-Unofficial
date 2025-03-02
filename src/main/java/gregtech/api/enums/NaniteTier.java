@@ -59,7 +59,7 @@ public enum NaniteTier {
     }
 
     public String describe() {
-        return MessageFormat.format("{0} (Tier {1})", getStack().getDisplayName(), tier);
+        return MessageFormat.format("{0} (Tier {1})", getMaterial().mLocalizedName, tier);
     }
 
     public static NaniteTier fromMaterial(Materials mat) {

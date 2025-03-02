@@ -48,6 +48,7 @@ import static gregtech.api.enums.MetaTileEntityIDs.ExtendedMegaUltimateBuckConve
 import static gregtech.api.enums.MetaTileEntityIDs.ExtremelyUltimateBuckConverter;
 import static gregtech.api.enums.MetaTileEntityIDs.EyeofHarmony;
 import static gregtech.api.enums.MetaTileEntityIDs.ForgeoftheGods;
+import static gregtech.api.enums.MetaTileEntityIDs.HatchNaniteDetector;
 import static gregtech.api.enums.MetaTileEntityIDs.HelioflarePowerForge;
 import static gregtech.api.enums.MetaTileEntityIDs.HeliofluxMeltingCore;
 import static gregtech.api.enums.MetaTileEntityIDs.HeliofusionExoticizer;
@@ -311,6 +312,7 @@ import static tectech.thing.CustomItemList.BECpipe;
 import static tectech.thing.CustomItemList.BECpipeBlock;
 import static tectech.thing.CustomItemList.DATApipe;
 import static tectech.thing.CustomItemList.DATApipeBlock;
+import static tectech.thing.CustomItemList.Hatch_BEC_Nanites;
 import static tectech.thing.CustomItemList.LASERpipe;
 import static tectech.thing.CustomItemList.LASERpipeBlock;
 import static tectech.thing.CustomItemList.LASERpipeSmart;
@@ -643,6 +645,7 @@ import tectech.thing.metaTileEntity.hatch.MTEHatchDynamoMulti;
 import tectech.thing.metaTileEntity.hatch.MTEHatchDynamoTunnel;
 import tectech.thing.metaTileEntity.hatch.MTEHatchEnergyMulti;
 import tectech.thing.metaTileEntity.hatch.MTEHatchEnergyTunnel;
+import tectech.thing.metaTileEntity.hatch.MTEHatchNaniteDetector;
 import tectech.thing.metaTileEntity.hatch.MTEHatchObjectHolder;
 import tectech.thing.metaTileEntity.hatch.MTEHatchRack;
 import tectech.thing.metaTileEntity.hatch.MTEHatchUncertainty;
@@ -2291,6 +2294,11 @@ public class MachineLoader implements Runnable {
                 BoseEinsteinCondensateIONode.ID,
                 "multimachine.em.bec-io-node",
                 "Observation Array Teleportation Node").getStackForm(1L));
+        Hatch_BEC_Nanites.set(
+            new MTEHatchNaniteDetector(
+                HatchNaniteDetector.ID,
+                "hatch.nanite-detector",
+                "Nanite Detector Hatch").getStackForm(1L));
 
         // ===================================================================================================
         // Hatches

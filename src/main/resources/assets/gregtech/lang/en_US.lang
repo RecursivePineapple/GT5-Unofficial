@@ -736,6 +736,7 @@ GT5U.gui.text.power_panel=Power Control Panel
 GT5U.gui.text.too_uncertain=Too Uncertain.
 GT5U.gui.text.invalid_parameters=Invalid Parameters.
 GT5U.gui.text.no_bec_assembler=Condensate Observation Array Offline
+GT5U.gui.text.nanite_threshold=Nanite Tier
 GT5U.item.programmed_circuit.select.header=Reprogram Circuit
 
 GT5U.gui.config.client=Client

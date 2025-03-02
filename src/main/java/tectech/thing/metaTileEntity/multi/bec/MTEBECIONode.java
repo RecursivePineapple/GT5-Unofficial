@@ -11,7 +11,9 @@ import static gregtech.api.enums.HatchElement.InputBus;
 import static gregtech.api.enums.HatchElement.OutputBus;
 
 import java.text.MessageFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
@@ -36,6 +38,7 @@ import gregtech.api.enums.GTValues;
 import gregtech.api.enums.ItemList;
 import gregtech.api.enums.NaniteTier;
 import gregtech.api.interfaces.IDataCopyable;
+import gregtech.api.interfaces.IHatchElement;
 import gregtech.api.interfaces.ITexture;
 import gregtech.api.interfaces.metatileentity.IMetaTileEntity;
 import gregtech.api.interfaces.tileentity.IGregTechTileEntity;
@@ -47,14 +50,15 @@ import gregtech.api.structure.MultiblockTooltipBuilder2;
 import gregtech.api.util.GTBECRecipe;
 import gregtech.api.util.GTRecipe;
 import gregtech.api.util.GTUtility;
+import gregtech.api.util.IGTHatchAdder;
 import gregtech.api.util.MultiblockTooltipBuilder;
 import gregtech.api.util.shutdown.ShutDownReason;
 import it.unimi.dsi.fastutil.ints.IntIterator;
-import it.unimi.dsi.fastutil.ints.IntObjectImmutablePair;
 import mcp.mobius.waila.api.IWailaConfigHandler;
 import mcp.mobius.waila.api.IWailaDataAccessor;
 import tectech.recipe.TecTechRecipeMaps;
 import tectech.thing.CustomItemList;
+import tectech.thing.metaTileEntity.hatch.MTEHatchNaniteDetector;
 import tectech.thing.metaTileEntity.multi.MTEBECAssembler;
 import tectech.thing.metaTileEntity.multi.base.MTEBECMultiblockBase;
 import tectech.thing.metaTileEntity.multi.structures.BECStructureDefinitions;
@@ -69,8 +73,10 @@ public class MTEBECIONode extends MTEBECMultiblockBase<MTEBECIONode> implements 
 
     private @Nullable NaniteTier[] requiredNanites;
 
-    private @Nullable NaniteTier providedTier;
+    private @Nullable NaniteTier providedTier, requiredTier;
     private int availableNanites;
+
+    private List<MTEHatchNaniteDetector> naniteDetectors = new ArrayList<>();
 
     public MTEBECIONode(int aID, String aName, String aNameRegional) {
         super(aID, aName, aNameRegional);
@@ -93,12 +99,19 @@ public class MTEBECIONode extends MTEBECMultiblockBase<MTEBECIONode> implements 
     @Override
     public IStructureDefinition<MTEBECIONode> compile(String[][] definition) {
         structure.addCasing('A', SuperconductivePlasmaEnergyConduit);
-        structure.addCasingWithHatches('B', ElectromagneticallyIsolatedCasing, 1, 16, Arrays.asList(Energy, ExoticEnergy, InputBus, OutputBus));
+        structure.addCasingWithHatches('B', ElectromagneticallyIsolatedCasing, 1, 16, Arrays.asList(Energy, ExoticEnergy, InputBus, OutputBus, NaniteHatch.INSTANCE));
         structure.addCasing('C', FineStructureConstantManipulator);
         structure.addCasing('D', AdvancedFusionCoilII);
         structure.addCasing('E', ElectromagneticWaveguide);
 
         return structure.buildStructure(definition);
+    }
+
+    @Override
+    protected void clearHatches_EM() {
+        super.clearHatches_EM();
+
+        naniteDetectors.clear();
     }
 
     @Override
@@ -186,12 +199,9 @@ public class MTEBECIONode extends MTEBECMultiblockBase<MTEBECIONode> implements 
     }
 
     private void setCurrentRecipe(@Nullable GTBECRecipe recipe) {
-        if (currentRecipe != recipe && assembler != null) {
-            assembler.markNeedsRebalance();
-        }
-
         currentRecipe = recipe;
         requiredNanites = recipe == null ? null : recipe.mInputTiers;
+        setRequiredTier(getRequiredNaniteTier(0));
     }
 
     public void setNaniteShare(NaniteTier providedTier, int nanites) {
@@ -199,14 +209,22 @@ public class MTEBECIONode extends MTEBECMultiblockBase<MTEBECIONode> implements 
         availableNanites = nanites;
     }
 
-    private boolean wasActive;
+    private void setRequiredTier(NaniteTier tier) {
+        if (tier != requiredTier) {
+            requiredTier = tier;
 
-    @Override
-    public void onSetActive(boolean active) {
-        if (isServerSide() && wasActive != active) {
-            wasActive = active;
+            Iterator<MTEHatchNaniteDetector> iter = naniteDetectors.iterator();
 
-            if (assembler != null) assembler.markNeedsRebalance();
+            while (iter.hasNext()) {
+                MTEHatchNaniteDetector naniteDetector = iter.next();
+
+                if (naniteDetector == null || !naniteDetector.isValid()) {
+                    iter.remove();
+                    continue;
+                }
+
+                naniteDetector.setRequiredTier(requiredTier);
+            }
         }
     }
 
@@ -218,14 +236,10 @@ public class MTEBECIONode extends MTEBECMultiblockBase<MTEBECIONode> implements 
         logic.setMaxParallel(Math.max(1, availableNanites));
     }
 
-    public boolean hasWork() {
-        return isAllowedToWork() || mMaxProgresstime > 0;
-    }
-
     private IntDivisionIterator getCurrentSlot(int progress) {
         IntDivisionIterator iter = new IntDivisionIterator(mMaxProgresstime, requiredNanites.length);
 
-        while (iter.sum + iter.peek() < progress && iter.hasNext()) {
+        while (iter.sum + iter.peek() <= progress && iter.hasNext()) {
             iter.nextInt();
         }
 
@@ -254,7 +268,8 @@ public class MTEBECIONode extends MTEBECMultiblockBase<MTEBECIONode> implements 
 
     @Override
     protected void incrementProgressTime() {
-        NaniteTier requiredTier = getRequiredNaniteTier(mProgresstime);
+        this.requiredTier = getRequiredNaniteTier(mProgresstime);
+        setRequiredTier(requiredTier);
 
         // sanity check, this should never happen
         if (requiredTier == null) return;
@@ -396,8 +411,6 @@ public class MTEBECIONode extends MTEBECMultiblockBase<MTEBECIONode> implements 
         return processingLogic.getCurrentParallels() == 0 ? 0 : availableNanites / (float) processingLogic.getCurrentParallels();
     }
 
-    private NaniteTier requiredTier;
-
     @Override
     protected void drawTexts(DynamicPositionedColumn screenElements, SlotWidget inventorySlot) {
         super.drawTexts(screenElements, inventorySlot);
@@ -414,13 +427,13 @@ public class MTEBECIONode extends MTEBECMultiblockBase<MTEBECIONode> implements 
 
         screenElements.widget(
             new FakeSyncWidget.IntegerSyncer(
-                () -> saveNanite(getRequiredNaniteTier(mProgresstime + 1)),
+                () -> saveNanite(getRequiredNaniteTier(mProgresstime)),
                 matId -> requiredTier = loadNanite(matId)));
     }
 
     @Override
     protected String generateCurrentRecipeInfoString() {
-        StringBuffer ret = new StringBuffer();
+        StringBuilder ret = new StringBuilder();
 
         ret.append(EnumChatFormatting.WHITE);
 
@@ -579,18 +592,44 @@ public class MTEBECIONode extends MTEBECMultiblockBase<MTEBECIONode> implements 
         public boolean hasNext() {
             return remaining > 0;
         }
+    }
 
-        public <T> Iterator<IntObjectImmutablePair<T>> zip(Iterator<T> other) {
-            return new Iterator<>() {
+    public enum NaniteHatch implements IHatchElement<MTEBECIONode> {
 
-                @Override
-                public boolean hasNext() {
-                    return IntDivisionIterator.this.hasNext() && other.hasNext();
-                }
+        INSTANCE;
 
-                @Override
-                public IntObjectImmutablePair<T> next() {
-                    return IntObjectImmutablePair.of(IntDivisionIterator.this.nextInt(), other.next());
+        @Override
+        public List<? extends Class<? extends IMetaTileEntity>> mteClasses() {
+            return Collections.singletonList(MTEHatchNaniteDetector.class);
+        }
+
+        @Override
+        public String getDisplayName() {
+            return CustomItemList.Hatch_BEC_Nanites.getDisplayName();
+        }
+
+        @Override
+        public long count(MTEBECIONode self) {
+            return self.naniteDetectors.size();
+        }
+
+        @Override
+        public IGTHatchAdder<MTEBECIONode> adder() {
+            return (self, igtme, id) -> {
+                IMetaTileEntity imte = igtme.getMetaTileEntity();
+
+                if (imte instanceof MTEHatchNaniteDetector hatch) {
+                    hatch.updateTexture(id);
+                    hatch.updateCraftingIcon(self.getMachineCraftingIcon());
+
+                    self.naniteDetectors.add(hatch);
+                    if (self.mMaxProgresstime > 0) {
+                        hatch.setRequiredTier(self.getRequiredNaniteTier(self.mProgresstime));
+                    }
+
+                    return true;
+                } else {
+                    return false;
                 }
             };
         }

@@ -4729,6 +4729,10 @@ public class GTUtility {
         return v;
     }
 
+    public static int mod(int value, int divisor) {
+        return ((value % divisor) + divisor) % divisor;
+    }
+
     /**
      * Hash an item stack for the purpose of storing hash across launches
      */
