@@ -92,13 +92,20 @@ public class MTEHatchNaniteDetector extends MTEBaseFactoryHatch {
     }
 
     @Override
+    public void onPostTick(IGregTechTileEntity baseMetaTileEntity, long tick) {
+        super.onPostTick(baseMetaTileEntity, tick);
+
+        updateOutput(true);
+    }
+
+    @Override
     public void onFacingChange() {
         IGregTechTileEntity igte = getBaseMetaTileEntity();
 
         if (igte == null || igte.isDead()) return;
 
         for (ForgeDirection dir : ForgeDirection.VALID_DIRECTIONS) {
-            igte.setInternalOutputRedstoneSignal(dir, (byte) 0);
+            igte.setStrongOutputRedstoneSignal(dir, (byte) 0);
         }
 
         updateOutput(true);
@@ -120,7 +127,11 @@ public class MTEHatchNaniteDetector extends MTEBaseFactoryHatch {
 
             currentSignal = signal;
 
-            igte.setRedstoneOutputStrength(igte.getFrontFacing(), signal);
+            for (ForgeDirection dir : ForgeDirection.VALID_DIRECTIONS) {
+                igte.setStrongOutputRedstoneSignal(dir, (byte) (signal ? 15 : 0));
+            }
+
+//            igte.setStrongOutputRedstoneSignal(igte.getFrontFacing(), (byte) (signal ? 15 : 0));
             igte.setActive(signal);
         }
     }

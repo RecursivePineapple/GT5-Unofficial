@@ -210,21 +210,19 @@ public class MTEBECIONode extends MTEBECMultiblockBase<MTEBECIONode> implements 
     }
 
     private void setRequiredTier(NaniteTier tier) {
-        if (tier != requiredTier) {
-            requiredTier = tier;
+        requiredTier = tier;
 
-            Iterator<MTEHatchNaniteDetector> iter = naniteDetectors.iterator();
+        Iterator<MTEHatchNaniteDetector> iter = naniteDetectors.iterator();
 
-            while (iter.hasNext()) {
-                MTEHatchNaniteDetector naniteDetector = iter.next();
+        while (iter.hasNext()) {
+            MTEHatchNaniteDetector naniteDetector = iter.next();
 
-                if (naniteDetector == null || !naniteDetector.isValid()) {
-                    iter.remove();
-                    continue;
-                }
-
-                naniteDetector.setRequiredTier(requiredTier);
+            if (naniteDetector == null || !naniteDetector.isValid()) {
+                iter.remove();
+                continue;
             }
+
+            naniteDetector.setRequiredTier(requiredTier);
         }
     }
 
