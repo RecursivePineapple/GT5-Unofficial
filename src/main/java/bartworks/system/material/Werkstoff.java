@@ -809,41 +809,8 @@ public class Werkstoff implements IColorModulationContainer, ISubTagContainer {
             return this;
         }
 
-        @Deprecated
-        public boolean hasDusts() {
-            return (this.toGenerate & 0b1) != 0;
-        }
-
-        @Deprecated
-        public boolean hasGems() {
-            return (this.toGenerate & 0b100) != 0;
-        }
-
-        @Deprecated
-        public boolean hasOres() {
-            return (this.toGenerate & 0b1000) != 0;
-        }
-
         public Werkstoff.GenerationFeatures enforceUnification() {
             this.enforceUnification = true;
-            return this;
-        }
-
-        @Deprecated
-        public Werkstoff.GenerationFeatures removeGems() {
-            if (this.hasGems()) this.toGenerate = this.toGenerate ^ 0b100;
-            return this;
-        }
-
-        @Deprecated
-        public Werkstoff.GenerationFeatures removeDusts() {
-            if (this.hasDusts()) this.toGenerate = this.toGenerate ^ 0b1;
-            return this;
-        }
-
-        @Deprecated
-        public Werkstoff.GenerationFeatures removeOres() {
-            if (this.hasOres()) this.toGenerate = this.toGenerate ^ 0b1000;
             return this;
         }
 
@@ -930,16 +897,6 @@ public class Werkstoff implements IColorModulationContainer, ISubTagContainer {
             return this;
         }
 
-        @Deprecated
-        public boolean hasCells() {
-            return (this.toGenerate & 0b10000) != 0;
-        }
-
-        @Deprecated
-        public boolean hasMolten() {
-            return (this.toGenerate & 0b1000000) != 0;
-        }
-
         public Werkstoff.GenerationFeatures addMolten() {
             this.toGenerate = this.toGenerate | 0b1000000;
             return this;
@@ -961,11 +918,6 @@ public class Werkstoff implements IColorModulationContainer, ISubTagContainer {
         public Werkstoff.GenerationFeatures addCasings() {
             this.toGenerate = this.toGenerate | 0x382;
             return this;
-        }
-
-        @Deprecated
-        public boolean hasSimpleMetalWorkingItems() {
-            return (this.toGenerate & 0b10000000) != 0;
         }
 
         public Werkstoff.GenerationFeatures addCraftingMetalWorkingItems() {

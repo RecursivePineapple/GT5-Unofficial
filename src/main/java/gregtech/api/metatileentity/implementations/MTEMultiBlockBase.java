@@ -15,7 +15,9 @@ import static mcp.mobius.waila.api.SpecialChars.RESET;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -27,6 +29,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.inventory.IInventory;
@@ -68,13 +71,15 @@ import com.gtnewhorizons.modularui.common.widget.SlotWidget;
 import com.gtnewhorizons.modularui.common.widget.TextWidget;
 import com.gtnewhorizons.modularui.common.widget.textfield.NumericWidget;
 
+import cpw.mods.fml.common.network.ByteBufUtils;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import gregtech.GTMod;
 import gregtech.api.enums.SoundResource;
+import gregtech.api.enums.StructureError;
 import gregtech.api.enums.VoidingMode;
-import gregtech.api.gui.modularui.GTUIInfos;
 import gregtech.api.gui.modularui.GTUITextures;
+import gregtech.api.gui.widgets.StructureErrorSyncer;
 import gregtech.api.interfaces.fluid.IFluidStore;
 import gregtech.api.interfaces.metatileentity.IItemLockable;
 import gregtech.api.interfaces.metatileentity.IMetaTileEntity;
@@ -86,7 +91,6 @@ import gregtech.api.interfaces.tileentity.IGregTechTileEntity;
 import gregtech.api.items.MetaGeneratedTool;
 import gregtech.api.logic.ProcessingLogic;
 import gregtech.api.metatileentity.MetaTileEntity;
-import gregtech.api.objects.GTItemStack;
 import gregtech.api.recipe.RecipeMap;
 import gregtech.api.recipe.check.CheckRecipeResult;
 import gregtech.api.recipe.check.CheckRecipeResultRegistry;
@@ -99,7 +103,6 @@ import gregtech.api.util.GTUtil;
 import gregtech.api.util.GTUtility;
 import gregtech.api.util.GTWaila;
 import gregtech.api.util.OutputHatchWrapper;
-import gregtech.api.util.OverclockCalculator;
 import gregtech.api.util.ParallelHelper;
 import gregtech.api.util.VoidProtectionHelper;
 import gregtech.api.util.shutdown.ShutDownReason;
@@ -182,6 +185,15 @@ public abstract class MTEMultiBlockBase extends MetaTileEntity
     private static final int CHECK_INTERVAL = 100; // How often should we check for a new recipe on an idle machine?
     private final int randomTickOffset = (int) (Math.random() * CHECK_INTERVAL + 1);
 
+    /** A list of unparameterized structure errors. */
+    private EnumSet<StructureError> structureErrors = EnumSet.noneOf(StructureError.class);
+
+    /**
+     * Any implementation-defined error data.
+     * Private so that multis have to use the parameters (to make it easier to refactor if needed).
+     */
+    private NBTTagCompound structureErrorContext = new NBTTagCompound();
+
     protected static final byte INTERRUPT_SOUND_INDEX = 8;
     protected static final byte PROCESS_START_SOUND_INDEX = 1;
 
@@ -205,7 +217,7 @@ public abstract class MTEMultiBlockBase extends MetaTileEntity
     }
 
     @Override
-    public boolean allowCoverOnSide(ForgeDirection side, GTItemStack aCoverID) {
+    public boolean allowCoverOnSide(ForgeDirection side, ItemStack coverItem) {
         return side != getBaseMetaTileEntity().getFrontFacing();
     }
 
@@ -222,11 +234,6 @@ public abstract class MTEMultiBlockBase extends MetaTileEntity
                 mSingleRecipeCheck = null;
             }
         }
-    }
-
-    @Override
-    public boolean isSimpleMachine() {
-        return false;
     }
 
     @Override
@@ -417,7 +424,7 @@ public abstract class MTEMultiBlockBase extends MetaTileEntity
             }
             return true;
         }
-        GTUIInfos.openGTTileEntityUI(aBaseMetaTileEntity, aPlayer);
+        openGui(aPlayer);
         return true;
     }
 
@@ -465,10 +472,62 @@ public abstract class MTEMultiBlockBase extends MetaTileEntity
         // Only trigger an update if forced (from onPostTick, generally), or if the structure has changed
         if ((mStructureChanged || aForceReset)) {
             clearHatches();
+
             mMachine = checkMachine(aBaseMetaTileEntity, mInventory[1]);
+
+            doStructureValidation();
         }
         mStructureChanged = false;
         return mMachine;
+    }
+
+    protected final void doStructureValidation() {
+        structureErrors = EnumSet.noneOf(StructureError.class);
+        structureErrorContext = new NBTTagCompound();
+
+        // only run validation when the structure check passes, so that we don't confuse people
+        if (mMachine) {
+            validateStructure(structureErrors, structureErrorContext);
+
+            if (hasStructureErrors()) mMachine = false;
+        }
+    }
+
+    /**
+     * Validates this multi's structure (hatch/casing counts mainly) for any errors. The multi will not form if any
+     * errors are added to {@code errors}.
+     * Only runs when {@link #checkMachine} is successful.
+     *
+     * @param errors  Add errors to this.
+     * @param context Generic data blob that is synced with the client.
+     */
+    protected void validateStructure(Collection<StructureError> errors, NBTTagCompound context) {
+
+    }
+
+    /**
+     * Scans {@code errors}, {@code context}, or other fields as needed and emits localized structure error messages.
+     * The {@code errors} and {@code context} params are synced already, but any other fields must be manually synced.
+     * Note that the parameters may not be in sync due to network latency (they are synced separately). You shouldn't
+     * rely on a field being in {@code context} if an error is present in {@code errors}. This method is typically only
+     * called on the client, but it may be called on the server in the future. Don't use {@link I18n#format} since
+     * that's client-only (use {@link StatCollector#translateToLocal} & its variants instead).
+     *
+     * @param errors  The errors generated by {@link #validateStructure}.
+     * @param context Generic context blob generated by {@link #validateStructure}.
+     * @param lines   Add text to this. These lines will be shown in the controller GUI.
+     */
+    protected void localizeStructureErrors(Collection<StructureError> errors, NBTTagCompound context,
+        List<String> lines) {
+
+    }
+
+    /**
+     * Controls whether the error message widget is shown. If you have any new structure status fields, make sure to
+     * check them here.
+     */
+    protected boolean hasStructureErrors() {
+        return !structureErrors.isEmpty();
     }
 
     /**
@@ -1335,27 +1394,6 @@ public abstract class MTEMultiBlockBase extends MetaTileEntity
         return rTier;
     }
 
-    /**
-     * Calcualtes the overclockedness using long integers
-     *
-     * @param aEUt            - recipe EUt
-     * @param aDuration       - recipe Duration
-     * @param mAmperage       - should be 1 ?
-     * @param maxInputVoltage - Multiblock Max input voltage. Voltage is rounded up to higher tier voltage.
-     * @param perfectOC       - If the Multiblock OCs perfectly, i.e. the large Chemical Reactor
-     */
-    protected void calculateOverclockedNessMultiInternal(long aEUt, int aDuration, int mAmperage, long maxInputVoltage,
-        boolean perfectOC) {
-        byte tier = (byte) Math.max(0, GTUtility.getTier(maxInputVoltage));
-        OverclockCalculator calculator = new OverclockCalculator().setRecipeEUt(aEUt)
-            .setEUt(V[tier] * mAmperage)
-            .setDuration(aDuration)
-            .setDurationDecreasePerOC(perfectOC ? 4.0 : 2.0)
-            .calculate();
-        mEUt = (int) calculator.getConsumption();
-        mMaxProgresstime = calculator.getDuration();
-    }
-
     public boolean drainEnergyInput(long aEU) {
         if (aEU <= 0) return true;
         for (MTEHatchEnergy tHatch : validMTEList(mEnergyHatches)) {
@@ -2118,7 +2156,7 @@ public abstract class MTEMultiBlockBase extends MetaTileEntity
             if (tag.getBoolean("isLockedToRecipe")) {
                 String lockedRecipe = tag.getString("lockedRecipeName");
                 if (!lockedRecipe.isEmpty()) {
-                    currentTip.add("Locked Recipe:");
+                    currentTip.add(StatCollector.translateToLocal("GT5U.waila.multiblock.status.locked_recipe"));
                     String[] lines = lockedRecipe.split("\n");
                     for (String line : lines) {
                         currentTip.add(line);
@@ -2875,6 +2913,26 @@ public abstract class MTEMultiBlockBase extends MetaTileEntity
     protected void drawTexts(DynamicPositionedColumn screenElements, SlotWidget inventorySlot) {
         screenElements.setSynced(false)
             .setSpace(0);
+
+        screenElements.widget(new StructureErrorSyncer(() -> structureErrors, value -> structureErrors = value));
+
+        screenElements.widget(
+            new FakeSyncWidget<>(
+                () -> structureErrorContext,
+                data -> structureErrorContext = data,
+                ByteBufUtils::writeTag,
+                ByteBufUtils::readTag));
+
+        screenElements.widgets(TextWidget.dynamicString(() -> {
+            ArrayList<String> lines = new ArrayList<>();
+            localizeStructureErrors(structureErrors, structureErrorContext, lines);
+            return String.join("\n", lines);
+        })
+            .setSynced(false)
+            .setTextAlignment(Alignment.CenterLeft)
+            .setDefaultColor(EnumChatFormatting.DARK_RED)
+            .setEnabled(w -> hasStructureErrors()));
+
         if (supportsMachineModeSwitch()) {
             screenElements.widget(
                 TextWidget
