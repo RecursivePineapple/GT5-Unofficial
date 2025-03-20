@@ -4736,6 +4736,26 @@ public class GTUtility {
         return ((value % divisor) + divisor) % divisor;
     }
 
+    public static long addSafe(long a, long b) {
+        if ((a > 0) != (b > 0)) {
+            return a + b;
+        }
+
+        long sum = a + b;
+
+        if (a >= 0 && b >= 0) {
+            if (sum < 0) {
+                return Long.MAX_VALUE;
+            }
+        } else {
+            if (sum >= 0) {
+                return Long.MIN_VALUE;
+            }
+        }
+
+        return sum;
+    }
+
     /**
      * Hash an item stack for the purpose of storing hash across launches
      */

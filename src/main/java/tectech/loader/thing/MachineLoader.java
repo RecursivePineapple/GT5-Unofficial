@@ -48,6 +48,7 @@ import static gregtech.api.enums.MetaTileEntityIDs.ExtendedMegaUltimateBuckConve
 import static gregtech.api.enums.MetaTileEntityIDs.ExtremelyUltimateBuckConverter;
 import static gregtech.api.enums.MetaTileEntityIDs.EyeofHarmony;
 import static gregtech.api.enums.MetaTileEntityIDs.ForgeoftheGods;
+import static gregtech.api.enums.MetaTileEntityIDs.HatchIOController;
 import static gregtech.api.enums.MetaTileEntityIDs.HatchNaniteDetector;
 import static gregtech.api.enums.MetaTileEntityIDs.HelioflarePowerForge;
 import static gregtech.api.enums.MetaTileEntityIDs.HeliofluxMeltingCore;
@@ -312,6 +313,7 @@ import static tectech.thing.CustomItemList.BECpipe;
 import static tectech.thing.CustomItemList.BECpipeBlock;
 import static tectech.thing.CustomItemList.DATApipe;
 import static tectech.thing.CustomItemList.DATApipeBlock;
+import static tectech.thing.CustomItemList.Hatch_BEC_IOController;
 import static tectech.thing.CustomItemList.Hatch_BEC_Nanites;
 import static tectech.thing.CustomItemList.LASERpipe;
 import static tectech.thing.CustomItemList.LASERpipeBlock;
@@ -633,6 +635,7 @@ import gregtech.api.enums.MetaTileEntityIDs;
 import gregtech.api.factory.test.TestFactoryHatch;
 import gregtech.api.factory.test.TestFactoryPipe;
 import tectech.thing.metaTileEntity.hatch.MTEHatchBEC;
+import tectech.thing.metaTileEntity.hatch.MTEHatchBECIONodeController;
 import tectech.thing.metaTileEntity.hatch.MTEHatchCapacitor;
 import tectech.thing.metaTileEntity.hatch.MTEHatchCreativeData;
 import tectech.thing.metaTileEntity.hatch.MTEHatchCreativeMaintenance;
@@ -2299,6 +2302,11 @@ public class MachineLoader implements Runnable {
                 HatchNaniteDetector.ID,
                 "hatch.nanite-detector",
                 "Nanite Detector Hatch").getStackForm(1L));
+        Hatch_BEC_IOController.set(
+            new MTEHatchBECIONodeController(
+                HatchIOController.ID,
+                "hatch.io-node-controller",
+                "Teleportation Node Controller Hatch").getStackForm(1L));
 
         // ===================================================================================================
         // Hatches

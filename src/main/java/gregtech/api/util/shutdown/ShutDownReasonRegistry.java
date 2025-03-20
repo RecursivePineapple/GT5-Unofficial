@@ -114,5 +114,6 @@ public class ShutDownReasonRegistry {
         register(new ReasonOutOfFluid(getWater(0)));
         register(new ReasonOutOfItem(new ItemStack(Items.feather, 1)));
         register(new ReasonOutOfStuff("stuff", 1));
+        register(new ReasonBEC());
     }
 }

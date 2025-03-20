@@ -42,11 +42,14 @@ import gregtech.api.recipe.RecipeMap;
 import gregtech.api.recipe.check.CheckRecipeResult;
 import gregtech.api.recipe.check.CheckRecipeResultRegistry;
 import gregtech.api.structure.MultiblockTooltipBuilder2;
+import gregtech.api.util.GTUtility;
 import gregtech.api.util.IGTHatchAdder;
 import gregtech.api.util.MultiblockTooltipBuilder;
 import mcp.mobius.waila.api.IWailaConfigHandler;
 import mcp.mobius.waila.api.IWailaDataAccessor;
 import tectech.mechanics.boseEinsteinCondensate.BECFactoryGrid;
+import tectech.mechanics.boseEinsteinCondensate.BECInventory;
+import tectech.mechanics.boseEinsteinCondensate.CondensateStack;
 import tectech.recipe.TecTechRecipeMaps;
 import tectech.thing.CustomItemList;
 import tectech.thing.metaTileEntity.multi.base.MTEBECMultiblockBase;
@@ -141,6 +144,7 @@ public class MTEBECAssembler extends MTEBECMultiblockBase<MTEBECAssembler> imple
     @Override
     public void onRemoval() {
         super.onRemoval();
+
         BECFactoryGrid.INSTANCE.removeElement(this);
     }
 
@@ -208,6 +212,62 @@ public class MTEBECAssembler extends MTEBECMultiblockBase<MTEBECAssembler> imple
     public void removeIONode(MTEBECIONode node) {
         ioNodes.remove(node);
         node.setNaniteShare(null, 0);
+    }
+
+    public enum CondensateDrainStatus {
+        /** Craft should be aborted because the input has invalid condensate. */
+        ABORT_CLOGGED,
+        /** Craft should be aborted because the input is missing condensate. */
+        ABORT_MISSING,
+        /** Craft should be paused. */
+        PAUSE,
+        /** Craft should continue. */
+        OK
+    }
+
+    public static class CondensateDrainResult {
+
+        public CondensateDrainStatus status;
+        public int slowdowns;
+
+        public CondensateDrainResult(CondensateDrainStatus status, int slowdowns) {
+            this.status = status;
+            this.slowdowns = slowdowns;
+        }
+    }
+
+    private boolean isSafeModeEnabled() {
+        return true;
+    }
+
+    public CondensateDrainResult drainCondensate(CondensateStack stack) {
+        if (network == null) {
+            return new CondensateDrainResult(isSafeModeEnabled() ? CondensateDrainStatus.PAUSE : CondensateDrainStatus.ABORT_MISSING, 0);
+        }
+
+        if (stack.amount > 0) {
+            long stored = 0;
+
+            for (BECInventory storage : network.getComponents(BECInventory.class)) {
+                stored = GTUtility.addSafe(stored, storage.getContents().getLong(stack.material));
+            }
+
+            if (stored < stack.amount) {
+                return new CondensateDrainResult(isSafeModeEnabled() ? CondensateDrainStatus.PAUSE : CondensateDrainStatus.ABORT_MISSING, 0);
+            }
+
+            long remaining = stack.amount;
+
+            for (BECInventory storage : network.getComponents(BECInventory.class)) {
+                long toConsume = Math.min(remaining, storage.getContents().getLong(stack.material));
+
+                if (storage.removeCondensate(Arrays.asList(new CondensateStack(stack.material, toConsume)))) {
+                    remaining -= toConsume;
+                }
+            }
+        }
+
+        return new CondensateDrainResult(CondensateDrainStatus.OK, isSafeModeEnabled() ? 1 : 0);
     }
 
     @Override

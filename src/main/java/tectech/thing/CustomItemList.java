@@ -40,6 +40,7 @@ public enum CustomItemList implements IItemContainer {
     Machine_Multi_BECAssembler,
     Machine_Multi_BECIONode,
     Hatch_BEC_Nanites,
+    Hatch_BEC_IOController,
     rack_Hatch,
     holder_Hatch,
     capacitor_Hatch,

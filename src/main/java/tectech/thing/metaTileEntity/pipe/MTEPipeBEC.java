@@ -17,7 +17,6 @@ import gregtech.api.interfaces.ITexture;
 import gregtech.api.interfaces.metatileentity.IMetaTileEntity;
 import gregtech.api.interfaces.tileentity.IGregTechTileEntity;
 import gregtech.api.render.TextureFactory;
-import gregtech.common.covers.CoverInfo;
 import gregtech.common.covers.CoverShutter;
 import mcp.mobius.waila.api.IWailaConfigHandler;
 import mcp.mobius.waila.api.IWailaDataAccessor;
@@ -79,7 +78,7 @@ public class MTEPipeBEC extends MTEBaseFactoryPipe implements BECFactoryElement 
             boolean hasShutter = false;
 
             for (ForgeDirection side : ForgeDirection.VALID_DIRECTIONS) {
-                if (base.getCoverInfoAtSide(side).getCoverBehavior() instanceof CoverShutter) {
+                if (base.getCoverAtSide(side) instanceof CoverShutter) {
                     hasShutter = true;
                     break;
                 }
@@ -105,20 +104,18 @@ public class MTEPipeBEC extends MTEBaseFactoryPipe implements BECFactoryElement 
 
     @Override
     protected void checkActive() {
-        mIsActive = network != null && network.getComponents(BECInventory.class)
-            .size() > 0;
+        mIsActive = network != null && !network.getComponents(BECInventory.class)
+            .isEmpty();
     }
 
     @Override
     public ConnectionType getConnectionOnSide(ForgeDirection side) {
-        CoverInfo cover = getBaseMetaTileEntity().getCoverInfoAtSide(side);
-
-        if (cover != null && cover.getCoverBehavior() instanceof CoverShutter shutter) {
-            if (shutter.letsEnergyIn(side, cover.getCoverID(), cover.getCoverData(), getBaseMetaTileEntity())) {
+        if (getBaseMetaTileEntity().getCoverAtSide(side) instanceof CoverShutter shutter) {
+            if (shutter.letsEnergyIn()) {
                 return ConnectionType.CONNECTABLE;
             }
 
-            if (shutter.alwaysLookConnected(side, cover.getCoverID(), cover.getCoverData(), getBaseMetaTileEntity())) {
+            if (shutter.alwaysLookConnected()) {
                 return ConnectionType.VISUAL_ONLY;
             }
 

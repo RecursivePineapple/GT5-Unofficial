@@ -1,14 +1,14 @@
 package tectech.mechanics.boseEinsteinCondensate;
 
 import java.util.Collection;
-import java.util.List;
 
-import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.NotNull;
+
+import it.unimi.dsi.fastutil.objects.Object2LongMap;
 
 public interface BECInventory {
 
-    @Nullable
-    List<CondensateStack> getContents();
+    @NotNull Object2LongMap<Object> getContents();
 
     void addCondensate(Collection<CondensateStack> stacks);
 

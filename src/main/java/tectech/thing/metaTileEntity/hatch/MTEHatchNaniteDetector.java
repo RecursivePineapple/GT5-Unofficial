@@ -34,7 +34,6 @@ public class MTEHatchNaniteDetector extends MTEBaseFactoryHatch {
     private int configuredTier;
     private @Nullable NaniteTier requiredTier;
     private Op op = Op.EQ;
-    private boolean currentSignal;
 
     enum Op {
         EQ,
@@ -54,12 +53,12 @@ public class MTEHatchNaniteDetector extends MTEBaseFactoryHatch {
         }
     }
 
-    protected MTEHatchNaniteDetector(MTEHatchNaniteDetector prototype) {
-        super(prototype);
-    }
-
     public MTEHatchNaniteDetector(int aID, String aName, String aNameRegional) {
         super(aID, aName, aNameRegional, VoltageIndex.UEV, null);
+    }
+
+    protected MTEHatchNaniteDetector(MTEHatchNaniteDetector prototype) {
+        super(prototype);
     }
 
     @Override
@@ -88,30 +87,17 @@ public class MTEHatchNaniteDetector extends MTEBaseFactoryHatch {
 
     public void setRequiredTier(@Nullable NaniteTier requiredTier) {
         this.requiredTier = requiredTier;
-        updateOutput(false);
+    }
+
+    @Override
+    public boolean allowGeneralRedstoneOutput() {
+        return true;
     }
 
     @Override
     public void onPostTick(IGregTechTileEntity baseMetaTileEntity, long tick) {
         super.onPostTick(baseMetaTileEntity, tick);
 
-        updateOutput(true);
-    }
-
-    @Override
-    public void onFacingChange() {
-        IGregTechTileEntity igte = getBaseMetaTileEntity();
-
-        if (igte == null || igte.isDead()) return;
-
-        for (ForgeDirection dir : ForgeDirection.VALID_DIRECTIONS) {
-            igte.setStrongOutputRedstoneSignal(dir, (byte) 0);
-        }
-
-        updateOutput(true);
-    }
-
-    private void updateOutput(boolean force) {
         boolean signal = requiredTier != null && switch (op) {
             case EQ -> requiredTier.tier == configuredTier;
             case LT -> requiredTier.tier < configuredTier;
@@ -120,20 +106,16 @@ public class MTEHatchNaniteDetector extends MTEBaseFactoryHatch {
             case GTEQ -> requiredTier.tier >= configuredTier;
         };
 
-        if (force || signal != currentSignal) {
-            IGregTechTileEntity igte = getBaseMetaTileEntity();
+        IGregTechTileEntity igte = getBaseMetaTileEntity();
 
-            if (igte == null || igte.isDead()) return;
+        if (igte == null || igte.isDead()) return;
 
-            currentSignal = signal;
-
-            for (ForgeDirection dir : ForgeDirection.VALID_DIRECTIONS) {
-                igte.setStrongOutputRedstoneSignal(dir, (byte) (signal ? 15 : 0));
-            }
-
-//            igte.setStrongOutputRedstoneSignal(igte.getFrontFacing(), (byte) (signal ? 15 : 0));
-            igte.setActive(signal);
+        for (ForgeDirection dir : ForgeDirection.VALID_DIRECTIONS) {
+            igte.setStrongOutputRedstoneSignal(dir, (byte) 0);
         }
+
+        igte.setStrongOutputRedstoneSignal(baseMetaTileEntity.getFrontFacing(), (byte) (signal ? 15 : 0));
+        igte.setActive(signal);
     }
 
     @Override
@@ -158,7 +140,6 @@ public class MTEHatchNaniteDetector extends MTEBaseFactoryHatch {
                     }
 
                     op = Op.values()[GTUtility.mod(op.ordinal() + offset, Op.values().length)];
-                    updateOutput(true);
 
                     ((VanillaButtonWidget) widget).setDisplayString(op.getDisplayString());
                     widget.notifyTooltipChange();
@@ -172,12 +153,13 @@ public class MTEHatchNaniteDetector extends MTEBaseFactoryHatch {
                             case GT -> "greater than";
                             case GTEQ -> "greater than or equal to";
                         })))
-                .setPos(10, 8), new NaniteTierNumericWidget(),
+                .setPos(10, 8),
+            new NaniteTierNumericWidget(),
             new TextWidget(StatCollector.translateToLocal("GT5U.gui.text.nanite_threshold"))
                 .setDefaultColor(COLOR_TEXT_GRAY.get())
                 .setTextAlignment(Alignment.CenterLeft)
                 .setPos(90, 14),
-            TextWidget.dynamicString(() -> "Current: " + requiredTier + " " + currentSignal)
+            TextWidget.dynamicString(() -> "Current: " + requiredTier)
                 .setDefaultColor(COLOR_TEXT_GRAY.get())
                 .setTextAlignment(Alignment.CenterLeft)
                 .setPos(20, 35)

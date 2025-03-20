@@ -8,10 +8,10 @@ import static gregtech.api.casing.Casings.SuperconductivePlasmaEnergyConduit;
 import static gregtech.api.enums.HatchElement.Energy;
 import static gregtech.api.enums.HatchElement.ExoticEnergy;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import javax.annotation.Nonnull;
 
@@ -21,7 +21,6 @@ import net.minecraft.nbt.NBTTagList;
 import net.minecraft.util.EnumChatFormatting;
 
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.joml.Vector3f;
 
 import com.gtnewhorizon.structurelib.structure.IStructureDefinition;
@@ -29,7 +28,6 @@ import com.gtnewhorizons.modularui.api.math.Alignment;
 import com.gtnewhorizons.modularui.common.widget.DynamicPositionedColumn;
 import com.gtnewhorizons.modularui.common.widget.SlotWidget;
 import com.gtnewhorizons.modularui.common.widget.TextWidget;
-
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import gregtech.api.enums.GTValues;
@@ -49,6 +47,7 @@ import gregtech.client.ISoundLoopAware;
 import gregtech.client.volumetric.CircularSound;
 import gregtech.client.volumetric.LinearSound;
 import it.unimi.dsi.fastutil.Pair;
+import it.unimi.dsi.fastutil.objects.Object2LongMap;
 import it.unimi.dsi.fastutil.objects.Object2LongOpenHashMap;
 import tectech.mechanics.boseEinsteinCondensate.BECFactoryGrid;
 import tectech.mechanics.boseEinsteinCondensate.BECInventory;
@@ -199,7 +198,13 @@ public class MTEBECStorage extends MTEBECMultiblockBase<MTEBECStorage> implement
     public void saveNBTData(NBTTagCompound aNBT) {
         super.saveNBTData(aNBT);
 
-        aNBT.setTag("condensate", CondensateStack.save(getContents()));
+        List<CondensateStack> stacks = new ArrayList<>();
+
+        for (var e : mStoredCondensate.object2LongEntrySet()) {
+            stacks.add(new CondensateStack(e.getKey(), e.getLongValue()));
+        }
+
+        aNBT.setTag("condensate", CondensateStack.save(stacks));
     }
 
     @Override
@@ -278,11 +283,8 @@ public class MTEBECStorage extends MTEBECMultiblockBase<MTEBECStorage> implement
     }
 
     @Override
-    public @Nullable List<CondensateStack> getContents() {
-        return mStoredCondensate.object2LongEntrySet()
-            .stream()
-            .map(e -> new CondensateStack(e.getKey(), e.getLongValue()))
-            .collect(Collectors.toList());
+    public @NotNull Object2LongMap<Object> getContents() {
+        return mStoredCondensate;
     }
 
     @Override
@@ -320,7 +322,7 @@ public class MTEBECStorage extends MTEBECMultiblockBase<MTEBECStorage> implement
             if (stored == 0) {
                 mStoredCondensate.removeLong(stack.material);
             } else {
-                mStoredCondensate.put(stacks, stored);
+                mStoredCondensate.put(stack.material, stored);
             }
 
             if (stack.amount > 0) consumedEverything = false;

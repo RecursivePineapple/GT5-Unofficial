@@ -24,6 +24,8 @@ import gregtech.loaders.load.BECRecipeLoader.MaterialInfo;
 import gtPlusPlus.core.material.Material;
 import gtPlusPlus.core.util.Utils;
 import it.unimi.dsi.fastutil.Pair;
+import it.unimi.dsi.fastutil.objects.Object2LongMap;
+import it.unimi.dsi.fastutil.objects.Object2LongOpenHashMap;
 
 public class CondensateStack {
 
@@ -106,6 +108,22 @@ public class CondensateStack {
         throw new IllegalStateException("material must be a GT, GT++, or Bartworks material");
     }
 
+    public String getDisplayName() {
+        if (material instanceof Materials gtMat) {
+            return gtMat.mDefaultLocalName;
+        }
+
+        if (material instanceof Material gtppMat) {
+            return gtppMat.getLocalizedName();
+        }
+
+        if (material instanceof Werkstoff bartMat) {
+            return bartMat.getLocalizedName();
+        }
+
+        throw new IllegalStateException("material must be a GT, GT++, or Bartworks material");
+    }
+
     public NBTTagCompound writeToTag(NBTTagCompound tag) {
         tag.setString("n", getMaterialName());
         tag.setLong("a", amount);
@@ -130,6 +148,29 @@ public class CondensateStack {
             CondensateStack stack = CondensateStack.readFromTag(tag);
 
             if (stack != null && stack.material != null) out.add(stack);
+        }
+
+        return out;
+    }
+
+    public static NBTTagList save(Object2LongMap<Object> stacks) {
+        NBTTagList tags = new NBTTagList();
+
+        for (var e : stacks.object2LongEntrySet()) {
+            tags.appendTag(new CondensateStack(e.getKey(), e.getLongValue()).writeToTag(new NBTTagCompound()));
+        }
+
+        return tags;
+    }
+
+    @SuppressWarnings("unchecked")
+    public static Object2LongOpenHashMap<Object> loadMap(NBTTagList stacks) {
+        Object2LongOpenHashMap<Object> out = new Object2LongOpenHashMap<>();
+
+        for (NBTTagCompound tag : ((List<NBTTagCompound>) stacks.tagList)) {
+            CondensateStack stack = CondensateStack.readFromTag(tag);
+
+            if (stack != null && stack.material != null) out.put(stack.material, stack.amount);
         }
 
         return out;
