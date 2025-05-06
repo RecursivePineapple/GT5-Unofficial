@@ -23,6 +23,7 @@ public class NetworkDispatcher extends eu.usrv.yamcore.network.PacketDispatcher 
         registerMessage(PipeActivityMessage.ClientHandler.class, PipeActivityMessage.PipeActivityData.class);
 
         registerMessage(RendererMessage.ClientHandler.class, RendererMessage.RendererData.class);
+
         PipeActivity.init();
         registerMessage(PipeActivity.Handler.class, BatchedPipeActivityMessage.class);
     }

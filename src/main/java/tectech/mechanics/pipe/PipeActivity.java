@@ -110,6 +110,7 @@ public class PipeActivity {
                 int x = CoordinatePacker.unpackX(coord);
                 int y = CoordinatePacker.unpackY(coord);
                 int z = CoordinatePacker.unpackZ(coord);
+
                 int chunkX = x >> 4;
                 int chunkZ = z >> 4;
 

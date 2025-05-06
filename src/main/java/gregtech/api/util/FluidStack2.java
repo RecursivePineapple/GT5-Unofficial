@@ -28,16 +28,19 @@ public class FluidStack2 extends FluidStack {
         if (nbt == null) {
             return null;
         }
+
         String fluidName = nbt.getString("FluidName");
 
         if (fluidName == null || FluidRegistry.getFluid(fluidName) == null) {
             return null;
         }
+
         FluidStack2 stack = new FluidStack2(FluidRegistry.getFluid(fluidName), nbt.getInteger("Amount"));
 
         if (nbt.hasKey("Tag")) {
             stack.tag = nbt.getCompoundTag("Tag");
         }
+
         return stack;
     }
 
