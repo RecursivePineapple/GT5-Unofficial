@@ -1,5 +1,7 @@
 package gregtech.common.blocks;
 
+import static com.gtnewhorizon.gtnhlib.util.AnimatedTooltipHandler.translatedText;
+
 import java.util.List;
 import java.util.function.Supplier;
 
@@ -22,16 +24,17 @@ import net.minecraft.util.StatCollector;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 
+import com.gtnewhorizon.gtnhlib.util.AnimatedTooltipHandler;
+
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import gregtech.api.GregTechAPI;
 import gregtech.api.enums.ItemList;
 import gregtech.api.enums.Textures;
+import gregtech.api.interfaces.IItemContainer;
 import gregtech.api.items.GTGenericBlock;
 import gregtech.api.render.TextureFactory;
 import gregtech.api.util.GTLanguageManager;
-import it.unimi.dsi.fastutil.objects.ObjectArrayList;
-import it.unimi.dsi.fastutil.objects.ObjectList;
 
 /**
  * The base class for casings. Casings are the blocks that are mainly used to build multiblocks.
@@ -39,12 +42,10 @@ import it.unimi.dsi.fastutil.objects.ObjectList;
 public abstract class BlockCasingsAbstract extends GTGenericBlock
     implements gregtech.api.interfaces.IHasIndexedTexture {
 
-    private final ObjectList<Supplier<String>> mTooltips = new ObjectArrayList<>();
-
     public BlockCasingsAbstract(Class<? extends ItemBlock> aItemClass, String aName, Material aMaterial) {
         super(aItemClass, aName, aMaterial);
         setStepSound(soundTypeMetal);
-        setCreativeTab(GregTechAPI.TAB_GREGTECH);
+        setCreativeTab(GregTechAPI.TAG_GREGTECH_CASINGS);
         GregTechAPI.registerMachineBlock(this, -1);
         GTLanguageManager.addStringLocalization(getUnlocalizedName() + "." + 32767 + ".name", "Any Sub Block of this");
     }
@@ -54,6 +55,11 @@ public abstract class BlockCasingsAbstract extends GTGenericBlock
         for (int i = 0; i < aMaxMeta; i++) {
             Textures.BlockIcons.setCasingTextureForId(getTextureIndex(i), TextureFactory.of(this, i));
         }
+    }
+
+    @Override
+    public int getRenderType() {
+        return GTRendererCasing.mRenderID;
     }
 
     @Override
@@ -150,41 +156,5 @@ public abstract class BlockCasingsAbstract extends GTGenericBlock
     @Override
     public int getTextureIndex(int aMeta) {
         return Textures.BlockIcons.ERROR_TEXTURE_INDEX;
-    }
-
-    public void addInformation(ItemStack stack, EntityPlayer player, List<String> tooltip, boolean advancedTooltips) {
-        int meta = stack.getItemDamage();
-
-        if (meta < 0 || meta >= mTooltips.size()) return;
-
-        Supplier<String> tt = mTooltips.get(meta);
-
-        if (tt == null) return;
-
-        tooltip.add(tt.get());
-    }
-
-    protected void register(int meta, ItemList handle, String defaultLocalName) {
-        register(meta, handle, defaultLocalName, (Supplier<String>) null);
-    }
-
-    protected void register(int meta, @Nullable ItemList handle, @Nonnull String defaultLocalName,
-        @Nonnull String tooltipLangKey) {
-        register(meta, handle, defaultLocalName, () -> I18n.format(tooltipLangKey));
-    }
-
-    protected void register(int meta, @Nullable ItemList handle, @Nonnull String defaultLocalName,
-        @Nullable Supplier<String> tooltip) {
-        GTLanguageManager.addStringLocalization(getUnlocalizedName() + "." + meta + ".name", defaultLocalName);
-
-        if (handle != null) {
-            handle.set(new ItemStack(this, 1, meta));
-        }
-
-        if (tooltip != null) {
-            if (mTooltips.size() < meta + 1) mTooltips.size(meta + 1);
-
-            mTooltips.set(meta, tooltip);
-        }
     }
 }

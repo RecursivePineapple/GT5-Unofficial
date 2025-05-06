@@ -5,6 +5,10 @@ import java.util.function.Supplier;
 import net.minecraft.block.Block;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.util.EnumChatFormatting;
+import java.util.List;
+
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.IIcon;
 import net.minecraft.world.IBlockAccess;
 import net.minecraftforge.common.util.ForgeDirection;
@@ -14,6 +18,7 @@ import cpw.mods.fml.relauncher.SideOnly;
 import gregtech.api.enums.ItemList;
 import gregtech.api.enums.Textures;
 import gregtech.api.util.GTUtility;
+import gregtech.common.misc.GTStructureChannels;
 
 /**
  * The casings are split into separate files because they are registered as regular blocks, and a regular block can have
@@ -22,24 +27,24 @@ import gregtech.api.util.GTUtility;
 public class BlockCasings11 extends BlockCasingsAbstract {
 
     public BlockCasings11() {
-        super(ItemCasings11.class, "gt.blockcasings11", MaterialCasings.INSTANCE, 16);
+        super(ItemCasings.class, "gt.blockcasings11", MaterialCasings.INSTANCE, 16);
 
-        register(0, ItemList.Casing_Item_Pipe_Tin, "Tin Item Pipe Casing", tierTooltip(1));
-        register(1, ItemList.Casing_Item_Pipe_Brass, "Brass Item Pipe Casing", tierTooltip(2));
-        register(2, ItemList.Casing_Item_Pipe_Electrum, "Electrum Item Pipe Casing", tierTooltip(3));
-        register(3, ItemList.Casing_Item_Pipe_Platinum, "Platinum Item Pipe Casing", tierTooltip(4));
-        register(4, ItemList.Casing_Item_Pipe_Osmium, "Osmium Item Pipe Casing", tierTooltip(5));
-        register(5, ItemList.Casing_Item_Pipe_Quantium, "Quantium Item Pipe Casing", tierTooltip(6));
-        register(6, ItemList.Casing_Item_Pipe_Fluxed_Electrum, "Fluxed Electrum Item Pipe Casing", tierTooltip(7));
-        register(7, ItemList.Casing_Item_Pipe_Black_Plutonium, "Black Plutonium Item Pipe Casing", tierTooltip(8));
+        register(0, ItemList.Casing_Item_Pipe_Tin, "Tin Item Pipe Casing");
+        register(1, ItemList.Casing_Item_Pipe_Brass, "Brass Item Pipe Casing");
+        register(2, ItemList.Casing_Item_Pipe_Electrum, "Electrum Item Pipe Casing");
+        register(3, ItemList.Casing_Item_Pipe_Platinum, "Platinum Item Pipe Casing");
+        register(4, ItemList.Casing_Item_Pipe_Osmium, "Osmium Item Pipe Casing");
+        register(5, ItemList.Casing_Item_Pipe_Quantium, "Quantium Item Pipe Casing");
+        register(6, ItemList.Casing_Item_Pipe_Fluxed_Electrum, "Fluxed Electrum Item Pipe Casing");
+        register(7, ItemList.Casing_Item_Pipe_Black_Plutonium, "Black Plutonium Item Pipe Casing");
 
         register(8, ItemList.Casing_Item_BEC1, "Coherence-preserving Plasma Conduit", "gt.casing11.8.tooltip");
         register(9, ItemList.Casing_Item_BEC2, "Electromagnetically-isolated Casing", "gt.casing11.9.tooltip");
         register(10, ItemList.Casing_Item_BEC3, "Fine-structure Constant Manipulator", "gt.casing11.10.tooltip");
-    }
 
-    private static Supplier<String> tierTooltip(int tier) {
-        return () -> I18n.format("gt.casing.tiertooltip", EnumChatFormatting.YELLOW.toString() + tier);
+        for (int i = 0; i < 8; i++) {
+            GTStructureChannels.ITEM_PIPE_CASING.registerAsIndicator(new ItemStack(this, 1, i), i + 1);
+        }
     }
 
     @Override

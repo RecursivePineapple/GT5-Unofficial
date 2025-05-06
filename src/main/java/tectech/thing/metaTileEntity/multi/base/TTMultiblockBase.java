@@ -28,6 +28,7 @@ import net.minecraft.client.resources.I18n;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumChatFormatting;
+import net.minecraft.util.StatCollector;
 import net.minecraftforge.common.util.ForgeDirection;
 import net.minecraftforge.fluids.FluidStack;
 
@@ -62,6 +63,7 @@ import com.gtnewhorizons.modularui.common.widget.textfield.NumericWidget;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import gregtech.GTMod;
+import gregtech.api.enums.GTValues;
 import gregtech.api.enums.SoundResource;
 import gregtech.api.enums.Textures;
 import gregtech.api.gui.modularui.GTUITextures;
@@ -164,14 +166,6 @@ public abstract class TTMultiblockBase extends MTEExtendedPowerMultiBlockBase<TT
     // what type of certainty inconvenience is used - can be used as in Computer - more info in uncertainty hatch
     protected byte eCertainMode = 0, eCertainStatus = 0;
 
-    // minimal repair status to make the machine even usable (how much unfixed fixed stuff is needed)
-    // if u need to force some things to be fixed - u might need to override doRandomMaintenanceDamage
-    protected byte minRepairStatus = 3;
-
-    // whether there is a maintenance hatch in the multi and whether checks are necessary (for now only used in a
-    // transformer)
-    protected boolean hasMaintenanceChecks = true;
-
     // is power pass cover present
     public boolean ePowerPassCover = false;
 
@@ -190,9 +184,6 @@ public abstract class TTMultiblockBase extends MTEExtendedPowerMultiBlockBase<TT
 
     // read only unless you are making computation generator - read computer class
     protected long eAvailableData = 0; // data being available
-
-    // just some info - private so hidden
-    private boolean explodedThisTick = false;
 
     /** Flag if the new long power variable should be used */
     protected boolean useLongPower = false;
@@ -403,63 +394,52 @@ public abstract class TTMultiblockBase extends MTEExtendedPowerMultiBlockBase<TT
                 .getEUCapacity();
         }
 
-        return new String[] { "Progress:",
-            EnumChatFormatting.GREEN + GTUtility.formatNumbers(mProgresstime / 20)
-                + EnumChatFormatting.RESET
-                + " s / "
+        return new String[] {
+            StatCollector.translateToLocalFormatted(
+                "GT5U.infodata.progress",
+                EnumChatFormatting.GREEN + GTUtility.formatNumbers(mProgresstime / 20) + EnumChatFormatting.RESET,
+                EnumChatFormatting.YELLOW + GTUtility.formatNumbers(mMaxProgresstime / 20) + EnumChatFormatting.RESET),
+            StatCollector.translateToLocalFormatted(
+                "tt.infodata.multi.energy_hatches",
+                EnumChatFormatting.GREEN + GTUtility.formatNumbers(storedEnergy) + EnumChatFormatting.RESET,
+                EnumChatFormatting.YELLOW + GTUtility.formatNumbers(maxEnergy) + EnumChatFormatting.RESET),
+            StatCollector.translateToLocalFormatted(
+                getPowerFlow() * eAmpereFlow <= 0 ? "GT5U.infodata.currently_uses"
+                    : "tt.infodata.multi.currently_generates",
+                EnumChatFormatting.RED + GTUtility.formatNumbers(Math.abs(getPowerFlow())) + EnumChatFormatting.RESET,
+                EnumChatFormatting.RED + GTUtility.formatNumbers(eAmpereFlow) + EnumChatFormatting.RESET),
+            StatCollector.translateToLocal("tt.keyphrase.Tier_Rating") + ": "
                 + EnumChatFormatting.YELLOW
-                + GTUtility.formatNumbers(mMaxProgresstime / 20)
-                + EnumChatFormatting.RESET
-                + " s",
-            "Energy Hatches:",
-            EnumChatFormatting.GREEN + GTUtility.formatNumbers(storedEnergy)
-                + EnumChatFormatting.RESET
-                + " EU / "
-                + EnumChatFormatting.YELLOW
-                + GTUtility.formatNumbers(maxEnergy)
-                + EnumChatFormatting.RESET
-                + " EU",
-            (getPowerFlow() * eAmpereFlow <= 0 ? "Currently uses: " : "Currently generates: ") + EnumChatFormatting.RED
-                + GTUtility.formatNumbers(Math.abs(getPowerFlow()))
-                + EnumChatFormatting.RESET
-                + " EU/t at "
-                + EnumChatFormatting.RED
-                + GTUtility.formatNumbers(eAmpereFlow)
-                + EnumChatFormatting.RESET
-                + " A",
-            "Tier Rating: " + EnumChatFormatting.YELLOW
                 + VN[getMaxEnergyInputTier_EM()]
                 + EnumChatFormatting.RESET
                 + " / "
                 + EnumChatFormatting.GREEN
                 + VN[getMinEnergyInputTier_EM()]
                 + EnumChatFormatting.RESET
-                + " Amp Rating: "
+                + " "
+                + StatCollector.translateToLocal("tt.keyphrase.Amp_Rating")
+                + " "
                 + EnumChatFormatting.GREEN
                 + GTUtility.formatNumbers(eMaxAmpereFlow)
                 + EnumChatFormatting.RESET
                 + " A",
-            "Problems: " + EnumChatFormatting.RED
-                + (getIdealStatus() - getRepairStatus())
-                + EnumChatFormatting.RESET
-                + " Efficiency: "
-                + EnumChatFormatting.YELLOW
-                + mEfficiency / 100.0F
-                + EnumChatFormatting.RESET
-                + " %",
-            "PowerPass: " + EnumChatFormatting.BLUE
+            StatCollector.translateToLocalFormatted(
+                "GT5U.infodata.problems_efficiency",
+                "" + EnumChatFormatting.RED + (getIdealStatus() - getRepairStatus()) + EnumChatFormatting.RESET,
+                "" + EnumChatFormatting.YELLOW + mEfficiency / 100.0F + EnumChatFormatting.RESET + " %"),
+            StatCollector.translateToLocalFormatted("tt.keyword.PowerPass") + ": "
+                + EnumChatFormatting.BLUE
                 + ePowerPass
                 + EnumChatFormatting.RESET
-                + " SafeVoid: "
+                + " "
+                + StatCollector.translateToFallback("tt.keyword.SafeVoid")
+                + ": "
                 + EnumChatFormatting.BLUE
                 + eSafeVoid,
-            "Computation: " + EnumChatFormatting.GREEN
-                + GTUtility.formatNumbers(eAvailableData)
-                + EnumChatFormatting.RESET
-                + " / "
-                + EnumChatFormatting.YELLOW
-                + GTUtility.formatNumbers(eRequiredData)
-                + EnumChatFormatting.RESET };
+            StatCollector.translateToLocalFormatted(
+                "tt.infodata.multi.computation",
+                EnumChatFormatting.GREEN + GTUtility.formatNumbers(eAvailableData) + EnumChatFormatting.RESET,
+                EnumChatFormatting.YELLOW + GTUtility.formatNumbers(eRequiredData) + EnumChatFormatting.RESET) };
     }
 
     /**
@@ -692,7 +672,6 @@ public abstract class TTMultiblockBase extends MTEExtendedPowerMultiBlockBase<TT
         aNBT.setLong("eDataA", eAvailableData);
         aNBT.setByte("eCertainM", eCertainMode);
         aNBT.setByte("eCertainS", eCertainStatus);
-        aNBT.setByte("eMinRepair", minRepairStatus);
         aNBT.setBoolean("eParam", eParameters);
         aNBT.setBoolean("ePass", ePowerPass);
         aNBT.setBoolean("ePowerPassCover", ePowerPassCover);
@@ -768,7 +747,6 @@ public abstract class TTMultiblockBase extends MTEExtendedPowerMultiBlockBase<TT
         eAvailableData = aNBT.getLong("eDataA");
         eCertainMode = aNBT.getByte("eCertainM");
         eCertainStatus = aNBT.getByte("eCertainS");
-        minRepairStatus = aNBT.hasKey("eMinRepair") ? aNBT.getByte("eMinRepair") : 3;
         eParameters = !aNBT.hasKey("eParam") || aNBT.getBoolean("eParam");
         ePowerPass = aNBT.getBoolean("ePass");
         ePowerPassCover = aNBT.getBoolean("ePowerPassCover");
@@ -942,7 +920,7 @@ public abstract class TTMultiblockBase extends MTEExtendedPowerMultiBlockBase<TT
         }
         eAvailableData = getAvailableData_EM();
 
-        if (NewHorizonsCoreMod.isModLoaded()) {
+        if (!GTValues.DEVENV) {
             parametersStatusesWrite_EM(busy);
         } else {
             try {
@@ -1021,7 +999,6 @@ public abstract class TTMultiblockBase extends MTEExtendedPowerMultiBlockBase<TT
     public void onPostTick(IGregTechTileEntity aBaseMetaTileEntity, long aTick) {
         if (aBaseMetaTileEntity.isServerSide()) {
             mTotalRunTime++;
-            explodedThisTick = false;
             if (mEfficiency < 0) {
                 mEfficiency = 0;
             }
@@ -1074,7 +1051,7 @@ public abstract class TTMultiblockBase extends MTEExtendedPowerMultiBlockBase<TT
                         checkMaintenance();
                     }
 
-                    if (getRepairStatus() >= minRepairStatus) { // S
+                    if (getRepairStatus() >= 3) { // S
                         if (CommonValues.MULTI_CHECK_AT == Tick) {
                             hatchesStatusUpdate_EM();
                         }
@@ -1559,15 +1536,10 @@ public abstract class TTMultiblockBase extends MTEExtendedPowerMultiBlockBase<TT
             EUuse = -EUuse;
         }
         if (EUuse > getEUVar() || // not enough power
-            (EUtTierVoltage == 0 ? EUuse > getMaxInputEnergy() : (EUtTierVoltage > maxEUinputMax) || // TIER IS
-                                                                                                     // BASED ON
-                                                                                                     // BEST HATCH!
-                                                                                                     // not total
-                                                                                                     // EUtEffective
-                                                                                                     // input
-                (EUtTierVoltage * Amperes - 1) / maxEUinputMin + 1 > eMaxAmpereFlow)) { // EUuse==0? --> (EUuse
-                                                                                        // - 1) / maxEUinputMin
-                                                                                        // + 1 = 1! //if
+        // TIER IS BASED ON BEST HATCH! not total EUtEffective input
+            (EUtTierVoltage == 0 ? EUuse > getMaxInputEnergy() : (EUtTierVoltage > maxEUinputMax) ||
+            // EUuse==0? --> (EUuse - 1) / maxEUinputMin + 1 = 1!
+                (EUtTierVoltage * Amperes - 1) / maxEUinputMin + 1 > eMaxAmpereFlow)) {
             // not too much A
             if (ConfigHandler.debug.DEBUG_MODE) {
                 TecTech.LOGGER.debug("L1 " + EUuse + ' ' + getEUVar() + ' ' + (EUuse > getEUVar()));
@@ -2190,7 +2162,7 @@ public abstract class TTMultiblockBase extends MTEExtendedPowerMultiBlockBase<TT
 
         @Override
         public String getDisplayName() {
-            return I18n.format(name);
+            return GTUtility.translate(name);
         }
 
         public IGTHatchAdder<? super TTMultiblockBase> adder() {

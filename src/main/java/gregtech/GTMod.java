@@ -88,6 +88,7 @@ import gregtech.common.config.OPStuff;
 import gregtech.common.config.Other;
 import gregtech.common.config.Worldgen;
 import gregtech.common.misc.GTCommand;
+import gregtech.common.misc.GTStructureChannels;
 import gregtech.common.misc.spaceprojects.commands.SPCommand;
 import gregtech.common.misc.spaceprojects.commands.SPMCommand;
 import gregtech.common.misc.spaceprojects.commands.SpaceProjectCommand;
@@ -95,7 +96,6 @@ import gregtech.crossmod.ae2.AE2Compat;
 import gregtech.crossmod.holoinventory.HoloInventory;
 import gregtech.crossmod.waila.Waila;
 import gregtech.loaders.load.BECRecipeLoader;
-import gregtech.loaders.load.CoverBehaviorLoader;
 import gregtech.loaders.load.FuelLoader;
 import gregtech.loaders.load.GTItemIterator;
 import gregtech.loaders.load.MTERecipeLoader;
@@ -291,7 +291,6 @@ public class GTMod implements IGTMod {
         new LoaderMetaPipeEntities().run();
 
         new LoaderCircuitBehaviors().run();
-        new CoverBehaviorLoader().run();
         new GTSpawnEventHandler();
 
         // populate itemstack instance for NBT check in GTRecipe
@@ -346,6 +345,8 @@ public class GTMod implements IGTMod {
         if (Mods.HoloInventory.isModLoaded()) {
             HoloInventory.init();
         }
+
+        GTStructureChannels.register();
 
         LHECoolantRegistry.registerBaseCoolants();
 

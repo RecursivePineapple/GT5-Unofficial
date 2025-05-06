@@ -23,6 +23,7 @@ import static gregtech.client.GTTooltipHandler.Tier.UXV;
 import static gregtech.client.GTTooltipHandler.Tier.ZPM;
 import static gregtech.client.GTTooltipHandler.registerTieredTooltip;
 import static gregtech.common.items.IDMetaItem03.Activated_Carbon_Filter_Mesh;
+import static gregtech.common.items.IDMetaItem03.Brittle_Netherite_Scrap;
 import static gregtech.common.items.IDMetaItem03.Circuit_Biomainframe;
 import static gregtech.common.items.IDMetaItem03.Circuit_Bioprocessor;
 import static gregtech.common.items.IDMetaItem03.Circuit_Biowarecomputer;
@@ -162,6 +163,9 @@ import static gregtech.common.items.IDMetaItem03.EV_Coil;
 import static gregtech.common.items.IDMetaItem03.GalliumArsenideCrystal;
 import static gregtech.common.items.IDMetaItem03.GalliumArsenideCrystalSmallPart;
 import static gregtech.common.items.IDMetaItem03.HV_Coil;
+import static gregtech.common.items.IDMetaItem03.Harmonic_Compound;
+import static gregtech.common.items.IDMetaItem03.Heavy_Hellish_Mud;
+import static gregtech.common.items.IDMetaItem03.Hot_Netherite_Scrap;
 import static gregtech.common.items.IDMetaItem03.IV_Coil;
 import static gregtech.common.items.IDMetaItem03.IndustrialApiary_Upgrade_AUTOMATION;
 import static gregtech.common.items.IDMetaItem03.IndustrialApiary_Upgrade_Acceleration_1;
@@ -195,11 +199,14 @@ import static gregtech.common.items.IDMetaItem03.IndustrialApiary_Upgrade_STABIL
 import static gregtech.common.items.IDMetaItem03.IndustrialApiary_Upgrade_TERRITORY;
 import static gregtech.common.items.IDMetaItem03.IndustrialApiary_Upgrade_UNLIGHT;
 import static gregtech.common.items.IDMetaItem03.IndustrialApiary_Upgrade_WINTER;
+import static gregtech.common.items.IDMetaItem03.Intensely_Bonded_Netherite_Nanoparticles;
 import static gregtech.common.items.IDMetaItem03.KevlarFiber;
 import static gregtech.common.items.IDMetaItem03.LV_Coil;
 import static gregtech.common.items.IDMetaItem03.LuV_Coil;
 import static gregtech.common.items.IDMetaItem03.MV_Coil;
 import static gregtech.common.items.IDMetaItem03.NandChip;
+import static gregtech.common.items.IDMetaItem03.Netherite_Nanoparticles;
+import static gregtech.common.items.IDMetaItem03.Netherite_Scrap_Seed;
 import static gregtech.common.items.IDMetaItem03.NuclearStar;
 import static gregtech.common.items.IDMetaItem03.Optical_Cpu_Containment_Housing;
 import static gregtech.common.items.IDMetaItem03.Optically_Compatible_Memory;
@@ -258,10 +265,20 @@ import java.util.List;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 
+import java.util.List;
+
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.ItemStack;
+
+import net.minecraft.item.ItemStack;
+
+import cpw.mods.fml.common.Optional;
+import gregtech.api.covers.CoverPlacer;
 import gregtech.api.covers.CoverRegistry;
 import gregtech.api.enums.GTValues;
 import gregtech.api.enums.ItemList;
 import gregtech.api.enums.Materials;
+import gregtech.api.enums.Mods;
 import gregtech.api.enums.NaniteTier;
 import gregtech.api.enums.OrePrefixes;
 import gregtech.api.enums.SubTag;
@@ -271,10 +288,11 @@ import gregtech.api.objects.ItemData;
 import gregtech.api.render.TextureFactory;
 import gregtech.api.util.GTOreDictUnificator;
 import gregtech.common.covers.CoverMetricsTransmitter;
-import gregtech.common.covers.CoverMetricsTransmitterPlacer;
 import gregtech.common.covers.CoverSolarPanel;
+import mods.railcraft.common.items.firestone.IItemFirestoneBurning;
 
-public class MetaGeneratedItem03 extends MetaGeneratedItemX32 {
+@Optional.Interface(iface = "mods.railcraft.common.items.firestone.IItemFirestoneBurning", modid = Mods.Names.RAILCRAFT)
+public class MetaGeneratedItem03 extends MetaGeneratedItemX32 implements IItemFirestoneBurning {
 
     public static MetaGeneratedItem03 INSTANCE;
 
@@ -392,101 +410,137 @@ public class MetaGeneratedItem03 extends MetaGeneratedItemX32 {
          * nanotube interconnected circuit (H-IC + nanotubes)
          * quantum chips
          */
-        ItemList.Circuit_Silicon_Ingot
-            .set(addItem(Circuit_Silicon_Ingot.ID, "Monocrystalline Silicon Boule", "Raw Circuit", o));
-        ItemList.Circuit_Silicon_Ingot2.set(
-            addItem(Circuit_Silicon_Ingot2.ID, "Phosphorus doped Monocrystalline Silicon Boule", "Raw Circuit", o));
-        ItemList.Circuit_Silicon_Ingot3
-            .set(addItem(Circuit_Silicon_Ingot3.ID, "Naquadah doped Monocrystalline Silicon Boule", "Raw Circuit", o));
-        ItemList.Circuit_Silicon_Ingot4
-            .set(addItem(Circuit_Silicon_Ingot4.ID, "Europium doped Monocrystalline Silicon Boule", "Raw Circuit", o));
-        ItemList.Circuit_Silicon_Ingot5
-            .set(addItem(Circuit_Silicon_Ingot5.ID, "Americium doped Monocrystalline Silicon Boule", "Raw Circuit", o));
-        ItemList.Circuit_Silicon_Ingot6
-            .set(addItem(Circuit_Silicon_Ingot6.ID, "Optically Enriched Crystalline Boule", "Raw Circuit", o));
 
-        ItemList.Circuit_Silicon_Wafer.set(addItem(Circuit_Silicon_Wafer.ID, "Wafer", "Raw Circuit", o));
+        final String RAW = "Raw Circuit";
+
+        ItemList.Circuit_Silicon_Ingot.set(addItem(Circuit_Silicon_Ingot.ID, "Monocrystalline Silicon Boule", RAW, o));
+        ItemList.Circuit_Silicon_Ingot2
+            .set(addItem(Circuit_Silicon_Ingot2.ID, "Phosphorus doped Monocrystalline Silicon Boule", RAW, o));
+        ItemList.Circuit_Silicon_Ingot3
+            .set(addItem(Circuit_Silicon_Ingot3.ID, "Naquadah doped Monocrystalline Silicon Boule", RAW, o));
+        ItemList.Circuit_Silicon_Ingot4
+            .set(addItem(Circuit_Silicon_Ingot4.ID, "Europium doped Monocrystalline Silicon Boule", RAW, o));
+        ItemList.Circuit_Silicon_Ingot5
+            .set(addItem(Circuit_Silicon_Ingot5.ID, "Americium doped Monocrystalline Silicon Boule", RAW, o));
+        ItemList.Circuit_Silicon_Ingot6
+            .set(addItem(Circuit_Silicon_Ingot6.ID, "Optically Enriched Crystalline Boule", RAW, o));
+
+        ItemList.Circuit_Silicon_Wafer.set(addItem(Circuit_Silicon_Wafer.ID, "Wafer", RAW, "waferPlain", "wafer"));
         ItemList.Circuit_Silicon_Wafer2
-            .set(addItem(Circuit_Silicon_Wafer2.ID, "Phosphorus doped Wafer", "Raw Circuit", o));
+            .set(addItem(Circuit_Silicon_Wafer2.ID, "Phosphorus doped Wafer", RAW, "waferPhosphorus", "wafer"));
         ItemList.Circuit_Silicon_Wafer3
-            .set(addItem(Circuit_Silicon_Wafer3.ID, "Naquadah doped Wafer", "Raw Circuit", o));
+            .set(addItem(Circuit_Silicon_Wafer3.ID, "Naquadah doped Wafer", RAW, "waferNaquadah", "wafer"));
         ItemList.Circuit_Silicon_Wafer4
-            .set(addItem(Circuit_Silicon_Wafer4.ID, "Europium doped Wafer", "Raw Circuit", o));
+            .set(addItem(Circuit_Silicon_Wafer4.ID, "Europium doped Wafer", RAW, "waferEuropium", "wafer"));
         ItemList.Circuit_Silicon_Wafer5
-            .set(addItem(Circuit_Silicon_Wafer5.ID, "Americium doped Wafer", "Raw Circuit", o));
-        ItemList.Circuit_Silicon_Wafer6
-            .set(addItem(Circuit_Silicon_Wafer6.ID, "Photonically Prepared Wafer", "Raw Circuit", o));
-        ItemList.Circuit_Silicon_Wafer7
-            .set(addItem(Circuit_Silicon_Wafer7.ID, "Photonically Enhanced Wafer", "Raw Circuit", o));
+            .set(addItem(Circuit_Silicon_Wafer5.ID, "Americium doped Wafer", RAW, "waferAmericium", "wafer"));
+        ItemList.Circuit_Silicon_Wafer6.set(
+            addItem(
+                Circuit_Silicon_Wafer6.ID,
+                "Photonically Prepared Wafer",
+                RAW,
+                "waferPhotonicallyPrepared",
+                "wafer"));
+        ItemList.Circuit_Silicon_Wafer7.set(
+            addItem(
+                Circuit_Silicon_Wafer7.ID,
+                "Photonically Enhanced Wafer",
+                RAW,
+                "waferPhotonicallyEnhanced",
+                "wafer"));
 
         ItemList.Circuit_Wafer_ILC
-            .set(addItem(Circuit_Wafer_ILC.ID, "Integrated Logic Circuit (Wafer)", "Raw Circuit", o));
+            .set(addItem(Circuit_Wafer_ILC.ID, "Integrated Logic Circuit (Wafer)", RAW, "waferILC", "wafer"));
         ItemList.Circuit_Chip_ILC
-            .set(addItem(Circuit_Chip_ILC.ID, "Integrated Logic Circuit", "Integrated Circuit", o));
+            .set(addItem(Circuit_Chip_ILC.ID, "Integrated Logic Circuit", "Integrated Circuit", "chipILC", "chip"));
 
         ItemList.Circuit_Wafer_Ram
-            .set(addItem(Circuit_Wafer_Ram.ID, "Random Access Memory Chip (Wafer)", "Raw Circuit", o));
+            .set(addItem(Circuit_Wafer_Ram.ID, "Random Access Memory Chip (Wafer)", RAW, "waferRAM", "wafer"));
         ItemList.Circuit_Chip_Ram
-            .set(addItem(Circuit_Chip_Ram.ID, "Random Access Memory Chip", "Integrated Circuit", o));
+            .set(addItem(Circuit_Chip_Ram.ID, "Random Access Memory Chip", "Integrated Circuit", "chipRAM", "chip"));
 
-        ItemList.Circuit_Wafer_NAND.set(addItem(Circuit_Wafer_NAND.ID, "NAND Memory Chip (Wafer)", "Raw Circuit", o));
-        ItemList.Circuit_Chip_NAND.set(addItem(Circuit_Chip_NAND.ID, "NAND Memory Chip", "Integrated Circuit", o));
+        ItemList.Circuit_Wafer_NAND
+            .set(addItem(Circuit_Wafer_NAND.ID, "NAND Memory Chip (Wafer)", RAW, "waferNAND", "wafer"));
+        ItemList.Circuit_Chip_NAND
+            .set(addItem(Circuit_Chip_NAND.ID, "NAND Memory Chip", "Integrated Circuit", "chipNAND", "chip"));
 
-        ItemList.Circuit_Wafer_NOR.set(addItem(Circuit_Wafer_NOR.ID, "NOR Memory Chip (Wafer)", "Raw Circuit", o));
-        ItemList.Circuit_Chip_NOR.set(addItem(Circuit_Chip_NOR.ID, "NOR Memory Chip", "Integrated Circuit", o));
+        ItemList.Circuit_Wafer_NOR
+            .set(addItem(Circuit_Wafer_NOR.ID, "NOR Memory Chip (Wafer)", RAW, "waferNOR", "wafer"));
+        ItemList.Circuit_Chip_NOR
+            .set(addItem(Circuit_Chip_NOR.ID, "NOR Memory Chip", "Integrated Circuit", "chipNOR", "chip"));
 
         ItemList.Circuit_Wafer_CPU
-            .set(addItem(Circuit_Wafer_CPU.ID, "Central Processing Unit (Wafer)", "Raw Circuit", o));
-        ItemList.Circuit_Chip_CPU.set(addItem(Circuit_Chip_CPU.ID, "Central Processing Unit", "Integrated Circuit", o));
+            .set(addItem(Circuit_Wafer_CPU.ID, "Central Processing Unit (Wafer)", RAW, "waferCPU", "wafer"));
+        ItemList.Circuit_Chip_CPU
+            .set(addItem(Circuit_Chip_CPU.ID, "Central Processing Unit", "Integrated Circuit", "chipCPU", "chip"));
 
-        ItemList.Circuit_Wafer_SoC.set(addItem(Circuit_Wafer_SoC.ID, "SoC Wafer", "Raw Circuit", o));
-        ItemList.Circuit_Chip_SoC.set(addItem(Circuit_Chip_SoC.ID, "SoC", "System on a Chip", o));
+        ItemList.Circuit_Wafer_SoC.set(addItem(Circuit_Wafer_SoC.ID, "SoC Wafer", RAW, "waferSoC", "wafer"));
+        ItemList.Circuit_Chip_SoC.set(addItem(Circuit_Chip_SoC.ID, "SoC", "System on a Chip", "chipSoC", "chip"));
 
-        ItemList.Circuit_Wafer_SoC2.set(addItem(Circuit_Wafer_SoC2.ID, "ASoC Wafer", "Raw Circuit", o));
-        ItemList.Circuit_Chip_SoC2.set(addItem(Circuit_Chip_SoC2.ID, "ASoC", "Advanced System on a Chip", o));
+        ItemList.Circuit_Wafer_SoC2.set(addItem(Circuit_Wafer_SoC2.ID, "ASoC Wafer", RAW, "waferASoC", "wafer"));
+        ItemList.Circuit_Chip_SoC2
+            .set(addItem(Circuit_Chip_SoC2.ID, "ASoC", "Advanced System on a Chip", "chipASoC", "chip"));
 
-        ItemList.Circuit_Wafer_PIC.set(addItem(Circuit_Wafer_PIC.ID, "PIC Wafer", "Raw Circuit", o));
-        ItemList.Circuit_Chip_PIC.set(addItem(Circuit_Chip_PIC.ID, "Power IC", "Power Circuit", o));
+        ItemList.Circuit_Wafer_PIC.set(addItem(Circuit_Wafer_PIC.ID, "PIC Wafer", RAW, "waferPIC", "wafer"));
+        ItemList.Circuit_Chip_PIC.set(addItem(Circuit_Chip_PIC.ID, "Power IC", "Power Circuit", "chipPIC", "chip"));
 
-        ItemList.Circuit_Wafer_HPIC.set(addItem(Circuit_Wafer_HPIC.ID, "HPIC Wafer", "Raw Circuit", o));
-        ItemList.Circuit_Chip_HPIC.set(addItem(Circuit_Chip_HPIC.ID, "High Power IC", "High Power Circuit", o));
+        ItemList.Circuit_Wafer_HPIC.set(addItem(Circuit_Wafer_HPIC.ID, "HPIC Wafer", RAW, "waferHPIC", "wafer"));
+        ItemList.Circuit_Chip_HPIC
+            .set(addItem(Circuit_Chip_HPIC.ID, "High Power IC", "High Power Circuit", "chipHPIC", "chip"));
 
-        ItemList.Circuit_Wafer_NanoCPU.set(addItem(Circuit_Wafer_NanoCPU.ID, "NanoCPU Wafer", "Raw Circuit", o));
-        ItemList.Circuit_Chip_NanoCPU
-            .set(addItem(Circuit_Chip_NanoCPU.ID, "Nanocomponent Central Processing Unit", "Power Circuit", o));
+        ItemList.Circuit_Wafer_NanoCPU
+            .set(addItem(Circuit_Wafer_NanoCPU.ID, "NanoCPU Wafer", RAW, "waferNanoCPU", "wafer"));
+        ItemList.Circuit_Chip_NanoCPU.set(
+            addItem(
+                Circuit_Chip_NanoCPU.ID,
+                "Nanocomponent Central Processing Unit",
+                "Power Circuit",
+                "chipNanoCPU",
+                "chip"));
 
-        ItemList.Circuit_Wafer_QuantumCPU.set(addItem(Circuit_Wafer_QuantumCPU.ID, "QBit Wafer", "Raw Circuit", o));
+        ItemList.Circuit_Wafer_QuantumCPU
+            .set(addItem(Circuit_Wafer_QuantumCPU.ID, "QBit Wafer", RAW, "waferQuantumCPU", "wafer"));
         ItemList.Circuit_Chip_QuantumCPU
-            .set(addItem(Circuit_Chip_QuantumCPU.ID, "QBit Processing Unit", "Quantum CPU", o));
+            .set(addItem(Circuit_Chip_QuantumCPU.ID, "QBit Processing Unit", "Quantum CPU", "chipQuantumCPU", "chip"));
 
-        ItemList.Circuit_Wafer_UHPIC.set(addItem(Circuit_Wafer_UHPIC.ID, "UHPIC Wafer", "Raw Circuit", o));
-        ItemList.Circuit_Chip_UHPIC
-            .set(addItem(Circuit_Chip_UHPIC.ID, "Ultra High Power IC", "Ultra High Power Circuit", o));
+        ItemList.Circuit_Wafer_UHPIC.set(addItem(Circuit_Wafer_UHPIC.ID, "UHPIC Wafer", RAW, "waferUHPIC", "wafer"));
+        ItemList.Circuit_Chip_UHPIC.set(
+            addItem(Circuit_Chip_UHPIC.ID, "Ultra High Power IC", "Ultra High Power Circuit", "chipUHPIC", "chip"));
 
-        ItemList.Circuit_Wafer_Simple_SoC
-            .set(addItem(Circuit_Wafer_Simple_SoC.ID, "Simple SoC Wafer", "Raw Primitive Circuit", o));
+        ItemList.Circuit_Wafer_Simple_SoC.set(
+            addItem(
+                Circuit_Wafer_Simple_SoC.ID,
+                "Simple SoC Wafer",
+                "Raw Primitive Circuit",
+                "waferSimpleSoC",
+                "wafer"));
         ItemList.Circuit_Chip_Simple_SoC
-            .set(addItem(Circuit_Chip_Simple_SoC.ID, "Simple SoC", "Simple System on a Chip", o));
+            .set(addItem(Circuit_Chip_Simple_SoC.ID, "Simple SoC", "Simple System on a Chip", "chipSimpleSoC", "chip"));
 
-        ItemList.Circuit_Wafer_ULPIC.set(addItem(Circuit_Wafer_ULPIC.ID, "ULPIC Wafer", "Raw Circuit", o));
+        ItemList.Circuit_Wafer_ULPIC.set(addItem(Circuit_Wafer_ULPIC.ID, "ULPIC Wafer", RAW, "waferULPIC", "wafer"));
         ItemList.Circuit_Chip_ULPIC
-            .set(addItem(Circuit_Chip_ULPIC.ID, "Ultra Low Power IC", "Ultra Low Power Circuit", o));
+            .set(addItem(Circuit_Chip_ULPIC.ID, "Ultra Low Power IC", "Ultra Low Power Circuit", "chipULPIC", "chip"));
 
-        ItemList.Circuit_Wafer_LPIC.set(addItem(Circuit_Wafer_LPIC.ID, "LPIC Wafer", "Raw Circuit", o));
-        ItemList.Circuit_Chip_LPIC.set(addItem(Circuit_Chip_LPIC.ID, "Low Power IC", "Low Power Circuit", o));
+        ItemList.Circuit_Wafer_LPIC.set(addItem(Circuit_Wafer_LPIC.ID, "LPIC Wafer", RAW, "waferLPIC", "wafer"));
+        ItemList.Circuit_Chip_LPIC
+            .set(addItem(Circuit_Chip_LPIC.ID, "Low Power IC", "Low Power Circuit", "chipLPIC", "chip"));
 
-        ItemList.Circuit_Wafer_NPIC.set(addItem(Circuit_Wafer_NPIC.ID, "NPIC Wafer", "Raw Circuit", o));
-        ItemList.Circuit_Chip_NPIC.set(addItem(Circuit_Chip_NPIC.ID, "Nano Power IC", "Nano Power Circuit", o));
+        ItemList.Circuit_Wafer_NPIC.set(addItem(Circuit_Wafer_NPIC.ID, "NPIC Wafer", RAW, "waferNPIC", "wafer"));
+        ItemList.Circuit_Chip_NPIC
+            .set(addItem(Circuit_Chip_NPIC.ID, "Nano Power IC", "Nano Power Circuit", "chipNPIC", "chip"));
 
-        ItemList.Circuit_Wafer_PPIC.set(addItem(Circuit_Wafer_PPIC.ID, "PPIC Wafer", "Raw Circuit", o));
-        ItemList.Circuit_Chip_PPIC.set(addItem(Circuit_Chip_PPIC.ID, "Piko Power IC", "Piko Power Circuit", o));
+        ItemList.Circuit_Wafer_PPIC.set(addItem(Circuit_Wafer_PPIC.ID, "PPIC Wafer", RAW, "waferPPIC", "wafer"));
+        ItemList.Circuit_Chip_PPIC
+            .set(addItem(Circuit_Chip_PPIC.ID, "Piko Power IC", "Piko Power Circuit", "chipPPIC", "chip"));
 
-        ItemList.Circuit_Wafer_QPIC.set(addItem(Circuit_Wafer_QPIC.ID, "QPIC Wafer", "Raw Circuit", o));
-        ItemList.Circuit_Chip_QPIC.set(addItem(Circuit_Chip_QPIC.ID, "Quantum Power IC", "Quantum Power Circuit", o));
+        ItemList.Circuit_Wafer_QPIC.set(addItem(Circuit_Wafer_QPIC.ID, "QPIC Wafer", RAW, "waferQPIC", "wafer"));
+        ItemList.Circuit_Chip_QPIC
+            .set(addItem(Circuit_Chip_QPIC.ID, "Quantum Power IC", "Quantum Power Circuit", "chipQPIC", "chip"));
 
-        ItemList.Circuit_Wafer_Bioware.set(addItem(Circuit_Wafer_Bioware.ID, "Living Bio Wafer", "Raw Circuit", o));
-        ItemList.Circuit_Parts_Chip_Bioware
-            .set(addItem(Circuit_Parts_Chip_Bioware.ID, "Living Bio Chip", "Needed for Circuits", o));
+        ItemList.Circuit_Wafer_Bioware
+            .set(addItem(Circuit_Wafer_Bioware.ID, "Living Bio Wafer", RAW, "waferBioware", "wafer"));
+        ItemList.Circuit_Parts_Chip_Bioware.set(
+            addItem(Circuit_Parts_Chip_Bioware.ID, "Living Bio Chip", "Needed for Circuits", "chipBioware", "chip"));
         /*
          * Engraved Crystal Chip Engraved Lapotron Chip Crystal CPU SoCrystal stem cells (disassemble eggs)
          */
@@ -1201,6 +1255,16 @@ public class MetaGeneratedItem03 extends MetaGeneratedItemX32 {
             .set(addItem(Relativistic_Heat_Capacitor.ID, "Relativistic Heat Capacitor", "Thermal Resonance?", o));
         ItemList.Phononic_Seed_Crystal
             .set(addItem(Phononic_Seed_Crystal.ID, "Phononic Seed Crystal", "Perfect Thermal Conductance", o));
+        ItemList.Harmonic_Compound.set(
+            addItem(Harmonic_Compound.ID, "Harmonic Compound", "Toxic violet with a red haze", "ingotHotHarmonic"));
+
+        ItemList.Heavy_Hellish_Mud.set(addItem(Heavy_Hellish_Mud.ID, "Heavy Hellish Mud", "God wouldn't touch this"));
+        ItemList.Netherite_Scrap_Seed.set(addItem(Netherite_Scrap_Seed.ID, "Netherite Scrap Seed", ""));
+        ItemList.Brittle_Netherite_Scrap.set(addItem(Brittle_Netherite_Scrap.ID, "Brittle Netherite Scrap", ""));
+        ItemList.Netherite_Nanoparticles.set(addItem(Netherite_Nanoparticles.ID, "Netherite Nanoparticles", ""));
+        ItemList.Intensely_Bonded_Netherite_Nanoparticles
+            .set(addItem(Intensely_Bonded_Netherite_Nanoparticles.ID, "Intensely Bonded Netherite Nanoparticles", ""));
+        ItemList.Hot_Netherite_Scrap.set(addItem(Hot_Netherite_Scrap.ID, "Hot Netherite Scrap", "Activated?"));
 
         ItemList.White_Dwarf_Shape_Extruder_Plate.set(
             addItem(
@@ -1472,7 +1536,9 @@ public class MetaGeneratedItem03 extends MetaGeneratedItemX32 {
             ItemList.Cover_Metrics_Transmitter.get(1L),
             TextureFactory.of(MACHINE_CASINGS[2][0], TextureFactory.of(OVERLAY_METRICS_TRANSMITTER)),
             context -> new CoverMetricsTransmitter(context, TextureFactory.of(OVERLAY_METRICS_TRANSMITTER)),
-            new CoverMetricsTransmitterPlacer());
+            CoverPlacer.builder()
+                .onlyPlaceIf(CoverMetricsTransmitter::isCoverPlaceable)
+                .build());
         CoverRegistry.registerCover(
             ItemList.Cover_SolarPanel_UHV.get(1L),
             TextureFactory.of(SOLARPANEL_UHV),
@@ -1497,6 +1563,16 @@ public class MetaGeneratedItem03 extends MetaGeneratedItemX32 {
         return aDoShowAllItems || pref.contains("nanite")
             || pref.contains("rawore")
             || pref.contains("platesuperdense");
+    }
+
+    @Override
+    @Optional.Method(modid = Mods.Names.RAILCRAFT)
+    public boolean shouldBurn(ItemStack itemStack) {
+        ItemData data = GTOreDictUnificator.getAssociation(itemStack);
+        if (data == null || data.mMaterial == null || data.mPrefix == null) {
+            return false;
+        }
+        return data.mMaterial.mMaterial == Materials.Firestone && data.mPrefix == OrePrefixes.rawOre;
     }
 
     @Override

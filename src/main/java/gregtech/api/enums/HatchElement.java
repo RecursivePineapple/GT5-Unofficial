@@ -18,6 +18,7 @@ import gregtech.api.metatileentity.implementations.MTEHatchOutput;
 import gregtech.api.metatileentity.implementations.MTEHatchOutputBus;
 import gregtech.api.metatileentity.implementations.MTEMultiBlockBase;
 import gregtech.api.util.ExoticEnergyInputHelper;
+import gregtech.api.util.GTUtility;
 import gregtech.api.util.IGTHatchAdder;
 
 public enum HatchElement implements IHatchElement<MTEMultiBlockBase> {
@@ -79,7 +80,7 @@ public enum HatchElement implements IHatchElement<MTEMultiBlockBase> {
             return t.mDynamoHatches.size();
         }
     },
-    ExoticEnergy("GT5U.MBTT.EnergyHatch", MTEMultiBlockBase::addExoticEnergyInputToMachineList) {
+    ExoticEnergy("GT5U.MBTT.MultiampEnergyHatch", MTEMultiBlockBase::addExoticEnergyInputToMachineList) {
 
         @Override
         public List<? extends Class<? extends IMetaTileEntity>> mteClasses() {
@@ -92,7 +93,7 @@ public enum HatchElement implements IHatchElement<MTEMultiBlockBase> {
                 .size();
         }
     },
-    MultiAmpEnergy("GT5U.MBTT.ExoticEnergyHatch", MTEMultiBlockBase::addMultiAmpEnergyInputToMachineList) {
+    MultiAmpEnergy("GT5U.MBTT.MultiampEnergyHatch", MTEMultiBlockBase::addMultiAmpEnergyInputToMachineList) {
 
         @Override
         public long count(MTEMultiBlockBase t) {
@@ -119,7 +120,7 @@ public enum HatchElement implements IHatchElement<MTEMultiBlockBase> {
 
     @Override
     public String getDisplayName() {
-        return I18n.format(name);
+        return GTUtility.translate(name);
     }
 
     public IGTHatchAdder<? super MTEMultiBlockBase> adder() {

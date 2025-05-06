@@ -140,7 +140,6 @@ import gregtech.GTMod;
 import gregtech.api.GregTechAPI;
 import gregtech.api.damagesources.GTDamageSources;
 import gregtech.api.damagesources.GTDamageSources.DamageSourceHotItem;
-import gregtech.api.enchants.EnchantmentHazmat;
 import gregtech.api.enchants.EnchantmentRadioactivity;
 import gregtech.api.enums.GTValues;
 import gregtech.api.enums.ItemList;
@@ -152,6 +151,7 @@ import gregtech.api.enums.SubTag;
 import gregtech.api.enums.Textures;
 import gregtech.api.enums.ToolDictNames;
 import gregtech.api.events.BlockScanningEvent;
+import gregtech.api.hazards.HazardProtection;
 import gregtech.api.interfaces.IBlockContainer;
 import gregtech.api.interfaces.IDebugableBlock;
 import gregtech.api.interfaces.IHasIndexedTexture;
@@ -2647,40 +2647,6 @@ public class GTUtility {
                 + metaFromBlock);
     }
 
-    public static void markNeedsAnimationUpdate(IIcon icon) {
-        if (HodgePodge.isModLoaded() && icon instanceof IPatchedTextureAtlasSprite) {
-            ((IPatchedTextureAtlasSprite) icon).markNeedsAnimationUpdate();
-        }
-    }
-
-    /**
-     * Converts a Number to a String
-     */
-    public static String parseNumberToString(int aNumber) {
-        boolean temp = true, negative = false;
-
-        if (aNumber < 0) {
-            aNumber *= -1;
-            negative = true;
-        }
-
-        StringBuilder tStringB = new StringBuilder();
-        for (int i = 1000000000; i > 0; i /= 10) {
-            int tDigit = (aNumber / i) % 10;
-            if (temp && tDigit != 0) temp = false;
-            if (!temp) {
-                tStringB.append(tDigit);
-                if (i != 1) for (int j = i; j > 0; j /= 1000) if (j == 1) tStringB.append(",");
-            }
-        }
-
-        String tString = tStringB.toString();
-
-        if (tString.equals(E)) tString = "0";
-
-        return negative ? "-" + tString : tString;
-    }
-
     public static NBTTagCompound getNBTContainingBoolean(NBTTagCompound aNBT, Object aTag, boolean aValue) {
         if (aNBT == null) aNBT = new NBTTagCompound();
         aNBT.setBoolean(aTag.toString(), aValue);
@@ -2724,81 +2690,6 @@ public class GTUtility {
         return aNBT;
     }
 
-    public static boolean isWearingFullFrostHazmat(EntityLivingBase aEntity) {
-        for (byte i = 1; i < 5; i++) {
-            ItemStack tStack = aEntity.getEquipmentInSlot(i);
-
-            if (!isStackInList(tStack, GregTechAPI.sFrostHazmatList) && !hasHazmatEnchant(tStack)) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    public static boolean isWearingFullHeatHazmat(EntityLivingBase aEntity) {
-        for (byte i = 1; i < 5; i++) {
-            ItemStack tStack = aEntity.getEquipmentInSlot(i);
-
-            if (!isStackInList(tStack, GregTechAPI.sHeatHazmatList) && !hasHazmatEnchant(tStack)) {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-    public static boolean isWearingFullBioHazmat(EntityLivingBase aEntity) {
-        for (byte i = 1; i < 5; i++) {
-            ItemStack tStack = aEntity.getEquipmentInSlot(i);
-
-            if (!isStackInList(tStack, GregTechAPI.sBioHazmatList) && !hasHazmatEnchant(tStack)) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    public static boolean isWearingFullRadioHazmat(EntityLivingBase aEntity) {
-        for (byte i = 1; i < 5; i++) {
-            ItemStack tStack = aEntity.getEquipmentInSlot(i);
-
-            if (!isStackInList(tStack, GregTechAPI.sRadioHazmatList) && !hasHazmatEnchant(tStack)) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    public static boolean isWearingFullElectroHazmat(EntityLivingBase aEntity) {
-        for (byte i = 1; i < 5; i++) {
-            ItemStack tStack = aEntity.getEquipmentInSlot(i);
-
-            if (!isStackInList(tStack, GregTechAPI.sElectroHazmatList) && !hasHazmatEnchant(tStack)) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    public static boolean isWearingFullGasHazmat(EntityLivingBase aEntity) {
-        for (byte i = 1; i < 5; i++) {
-            ItemStack tStack = aEntity.getEquipmentInSlot(i);
-
-            if (!isStackInList(tStack, GregTechAPI.sGasHazmatList) && !hasHazmatEnchant(tStack)) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    public static boolean hasHazmatEnchant(ItemStack aStack) {
-        if (aStack == null) return false;
-        Map<Integer, Integer> tEnchantments = EnchantmentHelper.getEnchantments(aStack);
-        Integer tLevel = tEnchantments.get(EnchantmentHazmat.INSTANCE.effectId);
-
-        return tLevel != null && tLevel >= 1;
-    }
-
     public static float getHeatDamageFromItem(ItemStack aStack) {
         ItemData tData = GTOreDictUnificator.getItemData(aStack);
         return tData == null ? 0
@@ -2817,10 +2708,6 @@ public class GTUtility {
         return EnchantmentHelper.getEnchantmentLevel(EnchantmentRadioactivity.INSTANCE.effectId, aStack);
     }
 
-    public static boolean isImmuneToBreathingGasses(EntityLivingBase aEntity) {
-        return isWearingFullGasHazmat(aEntity);
-    }
-
     public static boolean applyHeatDamage(EntityLivingBase entity, float damage) {
         return applyHeatDamage(entity, damage, GTDamageSources.getHeatDamage());
     }
@@ -2830,7 +2717,7 @@ public class GTUtility {
     }
 
     private static boolean applyHeatDamage(EntityLivingBase aEntity, float aDamage, DamageSource source) {
-        if (aDamage > 0 && aEntity != null && !isWearingFullHeatHazmat(aEntity)) {
+        if (aDamage > 0 && aEntity != null && !HazardProtection.isWearingFullHeatHazmat(aEntity)) {
             try {
                 return aEntity.attackEntityFrom(source, aDamage);
             } catch (Throwable t) {
@@ -2841,7 +2728,7 @@ public class GTUtility {
     }
 
     public static boolean applyFrostDamage(EntityLivingBase aEntity, float aDamage) {
-        if (aDamage > 0 && aEntity != null && !isWearingFullFrostHazmat(aEntity)) {
+        if (aDamage > 0 && aEntity != null && !HazardProtection.isWearingFullFrostHazmat(aEntity)) {
             return aEntity.attackEntityFrom(GTDamageSources.getFrostDamage(), aDamage);
         }
         return false;
@@ -2849,7 +2736,7 @@ public class GTUtility {
 
     public static boolean applyElectricityDamage(EntityLivingBase aEntity, long aVoltage, long aAmperage) {
         long aDamage = getTier(aVoltage) * aAmperage * 4;
-        if (aDamage > 0 && aEntity != null && !isWearingFullElectroHazmat(aEntity)) {
+        if (aDamage > 0 && aEntity != null && !HazardProtection.isWearingFullElectroHazmat(aEntity)) {
             return aEntity.attackEntityFrom(GTDamageSources.getElectricDamage(), aDamage);
         }
         return false;
@@ -2859,7 +2746,7 @@ public class GTUtility {
         if (aLevel > 0 && aEntity != null
             && aEntity.getCreatureAttribute() != EnumCreatureAttribute.UNDEAD
             && aEntity.getCreatureAttribute() != EnumCreatureAttribute.ARTHROPOD
-            && !isWearingFullRadioHazmat(aEntity)) {
+            && !HazardProtection.isWearingFullRadioHazmat(aEntity)) {
             PotionEffect tEffect = null;
             aEntity.addPotionEffect(
                 new PotionEffect(

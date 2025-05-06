@@ -2,12 +2,12 @@ package gtPlusPlus.xmod.gregtech.common.tileentities.machines.multi.production.c
 
 import static com.gtnewhorizon.structurelib.structure.StructureUtility.ofChain;
 import static com.gtnewhorizon.structurelib.structure.StructureUtility.transpose;
-import static com.gtnewhorizon.structurelib.structure.StructureUtility.withChannel;
 import static gregtech.api.enums.HatchElement.InputBus;
 import static gregtech.api.enums.HatchElement.InputHatch;
 import static gregtech.api.enums.HatchElement.Maintenance;
 import static gregtech.api.enums.HatchElement.OutputBus;
 import static gregtech.api.enums.HatchElement.OutputHatch;
+import static gregtech.api.util.GTStructureUtility.activeCoils;
 import static gregtech.api.util.GTStructureUtility.buildHatchAdder;
 import static gregtech.api.util.GTStructureUtility.filterByMTETier;
 import static gregtech.api.util.GTStructureUtility.ofCoil;
@@ -62,6 +62,7 @@ import gregtech.api.recipe.check.SimpleCheckRecipeResult;
 import gregtech.api.util.GTRecipe;
 import gregtech.api.util.GTUtility;
 import gregtech.api.util.MultiblockTooltipBuilder;
+import gregtech.common.misc.GTStructureChannels;
 import gregtech.common.tileentities.machines.IDualInputHatch;
 import gtPlusPlus.api.recipe.GTPPRecipeMaps;
 import gtPlusPlus.core.item.chemistry.general.ItemGenericChemBase;
@@ -107,6 +108,7 @@ public class MTEChemicalPlant extends GTPPMultiBlockBase<MTEChemicalPlant> imple
                     + " to the Chemical Plant, however this tier already contains one.");
         }
         mTieredBlockRegistry.put(aTier, aCasingData);
+        GTStructureChannels.METAL_MACHINE_CASING.registerAsIndicator(new ItemStack(aBlock, 1, aMeta), aTier + 1);
         return true;
     }
 
@@ -148,10 +150,10 @@ public class MTEChemicalPlant extends GTPPMultiBlockBase<MTEChemicalPlant> imple
             .addOutputHatch("Bottom Casing", 1)
             .addEnergyHatch("Bottom Casing", 1)
             .addMaintenanceHatch("Bottom Casing", 1)
-            .addSubChannelUsage("casing", "metal machine casing (minimum 70)")
-            .addSubChannelUsage("machine", "tier machine casing")
-            .addSubChannelUsage("coil", "heating coil blocks")
-            .addSubChannelUsage("pipe", "pipe casing blocks")
+            .addSubChannelUsage(GTStructureChannels.METAL_MACHINE_CASING, "metal machine casing (minimum 70)")
+            .addSubChannelUsage(GTStructureChannels.TIER_MACHINE_CASING)
+            .addSubChannelUsage(GTStructureChannels.HEATING_COIL)
+            .addSubChannelUsage(GTStructureChannels.PIPE_CASING)
             .toolTipFinisher();
     }
 
@@ -182,8 +184,7 @@ public class MTEChemicalPlant extends GTPPMultiBlockBase<MTEChemicalPlant> imple
     @Override
     public IStructureDefinition<MTEChemicalPlant> getStructureDefinition() {
         if (STRUCTURE_DEFINITION == null) {
-            IStructureElement<MTEChemicalPlant> allCasingsElement = withChannel(
-                "casing",
+            IStructureElement<MTEChemicalPlant> allCasingsElement = GTStructureChannels.METAL_MACHINE_CASING.use(
                 ofChain(
                     IntStream.range(0, 8)
                         .mapToObj(MTEChemicalPlant::ofSolidCasing)
@@ -226,8 +227,7 @@ public class MTEChemicalPlant extends GTPPMultiBlockBase<MTEChemicalPlant> imple
                 .addElement('X', allCasingsElement)
                 .addElement(
                     'M',
-                    withChannel(
-                        "machine",
+                    GTStructureChannels.TIER_MACHINE_CASING.use(
                         addTieredBlock(
                             GregTechAPI.sBlockCasings1,
                             MTEChemicalPlant::setMachineMeta,
@@ -235,11 +235,11 @@ public class MTEChemicalPlant extends GTPPMultiBlockBase<MTEChemicalPlant> imple
                             10)))
                 .addElement(
                     'H',
-                    withChannel("coil", ofCoil(MTEChemicalPlant::setCoilMeta, MTEChemicalPlant::getCoilMeta)))
+                    GTStructureChannels.HEATING_COIL
+                        .use(activeCoils(ofCoil(MTEChemicalPlant::setCoilMeta, MTEChemicalPlant::getCoilMeta))))
                 .addElement(
                     'P',
-                    withChannel(
-                        "pipe",
+                    GTStructureChannels.PIPE_CASING.use(
                         addTieredBlock(
                             GregTechAPI.sBlockCasings2,
                             MTEChemicalPlant::setPipeMeta,

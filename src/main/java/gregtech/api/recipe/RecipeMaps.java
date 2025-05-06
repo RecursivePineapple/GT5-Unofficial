@@ -271,7 +271,7 @@ public final class RecipeMaps {
      */
     public static final RecipeMap<RecipeMapBackend> plasmaArcFurnaceRecipes = RecipeMapBuilder
         .of("gt.recipe.plasmaarcfurnace")
-        .maxIO(1, 9, 1, 1)
+        .maxIO(2, 9, 1, 1)
         .minInputs(1, 1)
         .build();
     /**
@@ -386,7 +386,7 @@ public final class RecipeMaps {
         .neiHandlerInfo(builder -> builder.setDisplayStack(ItemList.Machine_LV_Macerator.get(1)))
         .build();
     public static final RecipeMap<RecipeMapBackend> chemicalBathRecipes = RecipeMapBuilder.of("gt.recipe.chemicalbath")
-        .maxIO(1, 3, 1, 1)
+        .maxIO(2, 3, 1, 1)
         .minInputs(1, 1)
         .progressBar(GTUITextures.PROGRESSBAR_BATH, ProgressBar.Direction.CIRCULAR_CW)
         .build();
@@ -831,6 +831,10 @@ public final class RecipeMaps {
         .build();
     public static final RecipeMap<RecipeMapBackend> pyrolyseRecipes = RecipeMapBuilder.of("gt.recipe.pyro")
         .maxIO(2, 1, 1, 1)
+        .minInputs(1, 0)
+        .build();
+    public static final RecipeMap<RecipeMapBackend> solarFactoryRecipes = RecipeMapBuilder.of("gt.recipe.solarfactory")
+        .maxIO(9, 1, 3, 0)
         .minInputs(1, 0)
         .build();
     public static final RecipeMap<RecipeMapBackend> wiremillRecipes = RecipeMapBuilder.of("gt.recipe.wiremill")

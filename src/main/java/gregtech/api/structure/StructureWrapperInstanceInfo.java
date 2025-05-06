@@ -1,102 +1,102 @@
 package gregtech.api.structure;
 
-import static net.minecraft.util.EnumChatFormatting.DARK_RED;
-import static net.minecraft.util.EnumChatFormatting.RESET;
-
-import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
-import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.NBTTagList;
+import net.minecraftforge.common.util.Constants;
 
-import com.gtnewhorizon.structurelib.structure.ISurvivalBuildEnvironment;
-import com.gtnewhorizons.modularui.api.drawable.TextRenderer;
+import com.gtnewhorizon.structurelib.alignment.IAlignment;
 
-import gregtech.api.metatileentity.implementations.MTEEnhancedMultiBlockBase;
+import gregtech.api.casing.ICasingGroup;
+import gregtech.api.enums.StructureError;
+import gregtech.api.metatileentity.implementations.MTEMultiBlockBase;
+import gregtech.api.util.GTUtility;
 import it.unimi.dsi.fastutil.chars.Char2IntArrayMap;
+import it.unimi.dsi.fastutil.objects.Reference2IntOpenHashMap;
 
-public class StructureWrapperInstanceInfo<MTE extends MTEEnhancedMultiBlockBase<?> & IStructureProvider<MTE>> {
+/**
+ * An object that stores specifics about an instance multi (casing counts mainly).
+ */
+public class StructureWrapperInstanceInfo<MTE extends MTEMultiBlockBase & IAlignment & IStructureProvider<MTE>>
+    implements IStructureInstance {
 
     public final StructureWrapper<MTE> structure;
 
     public Char2IntArrayMap actualCasingCounts = new Char2IntArrayMap();
 
-    private boolean valid = false;
-
-    private String error;
+    public final Reference2IntOpenHashMap<ICasingGroup> casingTiers = new Reference2IntOpenHashMap<>();
 
     public StructureWrapperInstanceInfo(StructureWrapper<MTE> structure) {
         this.structure = structure;
     }
 
-    private static final int ERROR_WRAP_WIDTH = 180;
+    public void clearHatches() {
+        actualCasingCounts.clear();
+        casingTiers.clear();
+    }
 
     /**
-     * Validates this structure. Currently only checks casing counts.
-     * 
-     * @return True when valid.
+     * Validates this multi. Currently only checks casing counts.
      */
-    public boolean validate() {
-        List<String> lines = new ArrayList<>();
-
-        this.error = null;
-        valid = true;
+    public void validate(Collection<StructureError> errors, NBTTagCompound context) {
+        NBTTagList data = new NBTTagList();
 
         for (var e : structure.casings.char2ObjectEntrySet()) {
+            if (!actualCasingCounts.containsKey(e.getCharKey())) continue;
+
             int presentCasings = actualCasingCounts.get(e.getCharKey());
-            int minCasings = e.getValue().definitionCasingCount - e.getValue().maxHatches;
+            int minCasings = structure.getCasingMin(e.getCharKey());
 
             if (presentCasings < minCasings) {
-                valid = false;
+                NBTTagCompound error = new NBTTagCompound();
 
-                String error = String.format(
-                    "%sNot enough %s: need %d, but have %d.%s",
-                    DARK_RED,
-                    e.getValue().casing.getLocalizedName(),
-                    minCasings,
-                    presentCasings,
-                    RESET);
+                error.setString("casing", Character.toString(e.getCharKey()));
+                error.setInteger("req", minCasings);
+                error.setInteger("pres", presentCasings);
 
-                lines.addAll(
-                    TextRenderer.getFontRenderer()
-                        .listFormattedStringToWidth(error, ERROR_WRAP_WIDTH));
+                data.appendTag(error);
             }
         }
 
-        error = String.join("\n", lines);
-
-        return valid;
-    }
-
-    public boolean checkStructure(MTE instance) {
-        actualCasingCounts.clear();
-
-        if (!structure.checkStructure(instance)) {
-            valid = false;
-            return false;
+        if (!data.tagList.isEmpty()) {
+            errors.add(StructureError.MISSING_STRUCTURE_WRAPPER_CASINGS);
+            context.setTag("structureWrapper", data);
         }
+    }
 
-        for (var e : structure.casings.char2ObjectEntrySet()) {
-            actualCasingCounts.putIfAbsent(e.getCharKey(), e.getValue().definitionCasingCount);
+    @SuppressWarnings("unchecked")
+    public void localizeStructureErrors(Collection<StructureError> errors, NBTTagCompound context, List<String> lines) {
+        if (!errors.contains(StructureError.MISSING_STRUCTURE_WRAPPER_CASINGS)) return;
+
+        NBTTagList list = context.getTagList("structureWrapper", Constants.NBT.TAG_COMPOUND);
+
+        for (NBTTagCompound tag : (List<NBTTagCompound>) list.tagList) {
+            char casing = tag.getString("casing")
+                .charAt(0);
+
+            lines.add(
+                GTUtility.translate(
+                    "GT5U.gui.missing_casings_specific",
+                    structure.casings.get(casing).casing.getLocalizedName(),
+                    tag.getInteger("req"),
+                    tag.getInteger("pres")));
         }
-
-        validate();
-
-        return valid;
     }
 
-    public String getErrorMessage() {
-        return error;
+    @Override
+    public void onCasingEncountered(char casing) {
+        actualCasingCounts.put(casing, actualCasingCounts.get(casing) + 1);
     }
 
-    public boolean isValid() {
-        return valid;
+    @Override
+    public int getCasingTier(ICasingGroup casing, int unset) {
+        return casingTiers.getOrDefault(casing, unset);
     }
 
-    public void construct(MTE instance, ItemStack trigger, boolean hintsOnly) {
-        structure.construct(instance, trigger, hintsOnly);
-    }
-
-    public int survivalConstruct(MTE instance, ItemStack trigger, int elementBudget, ISurvivalBuildEnvironment env) {
-        return structure.survivalConstruct(instance, trigger, elementBudget, env);
+    @Override
+    public void setCasingTier(ICasingGroup casing, int tier) {
+        casingTiers.put(casing, tier);
     }
 }

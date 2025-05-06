@@ -7,7 +7,6 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.oredict.OreDictionary;
 
-import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.registry.GameRegistry;
 import goodgenerator.blocks.myFluids.FluidsBuilder;
 import goodgenerator.blocks.regularBlock.AntimatterRenderBlock;
@@ -43,7 +42,6 @@ import goodgenerator.blocks.tileEntity.MTESupercriticalFluidTurbine;
 import goodgenerator.blocks.tileEntity.MTEUniversalChemicalFuelEngine;
 import goodgenerator.blocks.tileEntity.MTEYottaFluidTank;
 import goodgenerator.blocks.tileEntity.render.TileAntimatter;
-import goodgenerator.client.render.BlockRenderHandler;
 import goodgenerator.crossmod.ic2.CropsLoader;
 import goodgenerator.crossmod.nei.NEIConfig;
 import goodgenerator.crossmod.thaumcraft.LargeEssentiaEnergyData;
@@ -64,6 +62,7 @@ import gregtech.api.enums.Textures;
 import gregtech.api.interfaces.ITexture;
 import gregtech.api.render.TextureFactory;
 import gregtech.api.util.GTOreDictUnificator;
+import gregtech.common.misc.GTStructureChannels;
 import gregtech.common.tileentities.generators.MTEDieselGenerator;
 import kekztech.common.blocks.BlockTFFTStorageField;
 
@@ -458,6 +457,12 @@ public class Loaders {
         GameRegistry.registerItem(huiCircuit, "huiCircuit", GoodGenerator.MOD_ID);
         GameRegistry.registerItem(circuitWrap, "circuitWrap", GoodGenerator.MOD_ID);
         GameRegistry.registerTileEntity(TileAntimatter.class, "AntimatterRender");
+
+        GTStructureChannels.PRASS_UNIT_CASING.registerAsIndicator(new ItemStack(impreciseUnitCasing), 1);
+        for (int i = 1; i < 6; i++) {
+            GTStructureChannels.PRASS_UNIT_CASING
+                .registerAsIndicator(new ItemStack(preciseUnitCasing, 1, i - 1), i + 1);
+        }
     }
 
     public static void compactMod() {
@@ -556,11 +561,6 @@ public class Loaders {
     }
 
     public static void initLoad() {
-        if (FMLCommonHandler.instance()
-            .getSide()
-            .isClient()) {
-            new BlockRenderHandler();
-        }
         GTMetaTileRegister();
         initLoadRecipes();
         CropsLoader.registerCrops();

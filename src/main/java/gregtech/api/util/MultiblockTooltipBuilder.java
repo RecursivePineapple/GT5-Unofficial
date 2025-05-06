@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.function.Consumer;
+import java.util.function.Consumer;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -19,6 +20,8 @@ import com.google.common.collect.SetMultimap;
 import com.gtnewhorizon.structurelib.StructureLibAPI;
 
 import gregtech.GTMod;
+import gregtech.api.enums.GTValues;
+import gregtech.api.structure.IStructureChannels;
 
 /**
  * This makes it easier to build multi tooltips, with a standardized format. <br>
@@ -152,6 +155,15 @@ public class MultiblockTooltipBuilder {
     }
 
     /**
+     * Add a colored separator line
+     *
+     * @return Instance this method was called on.
+     */
+    public MultiblockTooltipBuilder addSeparator(EnumChatFormatting color) {
+        return addSeparator(color, 41);
+    }
+
+    /**
      * Add a colored separator line with specified length
      *
      * @return Instance this method was called on.
@@ -218,7 +230,6 @@ public class MultiblockTooltipBuilder {
                 + "L"
                 + EnumChatFormatting.GRAY
                 + ") "
-                + EnumChatFormatting.RED
                 + (hollow ? EnumChatFormatting.RED + TT_hollow : ""));
         sLines.add(EnumChatFormatting.WHITE + TT_structure + COLON);
         return this;
@@ -548,12 +559,66 @@ public class MultiblockTooltipBuilder {
 
     /**
      * Add a line of information about the structure:<br>
+     * Supports TecTech Multi-Amp Hatches!
+     *
+     * @return Instance this method was called on.
+     */
+    public MultiblockTooltipBuilder addMultiAmpHatchInfo() {
+        iLines.add(EnumChatFormatting.GREEN + GTUtility.translate("GT5U.MBTT.TecTechMultiAmp"));
+        return this;
+    }
+
+    /**
+     * Add a line of information about the structure:<br>
      * Supports TecTech Multi-Amp and Laser Hatches!
      *
      * @return Instance this method was called on.
      */
     public MultiblockTooltipBuilder addTecTechHatchInfo() {
         iLines.add(EnumChatFormatting.GREEN + TT_tectechhatch);
+        return this;
+    }
+
+    /**
+     * Add a line of information about the structure:<br>
+     * t-tier Glass required for TecTech Laser Hatches.
+     *
+     * @param t Tier of glass that unlocks all energy hatches
+     * @return Instance this method was called on.
+     */
+    public MultiblockTooltipBuilder addMinGlassForLaser(int t) {
+        iLines.add(
+            GTValues.TIER_COLORS[t] + GTValues.VN[t]
+                + EnumChatFormatting.GRAY
+                + StatCollector.translateToLocal("GT5U.MBTT.Structure.MinGlassForLaser"));
+        return this;
+    }
+
+    /**
+     * Add a line of information about the structure:<br>
+     * Energy Hatch limited by Glass tier.
+     *
+     * @return Instance this method was called on.
+     */
+    public MultiblockTooltipBuilder addGlassEnergyLimitInfo() {
+        iLines.add(StatCollector.translateToLocal("GT5U.MBTT.Structure.GlassEnergyLimit") + ".");
+        return this;
+    }
+
+    /**
+     * Add a line of information about the structure:<br>
+     * Energy Hatch limited by Glass tier, t-tier Glass unlocks all.
+     *
+     * @param t Tier of glass that unlocks all energy hatches
+     * @return Instance this method was called on.
+     */
+    public MultiblockTooltipBuilder addGlassEnergyLimitInfo(int t) {
+        iLines.add(
+            StatCollector.translateToLocal("GT5U.MBTT.Structure.GlassEnergyLimit") + ", "
+                + GTValues.TIER_COLORS[t]
+                + GTValues.VN[t]
+                + EnumChatFormatting.GRAY
+                + StatCollector.translateToLocal("GT5U.MBTT.Structure.GlassEnergyLimitTier"));
         return this;
     }
 
@@ -719,6 +784,15 @@ public class MultiblockTooltipBuilder {
     }
 
     /**
+     * @deprecated use overload that accepts {@link IStructureChannels} instead
+     */
+    @Deprecated
+    public MultiblockTooltipBuilder addSubChannelUsage(String channel, String purpose) {
+        sLines.add(TAB + StatCollector.translateToLocalFormatted("GT5U.MBTT.subchannel", channel, purpose));
+        return this;
+    }
+
+    /**
      * Use this method to add non-standard structural info.<br>
      * (indent)info
      *
@@ -726,8 +800,22 @@ public class MultiblockTooltipBuilder {
      * @param purpose the purpose of subchannel
      * @return Instance this method was called on.
      */
-    public MultiblockTooltipBuilder addSubChannelUsage(String channel, String purpose) {
-        sLines.add(TAB + StatCollector.translateToLocalFormatted("GT5U.MBTT.subchannel", channel, purpose));
+    public MultiblockTooltipBuilder addSubChannelUsage(IStructureChannels channel, String purpose) {
+        sLines.add(TAB + StatCollector.translateToLocalFormatted("GT5U.MBTT.subchannel", channel.get(), purpose));
+        return this;
+    }
+
+    /**
+     * Use this method to add non-standard structural info.<br>
+     * (indent)info
+     *
+     * @param channel the name of subchannel
+     * @return Instance this method was called on.
+     */
+    public MultiblockTooltipBuilder addSubChannelUsage(IStructureChannels channel) {
+        sLines.add(
+            TAB + StatCollector
+                .translateToLocalFormatted("GT5U.MBTT.subchannel", channel.get(), channel.getDefaultTooltip()));
         return this;
     }
 
@@ -757,7 +845,7 @@ public class MultiblockTooltipBuilder {
 
     /**
      * Useful for maintaining the flow when you need to run an arbitrary operation on the builder.
-     * 
+     *
      * @param fn The operation.
      * @return Instance this method was called on.
      */

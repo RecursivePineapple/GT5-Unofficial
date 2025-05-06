@@ -21,4 +21,7 @@ public interface IDualInputInventory {
     /** The list of items & fluids that this pattern will provide. */
     GTDualInputs getPatternInputs();
 
+    default boolean shouldBeCached() {
+        return true;
+    }
 }

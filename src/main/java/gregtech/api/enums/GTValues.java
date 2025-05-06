@@ -21,6 +21,7 @@ import java.util.function.Supplier;
 import net.minecraft.item.ItemStack;
 import net.minecraft.launchwrapper.Launch;
 import net.minecraft.util.EnumChatFormatting;
+import net.minecraft.util.StatCollector;
 import net.minecraft.world.World;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.FluidTankInfo;
@@ -450,6 +451,14 @@ public class GTValues {
     public static boolean DEVENV = (boolean) Launch.blackboard.get("fml.deobfuscatedEnvironment");
 
     /**
+     * Detects if we're in a deobfuscated environment, meaning that additional sanity checks should be ran.
+     * If the blackboard is null, we're in a unit test that hasn't set its env up properly and also want those checks to
+     * be ran.
+     */
+    public static boolean DEVENV = Launch.blackboard == null ? true
+        : (boolean) Launch.blackboard.get("fml.deobfuscatedEnvironment");
+
+    /**
      * Pretty formatting for author names.
      */
     public static final String Colen = "" + EnumChatFormatting.DARK_RED
@@ -589,7 +598,30 @@ public class GTValues {
 
     public static final String AuthorPineapple = "Author: " + EnumChatFormatting.BLUE + "Recursive Pineapple";
 
+    public static final Supplier<String> AuthorNoc = chain(
+        text("Author: "),
+        animatedText(
+            "Noc",
+            0,
+            500,
+            EnumChatFormatting.GOLD + BOLD,
+            EnumChatFormatting.DARK_GREEN + BOLD,
+            EnumChatFormatting.GOLD + BOLD,
+            EnumChatFormatting.DARK_GREEN + BOLD,
+            EnumChatFormatting.DARK_GREEN + OBFUSCATED + BOLD));
+
     public static final String TecTechHatches = "Supports " + TT + " laser and multi-amp hatches";
+
+    public static final String AuthorPureBluez = "Author: " + EnumChatFormatting.WHITE
+        + "Pure"
+        + EnumChatFormatting.AQUA
+        + "B"
+        + EnumChatFormatting.DARK_AQUA
+        + "l"
+        + EnumChatFormatting.BLUE
+        + "u"
+        + EnumChatFormatting.DARK_BLUE
+        + "ez";
 
     // 7.5F comes from GT_Tool_Turbine_Large#getBaseDamage() given huge turbines are the most efficient now.
     public static double getMaxPlasmaTurbineEfficiencyFromMaterial(Materials material) {
@@ -627,5 +659,18 @@ public class GTValues {
             }
         }
         return EXPLOSION_LOOKUP_POWER[EXPLOSION_LOOKUP_POWER.length - 1];
+    }
+
+    public static String getLocalizedLongVoltageName(int voltage) {
+        if (voltage >= VOLTAGE_NAMES.length) {
+            return StatCollector.translateToLocal("GT5U.voltage_names.error_voltage_report_this");
+        }
+        String unlocalizedName = "GT5U.voltage_names." + VOLTAGE_NAMES[voltage].toLowerCase()
+            .replace(",", "")
+            .replace(' ', '_');
+        if (StatCollector.canTranslate(unlocalizedName)) {
+            return StatCollector.translateToLocal(unlocalizedName);
+        }
+        return StatCollector.translateToLocal("GT5U.voltage_names.error_voltage_report_this");
     }
 }
