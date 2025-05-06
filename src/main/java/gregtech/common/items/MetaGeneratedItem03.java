@@ -265,13 +265,6 @@ import java.util.List;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 
-import java.util.List;
-
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.item.ItemStack;
-
-import net.minecraft.item.ItemStack;
-
 import cpw.mods.fml.common.Optional;
 import gregtech.api.covers.CoverPlacer;
 import gregtech.api.covers.CoverRegistry;
@@ -1585,7 +1578,8 @@ public class MetaGeneratedItem03 extends MetaGeneratedItemX32 implements IItemFi
             NaniteTier tier = NaniteTier.fromStack(aStack);
 
             if (tier != null) {
-                aList.add(net.minecraft.util.StatCollector.translateToLocalFormatted("gt.tooltip.nanite-tier", tier.tier));
+                aList.add(
+                    net.minecraft.util.StatCollector.translateToLocalFormatted("gt.tooltip.nanite-tier", tier.tier));
             }
         }
     }

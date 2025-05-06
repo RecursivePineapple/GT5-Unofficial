@@ -5,6 +5,7 @@ import java.util.Comparator;
 import java.util.List;
 
 import com.gtnewhorizons.modularui.common.widget.ProgressBar;
+
 import gregtech.api.gui.modularui.GTUITextures;
 import gregtech.api.items.ItemCondensate;
 import gregtech.api.recipe.RecipeMap;

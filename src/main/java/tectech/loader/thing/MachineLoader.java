@@ -2298,10 +2298,8 @@ public class MachineLoader implements Runnable {
                 "multimachine.em.bec-io-node",
                 "Observation Array Teleportation Node").getStackForm(1L));
         Hatch_BEC_Nanites.set(
-            new MTEHatchNaniteDetector(
-                HatchNaniteDetector.ID,
-                "hatch.nanite-detector",
-                "Nanite Detector Hatch").getStackForm(1L));
+            new MTEHatchNaniteDetector(HatchNaniteDetector.ID, "hatch.nanite-detector", "Nanite Detector Hatch")
+                .getStackForm(1L));
         Hatch_BEC_IOController.set(
             new MTEHatchBECIONodeController(
                 HatchIOController.ID,

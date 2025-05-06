@@ -8,6 +8,7 @@ import gregtech.api.objects.ItemData;
 import gregtech.api.util.GTOreDictUnificator;
 
 public enum NaniteTier {
+
     Carbon(1),
     Glowstone(1),
     Silver(2),

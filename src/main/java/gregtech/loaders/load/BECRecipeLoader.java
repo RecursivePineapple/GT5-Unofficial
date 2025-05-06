@@ -226,16 +226,10 @@ public class BECRecipeLoader {
                 GTOreDictUnificator.get(OrePrefixes.ingot, Materials.Iron, 2L))
             .fluidInputs(Materials.Copper.getMolten(144L))
             .itemOutputs(GTOreDictUnificator.get(OrePrefixes.plate, Materials.Iron, 2L))
-            .metadata(GTRecipeConstants.NANITE_TIERS, new NaniteTier[] {
-                NaniteTier.Carbon,
-                NaniteTier.Carbon,
-                NaniteTier.Carbon,
-                NaniteTier.Carbon,
-                NaniteTier.Neutronium,
-                NaniteTier.Silver,
-                NaniteTier.Gold,
-                NaniteTier.Neutronium,
-            })
+            .metadata(
+                GTRecipeConstants.NANITE_TIERS,
+                new NaniteTier[] { NaniteTier.Carbon, NaniteTier.Carbon, NaniteTier.Carbon, NaniteTier.Carbon,
+                    NaniteTier.Neutronium, NaniteTier.Silver, NaniteTier.Gold, NaniteTier.Neutronium, })
             .eut(144)
             .duration(200)
             .addTo(TecTechRecipeMaps.condensateAssemblingRecipes);

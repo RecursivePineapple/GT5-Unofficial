@@ -18,6 +18,7 @@ import com.gtnewhorizons.modularui.common.widget.FakeSyncWidget;
 import com.gtnewhorizons.modularui.common.widget.TextWidget;
 import com.gtnewhorizons.modularui.common.widget.VanillaButtonWidget;
 import com.gtnewhorizons.modularui.common.widget.textfield.NumericWidget;
+
 import gregtech.api.enums.NaniteTier;
 import gregtech.api.enums.Textures;
 import gregtech.api.enums.VoltageIndex;
@@ -36,6 +37,7 @@ public class MTEHatchNaniteDetector extends MTEBaseFactoryHatch {
     private Op op = Op.EQ;
 
     enum Op {
+
         EQ,
         LT,
         GT,
@@ -68,21 +70,15 @@ public class MTEHatchNaniteDetector extends MTEBaseFactoryHatch {
 
     @Override
     public ITexture[] getTexturesInactive(ITexture baseTexture) {
-        return new ITexture[] {
-            baseTexture,
-            TextureFactory.of(Textures.BlockIcons.OVERLAY_HATCH_NANITE_DETECTOR)
-        };
+        return new ITexture[] { baseTexture, TextureFactory.of(Textures.BlockIcons.OVERLAY_HATCH_NANITE_DETECTOR) };
     }
 
     @Override
     public ITexture[] getTexturesActive(ITexture baseTexture) {
-        return new ITexture[] {
-            baseTexture,
-            TextureFactory.builder()
-                .addIcon(Textures.BlockIcons.OVERLAY_HATCH_NANITE_DETECTOR_GLOW)
-                .glow()
-                .build()
-        };
+        return new ITexture[] { baseTexture, TextureFactory.builder()
+            .addIcon(Textures.BlockIcons.OVERLAY_HATCH_NANITE_DETECTOR_GLOW)
+            .glow()
+            .build() };
     }
 
     public void setRequiredTier(@Nullable NaniteTier requiredTier) {
@@ -128,8 +124,7 @@ public class MTEHatchNaniteDetector extends MTEBaseFactoryHatch {
     public void addUIWidgets(ModularWindow.Builder builder, UIBuildContext buildContext) {
         builder.widgets(
             new FakeSyncWidget.IntegerSyncer(() -> op.ordinal(), index -> op = Op.values()[index]),
-            new VanillaButtonWidget()
-                .setDisplayString(op.getDisplayString())
+            new VanillaButtonWidget().setDisplayString(op.getDisplayString())
                 .setOnClick((clickData, widget) -> {
                     int offset = 0;
 
@@ -144,15 +139,17 @@ public class MTEHatchNaniteDetector extends MTEBaseFactoryHatch {
                     ((VanillaButtonWidget) widget).setDisplayString(op.getDisplayString());
                     widget.notifyTooltipChange();
                 })
-                .dynamicTooltip(() -> Arrays.asList(
-                    String
-                        .format("Emit a redstone signal when the required nanite tier is %s than the threshold", switch (op) {
+                .dynamicTooltip(
+                    () -> Arrays.asList(
+                        String.format(
+                            "Emit a redstone signal when the required nanite tier is %s than the threshold",
+                            switch (op) {
                             case EQ -> "equal to";
                             case LT -> "less than";
                             case LTEQ -> "less than or equal to";
                             case GT -> "greater than";
                             case GTEQ -> "greater than or equal to";
-                        })))
+                            })))
                 .setPos(10, 8),
             new NaniteTierNumericWidget(),
             new TextWidget(StatCollector.translateToLocal("GT5U.gui.text.nanite_threshold"))
@@ -162,14 +159,18 @@ public class MTEHatchNaniteDetector extends MTEBaseFactoryHatch {
             TextWidget.dynamicString(() -> "Current: " + requiredTier)
                 .setDefaultColor(COLOR_TEXT_GRAY.get())
                 .setTextAlignment(Alignment.CenterLeft)
-                .setPos(20, 35)
-        );
+                .setPos(20, 35));
     }
 
     private class NaniteTierNumericWidget extends NumericWidget {
 
         public NaniteTierNumericWidget() {
-            setBounds(1, Stream.of(NaniteTier.values()).mapToInt(t -> t.tier).max().getAsInt());
+            setBounds(
+                1,
+                Stream.of(NaniteTier.values())
+                    .mapToInt(t -> t.tier)
+                    .max()
+                    .getAsInt());
             setGetter(() -> (double) configuredTier);
             setSetter((value) -> {
                 configuredTier = (int) value;
@@ -181,22 +182,24 @@ public class MTEHatchNaniteDetector extends MTEBaseFactoryHatch {
             setTextAlignment(Alignment.CenterLeft);
             setFocusOnGuiOpen(true);
             setBackground(GTUITextures.BACKGROUND_TEXT_FIELD.withOffset(-1, -1, 2, 2));
-            dynamicTooltip(() -> Arrays.asList(
-                String.format(
-                    "Nanites: %s",
-                    Stream.of(NaniteTier.values())
-                        .filter(t -> t.tier == configuredTier)
-                        .map(t -> t.getMaterial().mLocalizedName)
-                        .sorted()
-                        .collect(Collectors.joining(", ")))
-            ));
+            dynamicTooltip(
+                () -> Arrays.asList(
+                    String.format(
+                        "Nanites: %s",
+                        Stream.of(NaniteTier.values())
+                            .filter(t -> t.tier == configuredTier)
+                            .map(t -> t.getMaterial().mLocalizedName)
+                            .sorted()
+                            .collect(Collectors.joining(", ")))));
             setPos(34, 12);
             setSize(50, 12);
         }
 
         @Override
         public ClickResult onClick(int buttonId, boolean doubleClick) {
-            NaniteTier inCursor = NaniteTier.fromStack(getContext().getCursor().getItemStack());
+            NaniteTier inCursor = NaniteTier.fromStack(
+                getContext().getCursor()
+                    .getItemStack());
 
             if (buttonId == 0 && inCursor != null) {
                 this.setValue(inCursor.tier);

@@ -1,13 +1,6 @@
 package gregtech.common.blocks;
 
-import java.util.function.Supplier;
-
 import net.minecraft.block.Block;
-import net.minecraft.client.resources.I18n;
-import net.minecraft.util.EnumChatFormatting;
-import java.util.List;
-
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.IIcon;
 import net.minecraft.world.IBlockAccess;

@@ -6,6 +6,7 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 import com.gtnewhorizons.modularui.common.widget.VanillaButtonWidget;
+
 import gregtech.api.util.GTUtility;
 
 public class EnumCycleButtonWidget<T extends Enum<T>> extends VanillaButtonWidget {

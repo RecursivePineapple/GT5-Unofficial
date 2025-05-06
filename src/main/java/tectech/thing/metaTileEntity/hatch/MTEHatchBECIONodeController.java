@@ -8,6 +8,7 @@ import com.gtnewhorizons.modularui.api.screen.ModularWindow;
 import com.gtnewhorizons.modularui.api.screen.UIBuildContext;
 import com.gtnewhorizons.modularui.common.widget.FakeSyncWidget;
 import com.gtnewhorizons.modularui.common.widget.TextWidget;
+
 import gregtech.api.enums.Textures;
 import gregtech.api.enums.VoltageIndex;
 import gregtech.api.interfaces.ITexture;
@@ -21,6 +22,7 @@ public class MTEHatchBECIONodeController extends MTEBaseFactoryHatch {
     private Mode mode = Mode.PAUSE_INSTANT;
 
     public enum Mode {
+
         PAUSE_INSTANT,
         PAUSE_STEP;
 
@@ -55,21 +57,15 @@ public class MTEHatchBECIONodeController extends MTEBaseFactoryHatch {
 
     @Override
     public ITexture[] getTexturesInactive(ITexture baseTexture) {
-        return new ITexture[] {
-            baseTexture,
-            TextureFactory.of(Textures.BlockIcons.OVERLAY_HATCH_NANITE_DETECTOR)
-        };
+        return new ITexture[] { baseTexture, TextureFactory.of(Textures.BlockIcons.OVERLAY_HATCH_NANITE_DETECTOR) };
     }
 
     @Override
     public ITexture[] getTexturesActive(ITexture baseTexture) {
-        return new ITexture[] {
-            baseTexture,
-            TextureFactory.builder()
-                .addIcon(Textures.BlockIcons.OVERLAY_HATCH_NANITE_DETECTOR_GLOW)
-                .glow()
-                .build()
-        };
+        return new ITexture[] { baseTexture, TextureFactory.builder()
+            .addIcon(Textures.BlockIcons.OVERLAY_HATCH_NANITE_DETECTOR_GLOW)
+            .glow()
+            .build() };
     }
 
     public Mode getMode() {
@@ -91,16 +87,10 @@ public class MTEHatchBECIONodeController extends MTEBaseFactoryHatch {
         builder.widgets(
             new FakeSyncWidget.IntegerSyncer(() -> mode.ordinal(), index -> mode = Mode.values()[index]),
 
-            new TextWidget("Mode:")
-                .setDefaultColor(COLOR_TEXT_GRAY.get())
+            new TextWidget("Mode:").setDefaultColor(COLOR_TEXT_GRAY.get())
                 .setTextAlignment(Alignment.CenterLeft)
                 .setPos(10, 14),
-            new EnumCycleButtonWidget<>(
-                Mode.class,
-                () -> mode,
-                value -> mode = value)
-                .setPos(40, 9)
-                .setSize(100, 18)
-        );
+            new EnumCycleButtonWidget<>(Mode.class, () -> mode, value -> mode = value).setPos(40, 9)
+                .setSize(100, 18));
     }
 }

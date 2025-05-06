@@ -520,16 +520,18 @@ public class GTNEIDefaultHandler extends TemplateRecipeHandler {
         public final int realStackSize;
         public final boolean renderRealStackSize;
 
-        public FixedPositionedStack(CachedDefaultRecipe recipe, Object object, boolean renderRealStackSizes, int x, int y) {
+        public FixedPositionedStack(CachedDefaultRecipe recipe, Object object, boolean renderRealStackSizes, int x,
+            int y) {
             this(recipe, object, renderRealStackSizes, x, y, 0, true);
         }
 
-        public FixedPositionedStack(CachedDefaultRecipe recipe, Object object, boolean renderRealStackSizes, int x, int y, boolean aUnificate) {
+        public FixedPositionedStack(CachedDefaultRecipe recipe, Object object, boolean renderRealStackSizes, int x,
+            int y, boolean aUnificate) {
             this(recipe, object, renderRealStackSizes, x, y, 0, aUnificate);
         }
 
-        public FixedPositionedStack(CachedDefaultRecipe recipe, Object object, boolean renderRealStackSize, int x, int y, int aChance,
-            boolean aUnificate) {
+        public FixedPositionedStack(CachedDefaultRecipe recipe, Object object, boolean renderRealStackSize, int x,
+            int y, int aChance, boolean aUnificate) {
             super(aUnificate ? GTOreDictUnificator.getNonUnifiedStacks(object) : object, x, y, true);
             this.recipe = recipe;
             this.mChance = aChance;

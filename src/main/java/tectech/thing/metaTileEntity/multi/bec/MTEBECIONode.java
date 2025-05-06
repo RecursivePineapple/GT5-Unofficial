@@ -25,7 +25,6 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.world.World;
-
 import net.minecraftforge.common.util.Constants;
 
 import org.jetbrains.annotations.NotNull;
@@ -35,6 +34,7 @@ import com.gtnewhorizon.structurelib.structure.IStructureDefinition;
 import com.gtnewhorizons.modularui.common.widget.DynamicPositionedColumn;
 import com.gtnewhorizons.modularui.common.widget.FakeSyncWidget;
 import com.gtnewhorizons.modularui.common.widget.SlotWidget;
+
 import gregtech.api.GregTechAPI;
 import gregtech.api.enums.GTValues;
 import gregtech.api.enums.ItemList;
@@ -106,7 +106,12 @@ public class MTEBECIONode extends MTEBECMultiblockBase<MTEBECIONode> implements 
     @Override
     public IStructureDefinition<MTEBECIONode> compile(String[][] definition) {
         structure.addCasing('A', SuperconductivePlasmaEnergyConduit);
-        structure.addCasingWithHatches('B', ElectromagneticallyIsolatedCasing, 1, 16, Arrays.asList(Energy, ExoticEnergy, InputBus, OutputBus, NaniteHatch.INSTANCE, ControllerHatch.INSTANCE));
+        structure.addCasingWithHatches(
+            'B',
+            ElectromagneticallyIsolatedCasing,
+            1,
+            16,
+            Arrays.asList(Energy, ExoticEnergy, InputBus, OutputBus, NaniteHatch.INSTANCE, ControllerHatch.INSTANCE));
         structure.addCasing('C', FineStructureConstantManipulator);
         structure.addCasing('D', AdvancedFusionCoilII);
         structure.addCasing('E', ElectromagneticWaveguide);
@@ -278,7 +283,8 @@ public class MTEBECIONode extends MTEBECMultiblockBase<MTEBECIONode> implements 
 
         IntDivisionIterator iter = getCurrentSlot(progress);
 
-        while(iter.hasNext() && iter.counter < requiredNanites.length && requiredNanites[iter.counter].tier <= providedTier.tier) {
+        while (iter.hasNext() && iter.counter < requiredNanites.length
+            && requiredNanites[iter.counter].tier <= providedTier.tier) {
             iter.nextInt();
         }
 
@@ -342,7 +348,9 @@ public class MTEBECIONode extends MTEBECMultiblockBase<MTEBECIONode> implements 
 
             if (remainingCondensate == 0) continue;
 
-            CondensateStack stack = new CondensateStack(required.getKey(), remainingCondensate / Math.max(1, remainingProgress));
+            CondensateStack stack = new CondensateStack(
+                required.getKey(),
+                remainingCondensate / Math.max(1, remainingProgress));
 
             var result = assembler.drainCondensate(stack);
 
@@ -416,7 +424,8 @@ public class MTEBECIONode extends MTEBECMultiblockBase<MTEBECIONode> implements 
         super.onPostTick(igte, aTick);
 
         if (isServerSide()) {
-            // periodically try to reconnect to the assembler if we're supposed to be running but the assembler isn't loaded
+            // periodically try to reconnect to the assembler if we're supposed to be running but the assembler isn't
+            // loaded
             if (assembler == null && mMaxProgresstime > 0 && aTick % 200 == 0) {
                 connect(getAssembler());
             }
@@ -431,12 +440,13 @@ public class MTEBECIONode extends MTEBECMultiblockBase<MTEBECIONode> implements 
         if (!ItemList.Tool_DataStick.isStackEqual(heldItem, false, true)) return;
 
         heldItem.setTagCompound(getCopiedData(player));
-        heldItem.setStackDisplayName(MessageFormat.format(
-            "{0} Link Data Stick ({1}, {2}, {3})",
-            getStackForm(1).getDisplayName(),
-            igte.getXCoord(),
-            igte.getYCoord(),
-            igte.getZCoord()));
+        heldItem.setStackDisplayName(
+            MessageFormat.format(
+                "{0} Link Data Stick ({1}, {2}, {3})",
+                getStackForm(1).getDisplayName(),
+                igte.getXCoord(),
+                igte.getYCoord(),
+                igte.getZCoord()));
         player.addChatMessage(new ChatComponentText("Saved Link Data to Data Stick"));
     }
 
@@ -450,13 +460,17 @@ public class MTEBECIONode extends MTEBECMultiblockBase<MTEBECIONode> implements 
         // intentionally run on the client so that the player's arm swings
         if (pasteCopiedData(player, heldItem.getTagCompound())) {
             if (isServerSide()) {
-                player.addChatMessage(new ChatComponentText("Successfully connected to " + CustomItemList.Machine_Multi_BECAssembler.getDisplayName()));
+                player.addChatMessage(
+                    new ChatComponentText(
+                        "Successfully connected to " + CustomItemList.Machine_Multi_BECAssembler.getDisplayName()));
             }
 
             return true;
         } else {
             if (isServerSide()) {
-                player.addChatMessage(new ChatComponentText("Could not connect to " + CustomItemList.Machine_Multi_BECAssembler.getDisplayName()));
+                player.addChatMessage(
+                    new ChatComponentText(
+                        "Could not connect to " + CustomItemList.Machine_Multi_BECAssembler.getDisplayName()));
             }
 
             return false;
@@ -477,7 +491,8 @@ public class MTEBECIONode extends MTEBECMultiblockBase<MTEBECIONode> implements 
 
     @Override
     public boolean pasteCopiedData(EntityPlayer player, NBTTagCompound nbt) {
-        if (!nbt.getString("type").equals(getCopiedDataIdentifier(player))) return false;
+        if (!nbt.getString("type")
+            .equals(getCopiedDataIdentifier(player))) return false;
 
         assemblerX = nbt.getInteger("x");
         assemblerY = nbt.getInteger("y");
@@ -495,7 +510,8 @@ public class MTEBECIONode extends MTEBECMultiblockBase<MTEBECIONode> implements 
     }
 
     private float getProcessingSpeed() {
-        return processingLogic.getCurrentParallels() == 0 ? 0 : availableNanites / (float) processingLogic.getCurrentParallels();
+        return processingLogic.getCurrentParallels() == 0 ? 0
+            : availableNanites / (float) processingLogic.getCurrentParallels();
     }
 
     @Override
@@ -507,10 +523,8 @@ public class MTEBECIONode extends MTEBECMultiblockBase<MTEBECIONode> implements 
                 () -> saveNanite(providedTier),
                 matId -> providedTier = loadNanite(matId)));
 
-        screenElements.widget(
-            new FakeSyncWidget.IntegerSyncer(
-                () -> availableNanites,
-                amount -> availableNanites = amount));
+        screenElements
+            .widget(new FakeSyncWidget.IntegerSyncer(() -> availableNanites, amount -> availableNanites = amount));
 
         screenElements.widget(
             new FakeSyncWidget.IntegerSyncer(
@@ -589,7 +603,9 @@ public class MTEBECIONode extends MTEBECMultiblockBase<MTEBECIONode> implements 
 
         NBTTagCompound tag = accessor.getNBTData();
 
-        currenttip.add(MessageFormat.format("Assembler: {0},{1},{2}", tag.getInteger("x"), tag.getInteger("y"), tag.getInteger("z")));
+        currenttip.add(
+            MessageFormat
+                .format("Assembler: {0},{1},{2}", tag.getInteger("x"), tag.getInteger("y"), tag.getInteger("z")));
         currenttip.add(MessageFormat.format("Connected: {0}", tag.getBoolean("con")));
 
         NaniteTier required = loadNanite(tag.getInteger("nanite"));

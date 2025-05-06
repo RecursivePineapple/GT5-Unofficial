@@ -21,12 +21,9 @@ import net.minecraftforge.fluids.FluidStack;
 
 import org.jetbrains.annotations.Contract;
 
-import tectech.mechanics.boseEinsteinCondensate.CondensateStack;
-
 import gregtech.GTMod;
 import gregtech.api.enums.GTValues;
 import gregtech.api.enums.Mods;
-import gregtech.api.enums.NaniteTier;
 import gregtech.api.interfaces.IRecipeMap;
 import gregtech.api.recipe.RecipeCategory;
 import gregtech.api.recipe.RecipeMetadataKey;

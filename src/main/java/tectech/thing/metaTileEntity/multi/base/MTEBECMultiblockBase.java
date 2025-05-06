@@ -23,6 +23,7 @@ import com.gtnewhorizons.modularui.common.widget.DynamicPositionedColumn;
 import com.gtnewhorizons.modularui.common.widget.FakeSyncWidget;
 import com.gtnewhorizons.modularui.common.widget.SlotWidget;
 import com.gtnewhorizons.modularui.common.widget.TextWidget;
+
 import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.relauncher.Side;
 import gregtech.api.interfaces.IHatchElement;
@@ -248,7 +249,8 @@ public abstract class MTEBECMultiblockBase<TSelf extends MTEBECMultiblockBase<TS
     protected boolean isServerSide() {
         IGregTechTileEntity igte = getBaseMetaTileEntity();
 
-        if (igte == null || igte.isDead()) return FMLCommonHandler.instance().getSide() == Side.SERVER;
+        if (igte == null || igte.isDead()) return FMLCommonHandler.instance()
+            .getSide() == Side.SERVER;
 
         return igte.isServerSide();
     }
@@ -256,6 +258,7 @@ public abstract class MTEBECMultiblockBase<TSelf extends MTEBECMultiblockBase<TS
     public enum BECHatches implements IHatchElement<MTEBECMultiblockBase<?>> {
 
         Hatch(MTEHatchBEC.class) {
+
             @Override
             public long count(MTEBECMultiblockBase<?> t) {
                 return t.mBECHatches.size();

@@ -35,7 +35,6 @@ import gregtech.common.items.MetaGeneratedItem03;
 import gtnhlanth.common.item.ItemPhotolithographicMask;
 import gtnhlanth.common.item.MaskList;
 import gtnhlanth.common.register.LanthItemList;
-import tectech.mechanics.boseEinsteinCondensate.CondensateStack;
 
 // this class is intended to be import-static-ed on every recipe script
 // so take care to not put unrelated stuff here!

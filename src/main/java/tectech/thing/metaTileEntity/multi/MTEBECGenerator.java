@@ -35,6 +35,7 @@ import com.gtnewhorizons.modularui.api.math.Alignment;
 import com.gtnewhorizons.modularui.common.widget.DynamicPositionedColumn;
 import com.gtnewhorizons.modularui.common.widget.SlotWidget;
 import com.gtnewhorizons.modularui.common.widget.TextWidget;
+
 import gregtech.api.enums.GTValues;
 import gregtech.api.enums.SoundResource;
 import gregtech.api.interfaces.ITexture;
@@ -335,9 +336,9 @@ public class MTEBECGenerator extends MTEBECMultiblockBase<MTEBECGenerator> imple
             return CheckRecipeResultRegistry.NO_RECIPE;
         } else {
             mOutputCondensate = outputMaterials.object2LongEntrySet()
-                    .stream()
-                    .map(e -> new CondensateStack(e.getKey(), e.getLongValue()))
-                    .collect(Collectors.toList());
+                .stream()
+                .map(e -> new CondensateStack(e.getKey(), e.getLongValue()))
+                .collect(Collectors.toList());
             mMaxProgresstime = baseProcessingTime;
             mEfficiency = 10_000;
 

@@ -1,21 +1,13 @@
 package gregtech.common.blocks;
 
-import static com.gtnewhorizon.gtnhlib.util.AnimatedTooltipHandler.translatedText;
-
 import java.util.List;
-import java.util.function.Supplier;
-
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.client.renderer.texture.IIconRegister;
-import net.minecraft.client.resources.I18n;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EnumCreatureType;
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemBlock;
@@ -24,14 +16,10 @@ import net.minecraft.util.StatCollector;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 
-import com.gtnewhorizon.gtnhlib.util.AnimatedTooltipHandler;
-
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import gregtech.api.GregTechAPI;
-import gregtech.api.enums.ItemList;
 import gregtech.api.enums.Textures;
-import gregtech.api.interfaces.IItemContainer;
 import gregtech.api.items.GTGenericBlock;
 import gregtech.api.render.TextureFactory;
 import gregtech.api.util.GTLanguageManager;

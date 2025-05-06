@@ -9,7 +9,6 @@ import gregtech.api.util.GTBECRecipe;
 import gregtech.api.util.GTRecipe;
 import gregtech.api.util.GTRecipeConstants;
 import gregtech.api.util.GTUtility;
-
 import tectech.mechanics.boseEinsteinCondensate.CondensateStack;
 
 public class BECRecipeMapBackend extends RecipeMapBackend {
@@ -20,15 +19,11 @@ public class BECRecipeMapBackend extends RecipeMapBackend {
 
     @Override
     public @Nonnull GTRecipe compileRecipe(@Nonnull GTRecipe recipe) {
-        CondensateStack[] inputs = GTUtility.mapToArray(
-            recipe.mFluidInputs,
-            CondensateStack[]::new,
-            CondensateStack::fromFluid);
+        CondensateStack[] inputs = GTUtility
+            .mapToArray(recipe.mFluidInputs, CondensateStack[]::new, CondensateStack::fromFluid);
 
-        CondensateStack[] outputs = GTUtility.mapToArray(
-            recipe.mFluidOutputs,
-            CondensateStack[]::new,
-            CondensateStack::fromFluid);
+        CondensateStack[] outputs = GTUtility
+            .mapToArray(recipe.mFluidOutputs, CondensateStack[]::new, CondensateStack::fromFluid);
 
         NaniteTier[] tiers = recipe.getMetadata(GTRecipeConstants.NANITE_TIERS);
 

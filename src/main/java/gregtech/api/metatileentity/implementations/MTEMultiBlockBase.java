@@ -730,7 +730,7 @@ public abstract class MTEMultiBlockBase extends MetaTileEntity
                             mOutputFluids = null;
                         }
                         outputAfterRecipe();
-                    mEfficiency = Math.max(
+                        mEfficiency = Math.max(
                             0,
                             Math.min(
                                 mEfficiency + mEfficiencyIncrease,

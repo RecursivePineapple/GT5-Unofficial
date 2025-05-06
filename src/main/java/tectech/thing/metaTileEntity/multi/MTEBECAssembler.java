@@ -29,6 +29,7 @@ import net.minecraft.world.World;
 import org.jetbrains.annotations.NotNull;
 
 import com.gtnewhorizon.structurelib.structure.IStructureDefinition;
+
 import gregtech.api.enums.GTValues;
 import gregtech.api.enums.ItemList;
 import gregtech.api.enums.NaniteTier;
@@ -86,7 +87,12 @@ public class MTEBECAssembler extends MTEBECMultiblockBase<MTEBECAssembler> imple
     @Override
     public IStructureDefinition<MTEBECAssembler> compile(String[][] definition) {
         structure.addCasing('A', SuperconductivePlasmaEnergyConduit);
-        structure.addCasingWithHatches('B', ElectromagneticallyIsolatedCasing, 1, 16, Arrays.asList(Energy, ExoticEnergy, InputBus, OutputBus, NaniteHatchElement.INSTANCE));
+        structure.addCasingWithHatches(
+            'B',
+            ElectromagneticallyIsolatedCasing,
+            1,
+            16,
+            Arrays.asList(Energy, ExoticEnergy, InputBus, OutputBus, NaniteHatchElement.INSTANCE));
         structure.addCasing('C', FineStructureConstantManipulator);
         structure.addCasing('D', ElectromagneticWaveguide);
         structure.addCasing('E', CyclotronCoil);
@@ -242,24 +248,34 @@ public class MTEBECAssembler extends MTEBECMultiblockBase<MTEBECAssembler> imple
 
     public CondensateDrainResult drainCondensate(CondensateStack stack) {
         if (network == null) {
-            return new CondensateDrainResult(isSafeModeEnabled() ? CondensateDrainStatus.PAUSE : CondensateDrainStatus.ABORT_MISSING, 0);
+            return new CondensateDrainResult(
+                isSafeModeEnabled() ? CondensateDrainStatus.PAUSE : CondensateDrainStatus.ABORT_MISSING,
+                0);
         }
 
         if (stack.amount > 0) {
             long stored = 0;
 
             for (BECInventory storage : network.getComponents(BECInventory.class)) {
-                stored = GTUtility.addSafe(stored, storage.getContents().getLong(stack.material));
+                stored = GTUtility.addSafe(
+                    stored,
+                    storage.getContents()
+                        .getLong(stack.material));
             }
 
             if (stored < stack.amount) {
-                return new CondensateDrainResult(isSafeModeEnabled() ? CondensateDrainStatus.PAUSE : CondensateDrainStatus.ABORT_MISSING, 0);
+                return new CondensateDrainResult(
+                    isSafeModeEnabled() ? CondensateDrainStatus.PAUSE : CondensateDrainStatus.ABORT_MISSING,
+                    0);
             }
 
             long remaining = stack.amount;
 
             for (BECInventory storage : network.getComponents(BECInventory.class)) {
-                long toConsume = Math.min(remaining, storage.getContents().getLong(stack.material));
+                long toConsume = Math.min(
+                    remaining,
+                    storage.getContents()
+                        .getLong(stack.material));
 
                 if (storage.removeCondensate(Arrays.asList(new CondensateStack(stack.material, toConsume)))) {
                     remaining -= toConsume;
@@ -293,12 +309,13 @@ public class MTEBECAssembler extends MTEBECMultiblockBase<MTEBECAssembler> imple
         if (!ItemList.Tool_DataStick.isStackEqual(heldItem, false, true)) return;
 
         heldItem.setTagCompound(getCopiedData(player));
-        heldItem.setStackDisplayName(MessageFormat.format(
-            "{0} Link Data Stick ({1}, {2}, {3})",
-            getStackForm(1).getDisplayName(),
-            igte.getXCoord(),
-            igte.getYCoord(),
-            igte.getZCoord()));
+        heldItem.setStackDisplayName(
+            MessageFormat.format(
+                "{0} Link Data Stick ({1}, {2}, {3})",
+                getStackForm(1).getDisplayName(),
+                igte.getXCoord(),
+                igte.getYCoord(),
+                igte.getZCoord()));
         player.addChatMessage(new ChatComponentText("Saved Link Data to Data Stick"));
     }
 
@@ -344,11 +361,17 @@ public class MTEBECAssembler extends MTEBECMultiblockBase<MTEBECAssembler> imple
 
         NaniteTier tier = tag.getInteger("nanite") == -1 ? null : NaniteTier.values()[tag.getInteger("nanite")];
 
-        currenttip.add(MessageFormat.format("Nanite Tier: {0}", tier == null ? "None" : tier.getStack().getDisplayName()));
+        currenttip.add(
+            MessageFormat.format(
+                "Nanite Tier: {0}",
+                tier == null ? "None"
+                    : tier.getStack()
+                        .getDisplayName()));
         currenttip.add(MessageFormat.format("Available Nanites: {0}", tag.getInteger("count")));
     }
 
     private enum NaniteHatchElement implements IHatchElement<MTEBECAssembler> {
+
         INSTANCE;
 
         @Override

@@ -1,10 +1,9 @@
 package gregtech.api.util;
 
-import gregtech.api.recipe.metadata.EmptyRecipeMetadataStorage;
 import net.minecraftforge.fluids.FluidStack;
 
 import gregtech.api.enums.NaniteTier;
-
+import gregtech.api.recipe.metadata.EmptyRecipeMetadataStorage;
 import tectech.mechanics.boseEinsteinCondensate.CondensateStack;
 
 public class GTBECRecipe extends GTRecipe {
@@ -38,7 +37,6 @@ public class GTBECRecipe extends GTRecipe {
         mCOutput = cOutput;
         mInputTiers = inputTiers;
     }
-
 
     public static int compare(GTRecipe a, GTRecipe b) {
         if (!(a instanceof GTBECRecipe bA)) return 0;
