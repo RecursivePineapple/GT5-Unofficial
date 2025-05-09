@@ -33,7 +33,7 @@ public class MTEPipeBlockBEC extends MTEPipeBEC {
     }
 
     @Override
-    public float getThickNess() {
+    public float getThickness() {
         return 1f;
     }
 

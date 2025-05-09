@@ -1,5 +1,7 @@
 package gregtech.common.blocks;
 
+import static com.gtnewhorizon.gtnhlib.util.AnimatedTooltipHandler.translatedText;
+
 import net.minecraft.block.Block;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.IIcon;
@@ -31,9 +33,9 @@ public class BlockCasings11 extends BlockCasingsAbstract {
         register(6, ItemList.Casing_Item_Pipe_Fluxed_Electrum, "Fluxed Electrum Item Pipe Casing");
         register(7, ItemList.Casing_Item_Pipe_Black_Plutonium, "Black Plutonium Item Pipe Casing");
 
-        register(8, ItemList.Casing_Item_BEC1, "Coherence-preserving Plasma Conduit", "gt.casing11.8.tooltip");
-        register(9, ItemList.Casing_Item_BEC2, "Electromagnetically-isolated Casing", "gt.casing11.9.tooltip");
-        register(10, ItemList.Casing_Item_BEC3, "Fine-structure Constant Manipulator", "gt.casing11.10.tooltip");
+        register(8, ItemList.Casing_Item_BEC1, "Coherence-preserving Plasma Conduit", translatedText("gt.casing11.8.tooltip"));
+        register(9, ItemList.Casing_Item_BEC2, "Electromagnetically-isolated Casing", translatedText("gt.casing11.9.tooltip"));
+        register(10, ItemList.Casing_Item_BEC3, "Fine-structure Constant Manipulator", translatedText("gt.casing11.10.tooltip"));
 
         for (int i = 0; i < 8; i++) {
             GTStructureChannels.ITEM_PIPE_CASING.registerAsIndicator(new ItemStack(this, 1, i), i + 1);

@@ -1,5 +1,7 @@
 package tectech.recipe;
 
+import static com.gtnewhorizon.gtnhlib.util.AnimatedTooltipHandler.*;
+
 import java.util.List;
 
 import javax.annotation.Nonnull;
@@ -33,11 +35,9 @@ public class BECRecipeMapFrontend extends AssemblyLineFrontend {
             String name = tier.getMaterial()
                 .getLocalizedNameForItem("%material");
 
-            currentTip.add(
-                GTUtility.GRAY + GTUtility.ITALIC
-                    + GTUtility.translate("gt.tooltip.nanite-tier", name, tier.ordinal()));
+            currentTip.add(GRAY + ITALIC + GTUtility.translate("gt.tooltip.nanite-tier", name, tier.ordinal()));
         } else {
-            currentTip.add(GTUtility.GRAY + GTUtility.ITALIC + GTUtility.translate("gt.tooltip.nanite-tier", "null"));
+            currentTip.add(GRAY + ITALIC + GTUtility.translate("gt.tooltip.nanite-tier", "null"));
         }
 
         return currentTip;

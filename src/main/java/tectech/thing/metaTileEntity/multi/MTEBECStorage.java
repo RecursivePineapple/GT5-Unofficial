@@ -28,7 +28,6 @@ import com.gtnewhorizons.modularui.api.math.Alignment;
 import com.gtnewhorizons.modularui.common.widget.DynamicPositionedColumn;
 import com.gtnewhorizons.modularui.common.widget.SlotWidget;
 import com.gtnewhorizons.modularui.common.widget.TextWidget;
-
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import gregtech.api.enums.GTValues;
@@ -39,7 +38,7 @@ import gregtech.api.interfaces.metatileentity.IMetaTileEntity;
 import gregtech.api.interfaces.tileentity.IGregTechTileEntity;
 import gregtech.api.recipe.check.CheckRecipeResult;
 import gregtech.api.recipe.check.CheckRecipeResultRegistry;
-import gregtech.api.structure.MultiblockTooltipBuilder2;
+import gregtech.api.structure.StructureWrapperTooltipBuilder;
 import gregtech.api.util.IntFraction;
 import gregtech.api.util.MultiblockTooltipBuilder;
 import gregtech.api.util.shutdown.ShutDownReason;
@@ -93,12 +92,11 @@ public class MTEBECStorage extends MTEBECMultiblockBase<MTEBECStorage> implement
     @Override
     public IStructureDefinition<MTEBECStorage> compile(String[][] definition) {
         structure.addCasing('A', SuperconductivePlasmaEnergyConduit);
-        structure
-            .addCasingWithHatches('B', ElectromagneticallyIsolatedCasing, 1, 16, Arrays.asList(Energy, ExoticEnergy));
+        structure.addCasing('B', ElectromagneticallyIsolatedCasing).withHatches(1, 16, Arrays.asList(Energy, ExoticEnergy));
         structure.addCasing('C', FineStructureConstantManipulator);
         structure.addCasing('D', ElectromagneticWaveguide);
         structure.addCasing('E', AdvancedFusionCoilII);
-        structure.addCasingWithHatches('1', FineStructureConstantManipulator, 2, 4, Arrays.asList(BECHatches.Hatch));
+        structure.addCasing('1', FineStructureConstantManipulator).withHatches(2, 4, Arrays.asList(BECHatches.Hatch));
 
         return structure.buildStructure(definition);
     }
@@ -142,7 +140,7 @@ public class MTEBECStorage extends MTEBECMultiblockBase<MTEBECStorage> implement
 
     @Override
     protected MultiblockTooltipBuilder createTooltip() {
-        MultiblockTooltipBuilder2<MTEBECStorage> tt = new MultiblockTooltipBuilder2<>(structure);
+        StructureWrapperTooltipBuilder<MTEBECStorage> tt = new StructureWrapperTooltipBuilder<>(structure);
 
         tt.addMachineType("BEC Storage")
             .addInfo("Stores fancy atoms");
@@ -156,7 +154,8 @@ public class MTEBECStorage extends MTEBECMultiblockBase<MTEBECStorage> implement
                 ElectromagneticallyIsolatedCasing,
                 FineStructureConstantManipulator,
                 ElectromagneticWaveguide,
-                AdvancedFusionCoilII));
+                AdvancedFusionCoilII),
+            null);
 
         tt.toolTipFinisher(EnumChatFormatting.WHITE, 0, GTValues.AuthorPineapple);
 

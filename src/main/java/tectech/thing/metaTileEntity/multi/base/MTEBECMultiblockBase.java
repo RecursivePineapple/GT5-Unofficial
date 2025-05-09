@@ -18,20 +18,16 @@ import net.minecraftforge.common.util.ForgeDirection;
 import com.gtnewhorizon.structurelib.alignment.constructable.ISurvivalConstructable;
 import com.gtnewhorizon.structurelib.structure.IStructureDefinition;
 import com.gtnewhorizon.structurelib.structure.ISurvivalBuildEnvironment;
-import com.gtnewhorizons.modularui.api.math.Alignment;
-import com.gtnewhorizons.modularui.common.widget.DynamicPositionedColumn;
-import com.gtnewhorizons.modularui.common.widget.FakeSyncWidget;
-import com.gtnewhorizons.modularui.common.widget.SlotWidget;
-import com.gtnewhorizons.modularui.common.widget.TextWidget;
-
 import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.relauncher.Side;
+import gregtech.api.enums.StructureError;
 import gregtech.api.interfaces.IHatchElement;
 import gregtech.api.interfaces.IIconContainer;
 import gregtech.api.interfaces.ITexture;
 import gregtech.api.interfaces.metatileentity.IMetaTileEntity;
 import gregtech.api.interfaces.tileentity.IGregTechTileEntity;
 import gregtech.api.render.TextureFactory;
+import gregtech.api.structure.IStructureInstance;
 import gregtech.api.structure.IStructureProvider;
 import gregtech.api.structure.StructureWrapper;
 import gregtech.api.structure.StructureWrapperInstanceInfo;
@@ -59,7 +55,7 @@ public abstract class MTEBECMultiblockBase<TSelf extends MTEBECMultiblockBase<TS
     public MTEBECMultiblockBase(int aID, String aName, String aNameRegional) {
         super(aID, aName, aNameRegional);
 
-        structure = new StructureWrapper<TSelf>(this);
+        structure = new StructureWrapper<>(this);
         structureInstanceInfo = null;
 
         structure.loadStructure();
@@ -73,28 +69,8 @@ public abstract class MTEBECMultiblockBase<TSelf extends MTEBECMultiblockBase<TS
     }
 
     @Override
-    public boolean isCorrectMachinePart(ItemStack aStack) {
-        return true;
-    }
-
-    @Override
-    public int getDamageToComponent(ItemStack aStack) {
-        return 0;
-    }
-
-    @Override
-    public boolean explodesOnComponentBreak(ItemStack aStack) {
-        return false;
-    }
-
-    @Override
     public boolean shouldCheckMaintenance() {
         return false;
-    }
-
-    @Override
-    public int getMaxEfficiency(ItemStack aStack) {
-        return 10_000;
     }
 
     @Override
@@ -133,7 +109,7 @@ public abstract class MTEBECMultiblockBase<TSelf extends MTEBECMultiblockBase<TS
             }
         }
 
-        return textures.toArray(new ITexture[textures.size()]);
+        return textures.toArray(new ITexture[0]);
     }
 
     protected ITexture getCasingTexture() {
@@ -162,7 +138,7 @@ public abstract class MTEBECMultiblockBase<TSelf extends MTEBECMultiblockBase<TS
     }
 
     @Override
-    public StructureWrapperInstanceInfo<TSelf> getWrapperInstanceInfo() {
+    public IStructureInstance getStructureInstance() {
         return structureInstanceInfo;
     }
 
@@ -176,34 +152,32 @@ public abstract class MTEBECMultiblockBase<TSelf extends MTEBECMultiblockBase<TS
     @Override
     @SuppressWarnings("unchecked")
     public void construct(ItemStack stackSize, boolean hintsOnly) {
-        structureInstanceInfo.construct((TSelf) this, stackSize, hintsOnly);
+        structure.construct((TSelf) this, stackSize, hintsOnly);
     }
 
     @Override
     @SuppressWarnings("unchecked")
     public int survivalConstruct(ItemStack stackSize, int elementBudget, ISurvivalBuildEnvironment env) {
-        return structureInstanceInfo.survivalConstruct((TSelf) this, stackSize, elementBudget, env);
+        return structure.survivalConstruct((TSelf) this, stackSize, elementBudget, env);
     }
 
     @Override
     @SuppressWarnings("unchecked")
     public boolean checkMachine_EM(IGregTechTileEntity iGregTechTileEntity, ItemStack itemStack) {
-        return structureInstanceInfo.checkStructure((TSelf) this);
+        return structure.checkStructure((TSelf) this);
     }
 
     private String errorMessage;
 
     @Override
-    protected void drawTexts(DynamicPositionedColumn screenElements, SlotWidget inventorySlot) {
-        super.drawTexts(screenElements, inventorySlot);
+    protected void validateStructure(Collection<StructureError> errors, NBTTagCompound context) {
+        structureInstanceInfo.validate(errors, context);
+    }
 
-        screenElements.widgets(new FakeSyncWidget.StringSyncer(() -> {
-            structureInstanceInfo.validate();
-            return structureInstanceInfo.getErrorMessage();
-        }, error -> errorMessage = error),
-            TextWidget.dynamicString(() -> errorMessage == null ? "" : errorMessage)
-                .setTextAlignment(Alignment.CenterLeft)
-                .setEnabled(errorMessage != null && !errorMessage.isEmpty()));
+    @Override
+    protected void localizeStructureErrors(Collection<StructureError> errors, NBTTagCompound context,
+        List<String> lines) {
+        structureInstanceInfo.localizeStructureErrors(errors, context, lines);
     }
 
     @Override

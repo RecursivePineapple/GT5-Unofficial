@@ -34,7 +34,6 @@ import com.gtnewhorizon.structurelib.structure.IStructureDefinition;
 import com.gtnewhorizons.modularui.common.widget.DynamicPositionedColumn;
 import com.gtnewhorizons.modularui.common.widget.FakeSyncWidget;
 import com.gtnewhorizons.modularui.common.widget.SlotWidget;
-
 import gregtech.api.GregTechAPI;
 import gregtech.api.enums.GTValues;
 import gregtech.api.enums.ItemList;
@@ -48,8 +47,9 @@ import gregtech.api.logic.ProcessingLogic;
 import gregtech.api.recipe.RecipeMap;
 import gregtech.api.recipe.check.CheckRecipeResult;
 import gregtech.api.recipe.check.SimpleCheckRecipeResult;
-import gregtech.api.structure.MultiblockTooltipBuilder2;
+import gregtech.api.structure.StructureWrapperTooltipBuilder;
 import gregtech.api.util.GTBECRecipe;
+import gregtech.api.util.GTDataUtils;
 import gregtech.api.util.GTRecipe;
 import gregtech.api.util.GTUtility;
 import gregtech.api.util.IGTHatchAdder;
@@ -106,12 +106,7 @@ public class MTEBECIONode extends MTEBECMultiblockBase<MTEBECIONode> implements 
     @Override
     public IStructureDefinition<MTEBECIONode> compile(String[][] definition) {
         structure.addCasing('A', SuperconductivePlasmaEnergyConduit);
-        structure.addCasingWithHatches(
-            'B',
-            ElectromagneticallyIsolatedCasing,
-            1,
-            16,
-            Arrays.asList(Energy, ExoticEnergy, InputBus, OutputBus, NaniteHatch.INSTANCE, ControllerHatch.INSTANCE));
+        structure.addCasing('B', ElectromagneticallyIsolatedCasing).withHatches(1, 16, Arrays.asList(Energy, ExoticEnergy, InputBus, OutputBus, NaniteHatch.INSTANCE, ControllerHatch.INSTANCE));
         structure.addCasing('C', FineStructureConstantManipulator);
         structure.addCasing('D', AdvancedFusionCoilII);
         structure.addCasing('E', ElectromagneticWaveguide);
@@ -129,7 +124,7 @@ public class MTEBECIONode extends MTEBECMultiblockBase<MTEBECIONode> implements 
 
     @Override
     protected MultiblockTooltipBuilder createTooltip() {
-        MultiblockTooltipBuilder2<MTEBECIONode> tt = new MultiblockTooltipBuilder2<>(structure);
+        StructureWrapperTooltipBuilder<MTEBECIONode> tt = new StructureWrapperTooltipBuilder<>(structure);
 
         tt.addMachineType("Input bus, Output bus")
             .addInfo("Teleports stuff");
@@ -275,7 +270,7 @@ public class MTEBECIONode extends MTEBECMultiblockBase<MTEBECIONode> implements 
 
         IntDivisionIterator iter = getCurrentSlot(progress);
 
-        return GTUtility.getIndexSafe(requiredNanites, iter.counter);
+        return GTDataUtils.getIndexSafe(requiredNanites, iter.counter);
     }
 
     private IntDivisionIterator getNextProgressGate(int progress) {
@@ -283,8 +278,7 @@ public class MTEBECIONode extends MTEBECMultiblockBase<MTEBECIONode> implements 
 
         IntDivisionIterator iter = getCurrentSlot(progress);
 
-        while (iter.hasNext() && iter.counter < requiredNanites.length
-            && requiredNanites[iter.counter].tier <= providedTier.tier) {
+        while (iter.hasNext() && iter.counter < requiredNanites.length && requiredNanites[iter.counter].tier <= providedTier.tier) {
             iter.nextInt();
         }
 
@@ -579,7 +573,7 @@ public class MTEBECIONode extends MTEBECMultiblockBase<MTEBECIONode> implements 
     }
 
     private static NaniteTier loadNanite(int id) {
-        return NaniteTier.fromMaterial(GTUtility.getIndexSafe(GregTechAPI.sGeneratedMaterials, id));
+        return NaniteTier.fromMaterial(GTDataUtils.getIndexSafe(GregTechAPI.sGeneratedMaterials, id));
     }
 
     @Override

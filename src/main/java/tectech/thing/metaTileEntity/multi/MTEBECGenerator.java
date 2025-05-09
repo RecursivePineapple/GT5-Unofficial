@@ -35,7 +35,6 @@ import com.gtnewhorizons.modularui.api.math.Alignment;
 import com.gtnewhorizons.modularui.common.widget.DynamicPositionedColumn;
 import com.gtnewhorizons.modularui.common.widget.SlotWidget;
 import com.gtnewhorizons.modularui.common.widget.TextWidget;
-
 import gregtech.api.enums.GTValues;
 import gregtech.api.enums.SoundResource;
 import gregtech.api.interfaces.ITexture;
@@ -48,7 +47,7 @@ import gregtech.api.metatileentity.implementations.MTEHatchMultiInput;
 import gregtech.api.recipe.RecipeMap;
 import gregtech.api.recipe.check.CheckRecipeResult;
 import gregtech.api.recipe.check.CheckRecipeResultRegistry;
-import gregtech.api.structure.MultiblockTooltipBuilder2;
+import gregtech.api.structure.StructureWrapperTooltipBuilder;
 import gregtech.api.util.GTBECRecipe;
 import gregtech.api.util.GTUtility;
 import gregtech.api.util.MultiblockTooltipBuilder;
@@ -103,20 +102,15 @@ public class MTEBECGenerator extends MTEBECMultiblockBase<MTEBECGenerator> imple
         structure.addCasing('C', FineStructureConstantManipulator);
         structure.addCasing('D', ElectromagneticWaveguide);
         structure.addCasing('E', AdvancedFusionCoilII);
-        structure.addCasingWithHatches('O', ElectromagneticallyIsolatedCasing, 2, 1, Arrays.asList(BECHatches.Hatch));
-        structure.addCasingWithHatches(
-            '1',
-            ElectromagneticallyIsolatedCasing,
-            1,
-            16,
-            Arrays.asList(InputBus, InputHatch, Energy, ExoticEnergy));
+        structure.addCasing('O', ElectromagneticallyIsolatedCasing).withUnlimitedHatches(2, Arrays.asList(BECHatches.Hatch));
+        structure.addCasing('1', ElectromagneticallyIsolatedCasing).withHatches(1, 16, Arrays.asList(InputBus, InputHatch, Energy, ExoticEnergy));
 
         return structure.buildStructure(definition);
     }
 
     @Override
     protected MultiblockTooltipBuilder createTooltip() {
-        MultiblockTooltipBuilder2<MTEBECGenerator> tt = new MultiblockTooltipBuilder2<>(structure);
+        StructureWrapperTooltipBuilder<MTEBECGenerator> tt = new StructureWrapperTooltipBuilder<>(structure);
 
         tt.addMachineType("BEC Generator")
             .addInfo("Makes fancy atoms");
@@ -133,7 +127,8 @@ public class MTEBECGenerator extends MTEBECMultiblockBase<MTEBECGenerator> imple
                 ElectromagneticallyIsolatedCasing,
                 SuperconductivePlasmaEnergyConduit,
                 AdvancedFusionCoilII,
-                ElectromagneticWaveguide));
+                ElectromagneticWaveguide),
+            null);
 
         tt.toolTipFinisher(EnumChatFormatting.WHITE, 0, GTValues.AuthorPineapple);
 

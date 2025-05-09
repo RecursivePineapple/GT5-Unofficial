@@ -108,6 +108,13 @@ public enum Casings implements ICasing {
     BlackPlutoniumItemPipeCasing
         (() -> GregTechAPI.sBlockCasings11, 7, gt(16, 64 + 7)),
 
+    SuperconductivePlasmaEnergyConduit
+        (() -> GregTechAPI.sBlockCasings11, 8, gt(16, 64 + 8)),
+    ElectromagneticallyIsolatedCasing
+        (() -> GregTechAPI.sBlockCasings11, 9, gt(16, 64 + 9)),
+    FineStructureConstantManipulator
+        (() -> GregTechAPI.sBlockCasings11, 10, gt(16, 64 + 10)),
+
     EntropyResistantCasing
         (() -> GregTechAPI.sBlockCasings12, 10, gt(16, 80 + 10)),
 
@@ -121,6 +128,8 @@ public enum Casings implements ICasing {
         (() -> GregTechAPI.sBlockGlass1, 3, gt(16, 3)),
     HawkingRadiationRealignmentFocus
         (() -> GregTechAPI.sBlockGlass1, 4, gt(16, 4)),
+    ElectromagneticWaveguide
+        (() -> GregTechAPI.sBlockGlass1, 5, -1),
 
     FusionMachineCasingMKIV
         (() -> ModBlocks.blockCasings6Misc, 0, gtpp(3, 4)),

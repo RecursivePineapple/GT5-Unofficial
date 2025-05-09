@@ -29,7 +29,6 @@ import net.minecraft.world.World;
 import org.jetbrains.annotations.NotNull;
 
 import com.gtnewhorizon.structurelib.structure.IStructureDefinition;
-
 import gregtech.api.enums.GTValues;
 import gregtech.api.enums.ItemList;
 import gregtech.api.enums.NaniteTier;
@@ -42,7 +41,7 @@ import gregtech.api.metatileentity.implementations.MTEHatchNanite;
 import gregtech.api.recipe.RecipeMap;
 import gregtech.api.recipe.check.CheckRecipeResult;
 import gregtech.api.recipe.check.CheckRecipeResultRegistry;
-import gregtech.api.structure.MultiblockTooltipBuilder2;
+import gregtech.api.structure.StructureWrapperTooltipBuilder;
 import gregtech.api.util.GTUtility;
 import gregtech.api.util.IGTHatchAdder;
 import gregtech.api.util.MultiblockTooltipBuilder;
@@ -87,17 +86,12 @@ public class MTEBECAssembler extends MTEBECMultiblockBase<MTEBECAssembler> imple
     @Override
     public IStructureDefinition<MTEBECAssembler> compile(String[][] definition) {
         structure.addCasing('A', SuperconductivePlasmaEnergyConduit);
-        structure.addCasingWithHatches(
-            'B',
-            ElectromagneticallyIsolatedCasing,
-            1,
-            16,
-            Arrays.asList(Energy, ExoticEnergy, InputBus, OutputBus, NaniteHatchElement.INSTANCE));
+        structure.addCasing('B', ElectromagneticallyIsolatedCasing).withHatches(1, 16, Arrays.asList(Energy, ExoticEnergy, InputBus, OutputBus, NaniteHatchElement.INSTANCE));
         structure.addCasing('C', FineStructureConstantManipulator);
         structure.addCasing('D', ElectromagneticWaveguide);
         structure.addCasing('E', CyclotronCoil);
         structure.addCasing('F', AdvancedFusionCoilII);
-        structure.addCasingWithHatches('G', ElectromagneticallyIsolatedCasing, 2, 2, Arrays.asList(BECHatches.Hatch));
+        structure.addCasing('G', ElectromagneticallyIsolatedCasing).withHatches(2, 2, Arrays.asList(BECHatches.Hatch));
 
         return structure.buildStructure(definition);
     }
@@ -111,7 +105,7 @@ public class MTEBECAssembler extends MTEBECMultiblockBase<MTEBECAssembler> imple
 
     @Override
     protected MultiblockTooltipBuilder createTooltip() {
-        MultiblockTooltipBuilder2<MTEBECAssembler> tt = new MultiblockTooltipBuilder2<>(structure);
+        StructureWrapperTooltipBuilder<MTEBECAssembler> tt = new StructureWrapperTooltipBuilder<>(structure);
 
         tt.addMachineType("BEC Assembler")
             .addInfo("Prints fancy atoms");
