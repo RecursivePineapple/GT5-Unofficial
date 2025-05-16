@@ -1,4 +1,4 @@
-package tectech.thing.metaTileEntity.multi;
+package tectech.thing.metaTileEntity.multi.bec;
 
 import static gregtech.api.casing.Casings.AdvancedFusionCoilII;
 import static gregtech.api.casing.Casings.CyclotronCoil;
@@ -8,12 +8,12 @@ import static gregtech.api.casing.Casings.FineStructureConstantManipulator;
 import static gregtech.api.casing.Casings.SuperconductivePlasmaEnergyConduit;
 import static gregtech.api.enums.HatchElement.Energy;
 import static gregtech.api.enums.HatchElement.ExoticEnergy;
-import static gregtech.api.enums.HatchElement.InputBus;
-import static gregtech.api.enums.HatchElement.OutputBus;
 
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
@@ -42,18 +42,14 @@ import gregtech.api.recipe.RecipeMap;
 import gregtech.api.recipe.check.CheckRecipeResult;
 import gregtech.api.recipe.check.CheckRecipeResultRegistry;
 import gregtech.api.structure.StructureWrapperTooltipBuilder;
-import gregtech.api.util.GTUtility;
 import gregtech.api.util.IGTHatchAdder;
 import gregtech.api.util.MultiblockTooltipBuilder;
 import mcp.mobius.waila.api.IWailaConfigHandler;
 import mcp.mobius.waila.api.IWailaDataAccessor;
-import tectech.mechanics.boseEinsteinCondensate.BECFactoryGrid;
-import tectech.mechanics.boseEinsteinCondensate.BECInventory;
 import tectech.mechanics.boseEinsteinCondensate.CondensateStack;
 import tectech.recipe.TecTechRecipeMaps;
 import tectech.thing.CustomItemList;
 import tectech.thing.metaTileEntity.multi.base.MTEBECMultiblockBase;
-import tectech.thing.metaTileEntity.multi.bec.MTEBECIONode;
 import tectech.thing.metaTileEntity.multi.structures.BECStructureDefinitions;
 
 public class MTEBECAssembler extends MTEBECMultiblockBase<MTEBECAssembler> implements IDataCopyable {
@@ -86,7 +82,7 @@ public class MTEBECAssembler extends MTEBECMultiblockBase<MTEBECAssembler> imple
     @Override
     public IStructureDefinition<MTEBECAssembler> compile(String[][] definition) {
         structure.addCasing('A', SuperconductivePlasmaEnergyConduit);
-        structure.addCasing('B', ElectromagneticallyIsolatedCasing).withHatches(1, 16, Arrays.asList(Energy, ExoticEnergy, InputBus, OutputBus, NaniteHatchElement.INSTANCE));
+        structure.addCasing('B', ElectromagneticallyIsolatedCasing).withHatches(1, 16, Arrays.asList(Energy, ExoticEnergy, NaniteHatchElement.INSTANCE));
         structure.addCasing('C', FineStructureConstantManipulator);
         structure.addCasing('D', ElectromagneticWaveguide);
         structure.addCasing('E', CyclotronCoil);
@@ -132,20 +128,6 @@ public class MTEBECAssembler extends MTEBECMultiblockBase<MTEBECAssembler> imple
     @Override
     protected @NotNull CheckRecipeResult checkProcessing_EM() {
         return CheckRecipeResultRegistry.SUCCESSFUL;
-    }
-
-    @Override
-    public void onFirstTick_EM(IGregTechTileEntity aBaseMetaTileEntity) {
-        super.onFirstTick_EM(aBaseMetaTileEntity);
-
-        BECFactoryGrid.INSTANCE.addElement(this);
-    }
-
-    @Override
-    public void onRemoval() {
-        super.onRemoval();
-
-        BECFactoryGrid.INSTANCE.removeElement(this);
     }
 
     @Override
@@ -214,70 +196,16 @@ public class MTEBECAssembler extends MTEBECMultiblockBase<MTEBECAssembler> imple
         node.setNaniteShare(null, 0);
     }
 
-    public enum CondensateDrainStatus {
-        /** Craft should be aborted because the input has invalid condensate. */
-        ABORT_CLOGGED,
-        /** Craft should be aborted because the input is missing condensate. */
-        ABORT_MISSING,
-        /** Craft should be paused. */
-        PAUSE,
-        /** Craft should continue. */
-        OK
-    }
-
-    public static class CondensateDrainResult {
-
-        public CondensateDrainStatus status;
-        public int slowdowns;
-
-        public CondensateDrainResult(CondensateDrainStatus status, int slowdowns) {
-            this.status = status;
-            this.slowdowns = slowdowns;
-        }
-    }
-
-    private boolean isSafeModeEnabled() {
-        return true;
-    }
-
-    public CondensateDrainResult drainCondensate(CondensateStack stack) {
-        if (network == null) {
-            return new CondensateDrainResult(
-                isSafeModeEnabled() ? CondensateDrainStatus.PAUSE : CondensateDrainStatus.ABORT_MISSING,
-                0);
-        }
+    public void drainCondensate(CondensateStack stack) {
+        if (network == null) return;
 
         if (stack.amount > 0) {
-            long stored = 0;
-
-            for (BECInventory storage : network.getComponents(BECInventory.class)) {
-                stored = GTUtility.addSafe(
-                    stored,
-                    storage.getContents()
-                        .getLong(stack.material));
-            }
-
-            if (stored < stack.amount) {
-                return new CondensateDrainResult(
-                    isSafeModeEnabled() ? CondensateDrainStatus.PAUSE : CondensateDrainStatus.ABORT_MISSING,
-                    0);
-            }
-
-            long remaining = stack.amount;
-
-            for (BECInventory storage : network.getComponents(BECInventory.class)) {
-                long toConsume = Math.min(
-                    remaining,
-                    storage.getContents()
-                        .getLong(stack.material));
-
-                if (storage.removeCondensate(Arrays.asList(new CondensateStack(stack.material, toConsume)))) {
-                    remaining -= toConsume;
-                }
-            }
+            network.drainCondensate(this, Collections.singletonList(stack));
         }
+    }
 
-        return new CondensateDrainResult(CondensateDrainStatus.OK, isSafeModeEnabled() ? 1 : 0);
+    public int getSlowdowns(Collection<Object> validMaterials) {
+        return network.getSlowdowns(this, validMaterials);
     }
 
     @Override

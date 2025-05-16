@@ -14,6 +14,7 @@ import static gregtech.api.enums.MetaTileEntityIDs.BasicTeslaTransceiver2by2;
 import static gregtech.api.enums.MetaTileEntityIDs.BasicTeslaTransceiver3by3;
 import static gregtech.api.enums.MetaTileEntityIDs.BasicTeslaTransceiver4by4;
 import static gregtech.api.enums.MetaTileEntityIDs.BoseEinsteinCondensateAssembler;
+import static gregtech.api.enums.MetaTileEntityIDs.BoseEinsteinCondensateDiode;
 import static gregtech.api.enums.MetaTileEntityIDs.BoseEinsteinCondensateGenerator;
 import static gregtech.api.enums.MetaTileEntityIDs.BoseEinsteinCondensateHatch;
 import static gregtech.api.enums.MetaTileEntityIDs.BoseEinsteinCondensateIONode;
@@ -331,6 +332,7 @@ import static tectech.thing.CustomItemList.Machine_DebugGenny;
 import static tectech.thing.CustomItemList.Machine_DebugPollutor;
 import static tectech.thing.CustomItemList.Machine_DebugWriter;
 import static tectech.thing.CustomItemList.Machine_Multi_BECAssembler;
+import static tectech.thing.CustomItemList.Machine_Multi_BECDiode;
 import static tectech.thing.CustomItemList.Machine_Multi_BECGenerator;
 import static tectech.thing.CustomItemList.Machine_Multi_BECIONode;
 import static tectech.thing.CustomItemList.Machine_Multi_BECStorage;
@@ -658,9 +660,10 @@ import tectech.thing.metaTileEntity.hatch.MTEHatchWirelessDataItemsInput;
 import tectech.thing.metaTileEntity.hatch.MTEHatchWirelessDataItemsOutput;
 import tectech.thing.metaTileEntity.hatch.MTEHatchWirelessMulti;
 import tectech.thing.metaTileEntity.multi.MTEActiveTransformer;
-import tectech.thing.metaTileEntity.multi.MTEBECAssembler;
-import tectech.thing.metaTileEntity.multi.MTEBECGenerator;
-import tectech.thing.metaTileEntity.multi.MTEBECStorage;
+import tectech.thing.metaTileEntity.multi.bec.MTEBECAssembler;
+import tectech.thing.metaTileEntity.multi.bec.MTEBECDiode;
+import tectech.thing.metaTileEntity.multi.bec.MTEBECGenerator;
+import tectech.thing.metaTileEntity.multi.bec.MTEBECStorage;
 import tectech.thing.metaTileEntity.multi.MTEDataBank;
 import tectech.thing.metaTileEntity.multi.MTEEnergyInfuser;
 import tectech.thing.metaTileEntity.multi.MTEEyeOfHarmony;
@@ -2305,6 +2308,11 @@ public class MachineLoader implements Runnable {
                 HatchIOController.ID,
                 "hatch.io-node-controller",
                 "Teleportation Node Controller Hatch").getStackForm(1L));
+        Machine_Multi_BECDiode.set(
+            new MTEBECDiode(
+                BoseEinsteinCondensateDiode.ID,
+                "multimachine.em.bec-diode",
+                "Bose-Einstein Condensate Maxwell Gate").getStackForm(1L));
 
         // ===================================================================================================
         // Hatches

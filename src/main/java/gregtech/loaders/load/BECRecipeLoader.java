@@ -224,7 +224,7 @@ public class BECRecipeLoader {
                 GTOreDictUnificator.get(OrePrefixes.ingot, Materials.Iron, 2L),
                 GTOreDictUnificator.get(OrePrefixes.ingot, Materials.Iron, 2L),
                 GTOreDictUnificator.get(OrePrefixes.ingot, Materials.Iron, 2L))
-            .fluidInputs(Materials.Copper.getMolten(144L))
+            .fluidInputs(Materials.Titanium.getMolten(144L))
             .itemOutputs(GTOreDictUnificator.get(OrePrefixes.plate, Materials.Iron, 2L))
             .metadata(
                 GTRecipeConstants.NANITE_TIERS,
@@ -260,5 +260,21 @@ public class BECRecipeLoader {
         }
 
         return mat;
+    }
+
+    public static MaterialInfo getInfoForCondensate(CondensateStack stack) {
+        if (stack.material instanceof Materials gtMat) {
+            return getMaterial(gtMat);
+        }
+
+        if (stack.material instanceof Material gtppMat) {
+            return getMaterial(gtppMat);
+        }
+
+        if (stack.material instanceof Werkstoff bwMat) {
+            return getMaterial(bwMat);
+        }
+
+        return null;
     }
 }

@@ -20,12 +20,13 @@ import tectech.mechanics.boseEinsteinCondensate.BECFactoryElement;
 import tectech.mechanics.boseEinsteinCondensate.BECFactoryGrid;
 import tectech.mechanics.boseEinsteinCondensate.BECFactoryNetwork;
 import tectech.mechanics.boseEinsteinCondensate.BECInventory;
+import tectech.thing.metaTileEntity.multi.base.MTEBECMultiblockBase;
 
 public class MTEHatchBEC extends MTEBaseFactoryHatch implements BECFactoryElement {
 
     private BECFactoryNetwork network;
 
-    private BECFactoryElement controller;
+    private MTEBECMultiblockBase<?> controller;
 
     protected MTEHatchBEC(MTEHatchBEC prototype) {
         super(prototype);
@@ -75,7 +76,7 @@ public class MTEHatchBEC extends MTEBaseFactoryHatch implements BECFactoryElemen
             }
         }
 
-        return data.toArray(new String[data.size()]);
+        return data.toArray(new String[0]);
     }
 
     @Override
@@ -98,9 +99,7 @@ public class MTEHatchBEC extends MTEBaseFactoryHatch implements BECFactoryElemen
             }
         }
 
-        if (controller != null && controller.getNetwork() != null) {
-            neighbours.add(controller);
-        }
+        if (controller != null) neighbours.add(controller);
     }
 
     @Override
@@ -139,10 +138,9 @@ public class MTEHatchBEC extends MTEBaseFactoryHatch implements BECFactoryElemen
         BECFactoryGrid.INSTANCE.addElement(this);
     }
 
-    public void setController(BECFactoryElement controller) {
+    public void setController(MTEBECMultiblockBase<?> controller) {
         if (controller != this.controller) {
             this.controller = controller;
-            BECFactoryGrid.INSTANCE.addElement(this);
         }
     }
 }

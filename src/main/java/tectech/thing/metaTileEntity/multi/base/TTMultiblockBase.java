@@ -1650,7 +1650,7 @@ public abstract class TTMultiblockBase extends MTEExtendedPowerMultiBlockBase<TT
 
     @Override
     public List<MTEHatch> getExoticAndNormalEnergyHatchList() {
-        List<MTEHatch> list = new ArrayList<>();
+        List<MTEHatch> list = new ArrayList<>(mEnergyHatches.size() + eEnergyMulti.size());
         list.addAll(filterValidMTEs(mEnergyHatches));
         list.addAll(filterValidMTEs(eEnergyMulti));
         return list;

@@ -1,4 +1,4 @@
-package tectech.thing.metaTileEntity.multi;
+package tectech.thing.metaTileEntity.multi.bec;
 
 import static gregtech.api.casing.Casings.AdvancedFusionCoilII;
 import static gregtech.api.casing.Casings.ElectromagneticWaveguide;
@@ -57,7 +57,6 @@ import gregtech.client.volumetric.LinearSound;
 import gregtech.common.tileentities.machines.MTEHatchInputME;
 import gregtech.loaders.load.BECRecipeLoader;
 import it.unimi.dsi.fastutil.objects.Object2LongOpenHashMap;
-import tectech.mechanics.boseEinsteinCondensate.BECFactoryGrid;
 import tectech.mechanics.boseEinsteinCondensate.BECInventory;
 import tectech.mechanics.boseEinsteinCondensate.CondensateStack;
 import tectech.recipe.TecTechRecipeMaps;
@@ -217,20 +216,6 @@ public class MTEBECGenerator extends MTEBECMultiblockBase<MTEBECGenerator> imple
 
             mOutputCondensate = null;
         }
-    }
-
-    @Override
-    public void onFirstTick_EM(IGregTechTileEntity aBaseMetaTileEntity) {
-        super.onFirstTick_EM(aBaseMetaTileEntity);
-
-        BECFactoryGrid.INSTANCE.addElement(this);
-    }
-
-    @Override
-    public void onRemoval() {
-        super.onRemoval();
-
-        BECFactoryGrid.INSTANCE.removeElement(this);
     }
 
     @Override

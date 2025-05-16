@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
@@ -53,6 +54,10 @@ public class CondensateStack {
     public static @Nullable CondensateStack fromFluid(FluidStack fluid) {
         if (fluid == null) return null;
 
+        if (fluid instanceof FakeCondensateFluidStack fakeFluid) {
+            return fakeFluid.condensateStack.copy();
+        }
+
         MaterialInfo material = BECRecipeLoader.FLUID_MATS.get(fluid.getFluid());
 
         if (material == null) return null;
@@ -63,7 +68,7 @@ public class CondensateStack {
     public static CondensateStack[] fromFluids(FluidStack... fluids) {
         return Arrays.stream(fluids)
             .map(CondensateStack::fromFluid)
-            .filter(x -> x != null)
+            .filter(Objects::nonNull)
             .toArray(CondensateStack[]::new);
     }
 
@@ -83,7 +88,7 @@ public class CondensateStack {
     public static CondensateStack[] fromStacks(ItemStack... fluids) {
         return Arrays.stream(fluids)
             .map(CondensateStack::fromStack)
-            .filter(x -> x != null)
+            .filter(Objects::nonNull)
             .toArray(CondensateStack[]::new);
     }
 
@@ -204,5 +209,16 @@ public class CondensateStack {
         return Arrays.stream(condensate)
             .map(CondensateStack::getPreview)
             .toArray(ItemStack[]::new);
+    }
+
+    public static class FakeCondensateFluidStack extends FluidStack {
+
+        public final CondensateStack condensateStack;
+
+        public FakeCondensateFluidStack(CondensateStack stack) {
+            super(Objects.requireNonNull(BECRecipeLoader.getInfoForCondensate(stack)).getOutputFluid(), stack.amount > Integer.MAX_VALUE ? Integer.MAX_VALUE : (int) stack.amount);
+
+            this.condensateStack = stack;
+        }
     }
 }

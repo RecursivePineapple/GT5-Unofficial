@@ -96,6 +96,7 @@ public class Textures {
         MACHINE_CASING_ITEM_PIPE_FLUXED_ELECTRUM,
         MACHINE_CASING_ITEM_PIPE_BLACK_PLUTONIUM,
 
+        BEC1_BLANK,
         BEC1,
         BEC1_90,
         BEC2,

@@ -13,9 +13,4 @@ public interface BECFactoryElement extends IFactoryElement<BECFactoryElement, BE
     }
 
     ConnectionType getConnectionOnSide(ForgeDirection side);
-
-    /** Elements that should be present in the routing map should return true here. */
-    default boolean impactsRouting() {
-        return false;
-    }
 }

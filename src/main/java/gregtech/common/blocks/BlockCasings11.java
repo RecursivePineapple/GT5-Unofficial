@@ -1,6 +1,13 @@
 package gregtech.common.blocks;
 
 import static com.gtnewhorizon.gtnhlib.util.AnimatedTooltipHandler.translatedText;
+import static gregtech.api.util.GTMathUtils.vec;
+import static net.minecraftforge.common.util.ForgeDirection.DOWN;
+import static net.minecraftforge.common.util.ForgeDirection.EAST;
+import static net.minecraftforge.common.util.ForgeDirection.NORTH;
+import static net.minecraftforge.common.util.ForgeDirection.SOUTH;
+import static net.minecraftforge.common.util.ForgeDirection.UP;
+import static net.minecraftforge.common.util.ForgeDirection.WEST;
 
 import net.minecraft.block.Block;
 import net.minecraft.item.ItemStack;
@@ -8,11 +15,12 @@ import net.minecraft.util.IIcon;
 import net.minecraft.world.IBlockAccess;
 import net.minecraftforge.common.util.ForgeDirection;
 
+import org.joml.Vector3i;
+
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import gregtech.api.enums.ItemList;
 import gregtech.api.enums.Textures;
-import gregtech.api.util.GTUtility;
 import gregtech.common.misc.GTStructureChannels;
 
 /**
@@ -40,6 +48,11 @@ public class BlockCasings11 extends BlockCasingsAbstract {
         for (int i = 0; i < 8; i++) {
             GTStructureChannels.ITEM_PIPE_CASING.registerAsIndicator(new ItemStack(this, 1, i), i + 1);
         }
+    }
+
+    @Override
+    public int getRenderType() {
+        return 0;
     }
 
     @Override
@@ -76,48 +89,179 @@ public class BlockCasings11 extends BlockCasingsAbstract {
         };
     }
 
-    private int getCTMPriority(IBlockAccess world, int x, int y, int z, boolean includeSimilar) {
-        Block block = world.getBlock(x, y, z);
-
-        if (block != this) return 0;
-
-        int meta = world.getBlockMetadata(x, y, z);
-
-        return switch (meta) {
-            case 9 -> includeSimilar ? 1 : 0;
-            case 10 -> includeSimilar ? 2 : 0;
-            case 8 -> 3;
-            default -> 0;
-        };
+    private enum IconType {
+        NONE,
+        NORMAL,
+        ROTATED
     }
+
+    private static final IconType[][] ICONS = {
+        { // facing_x
+            IconType.NORMAL, // down
+            IconType.NORMAL, // up
+            IconType.NORMAL, // north
+            IconType.NORMAL, // south
+            IconType.NONE, // west
+            IconType.NONE, // east
+        },
+        { // facing_y
+            IconType.NONE, // down
+            IconType.NONE, // up
+            IconType.ROTATED, // north
+            IconType.ROTATED, // south
+            IconType.ROTATED, // west
+            IconType.ROTATED, // east
+        },
+        { // facing_z
+            IconType.ROTATED, // down
+            IconType.ROTATED, // up
+            IconType.NONE, // north
+            IconType.NONE, // south
+            IconType.NORMAL, // west
+            IconType.NORMAL, // east
+        },
+        { // plane_x
+            IconType.ROTATED, // down
+            IconType.ROTATED, // up
+            IconType.ROTATED, // north
+            IconType.ROTATED, // south
+            IconType.NONE, // west
+            IconType.NONE, // east
+        },
+        { // plane_y
+            IconType.NONE, // down
+            IconType.NONE, // up
+            IconType.NORMAL, // north
+            IconType.NORMAL, // south
+            IconType.NORMAL, // west
+            IconType.NORMAL, // east
+        },
+        { // plane_z
+            IconType.NORMAL, // down
+            IconType.NORMAL, // up
+            IconType.NONE, // north
+            IconType.NONE, // south
+            IconType.ROTATED, // west
+            IconType.ROTATED, // east
+        },
+    };
 
     @SideOnly(Side.CLIENT)
     private IIcon getCTMIcon(IBlockAccess world, int x, int y, int z, ForgeDirection side) {
-        int x1 = getCTMPriority(world, x + 1, y, z, true), x2 = getCTMPriority(world, x - 1, y, z, true),
-            y1 = getCTMPriority(world, x, y + 1, z, side.offsetY != 0),
-            y2 = getCTMPriority(world, x, y - 1, z, side.offsetY != 0), z1 = getCTMPriority(world, x, y, z + 1, true),
-            z2 = getCTMPriority(world, x, y, z - 1, true);
+        Orientation orientation = getConduitOrientation(world, x, y, z);
 
-        return switch (side) {
-            case UP, DOWN -> {
-                int max = GTUtility.max(x1, x2, z1, z2);
-
-                yield max == x1 || max == x2 ? Textures.BlockIcons.BEC1.getIcon()
-                    : Textures.BlockIcons.BEC1_90.getIcon();
-            }
-            case EAST, WEST -> {
-                int max = GTUtility.max(y1, y2, z1, z2);
-
-                yield max == z1 || max == z2 || max == 0 ? Textures.BlockIcons.BEC1.getIcon()
-                    : Textures.BlockIcons.BEC1_90.getIcon();
-            }
-            case NORTH, SOUTH -> {
-                int max = GTUtility.max(x1, x2, y1, y2);
-
-                yield max == x1 || max == x2 ? Textures.BlockIcons.BEC1.getIcon()
-                    : Textures.BlockIcons.BEC1_90.getIcon();
-            }
-            default -> Textures.BlockIcons.BEC1.getIcon();
+        return switch (ICONS[orientation.ordinal()][side.ordinal()]) {
+            case NONE -> Textures.BlockIcons.BEC1_BLANK.getIcon();
+            case NORMAL -> Textures.BlockIcons.BEC1.getIcon();
+            case ROTATED -> Textures.BlockIcons.BEC1_90.getIcon();
         };
+    }
+
+    private static final ForgeDirection[] HALF = { SOUTH, UP, EAST };
+
+    private enum Orientation {
+        FACING_X,
+        FACING_Y,
+        FACING_Z,
+        PLANE_X,
+        PLANE_Y,
+        PLANE_Z;
+
+        public static Orientation facing(ForgeDirection dir) {
+            return switch(dir) {
+                case DOWN, UP -> FACING_Y;
+                case NORTH, SOUTH -> FACING_Z;
+                case EAST, WEST -> FACING_X;
+                case UNKNOWN -> null;
+            };
+        }
+
+        public static Orientation plane(ForgeDirection normal) {
+            return switch(normal) {
+                case DOWN, UP -> PLANE_Y;
+                case NORTH, SOUTH -> PLANE_Z;
+                case EAST, WEST -> PLANE_X;
+                case UNKNOWN -> null;
+            };
+        }
+    }
+
+    private static final ForgeDirection[][] SIDES = {
+        {}, // down
+        {EAST, SOUTH, WEST, NORTH}, // up
+        {}, // north
+        {UP, EAST, DOWN, WEST}, // south
+        {}, // west
+        {UP, SOUTH, DOWN, NORTH}, // east
+    };
+
+    private Orientation getConduitOrientation(IBlockAccess world, int x, int y, int z) {
+        for (ForgeDirection dir : ForgeDirection.VALID_DIRECTIONS) {
+            Block block = world.getBlock(x + dir.offsetX, y + dir.offsetY, z + dir.offsetZ);
+
+            if (block != this) continue;
+
+            int meta = world.getBlockMetadata(x + dir.offsetX, y + dir.offsetY, z + dir.offsetZ);
+
+            if (meta == 8) return Orientation.facing(dir);
+        }
+
+        int max = 0;
+        ForgeDirection maxNormal = null;
+        Vector3i v = new Vector3i();
+
+        for (ForgeDirection normal : HALF) {
+            int count = 0;
+
+            for (int i = 0; i < 4; i++) {
+                ForgeDirection a = SIDES[normal.ordinal()][i];
+                ForgeDirection b = SIDES[normal.ordinal()][(i + 1) % 4];
+
+                v.set(x, y, z).add(vec(a)).add(vec(b));
+
+                Block block = world.getBlock(v.x, v.y, v.z);
+
+                if (block != this) continue;
+
+                int meta = world.getBlockMetadata(v.x, v.y, v.z);
+
+                if (meta == 8) count++;
+            }
+
+            if (count > 0 && count > max) {
+                maxNormal = normal;
+                max = count;
+
+                if (count == 4) break;
+            }
+        }
+
+        if (maxNormal != null) return Orientation.plane(maxNormal);
+
+        max = 0;
+        ForgeDirection maxDir = null;
+
+        for (ForgeDirection dir : ForgeDirection.VALID_DIRECTIONS) {
+            Block block = world.getBlock(x + dir.offsetX, y + dir.offsetY, z + dir.offsetZ);
+
+            if (block != this) continue;
+
+            int meta = world.getBlockMetadata(x + dir.offsetX, y + dir.offsetY, z + dir.offsetZ);
+
+            int value = switch (meta) {
+                case 9 -> 1;
+                case 10 -> 2;
+                default -> 0;
+            };
+
+            if (value > max) {
+                maxDir = dir;
+                max = value;
+            }
+        }
+
+        if (maxDir != null) return Orientation.facing(maxDir);
+
+        return Orientation.plane(UP);
     }
 }

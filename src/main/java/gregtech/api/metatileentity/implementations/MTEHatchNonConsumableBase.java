@@ -83,6 +83,10 @@ public abstract class MTEHatchNonConsumableBase extends MTEHatch
 
     @Override
     public void setItemCount(int amount) {
+        if (itemCount != amount) {
+            changed = true;
+        }
+
         itemCount = amount;
     }
 

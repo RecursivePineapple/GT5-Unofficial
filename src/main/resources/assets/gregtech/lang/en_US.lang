@@ -443,6 +443,7 @@ gt.recipe.category.tic_bolt_molding=TiC Bolt Molding
 
 # Misc Tooltips
 gt.tooltip.nanite-tier=Nanite Tier: %s
+gt.tooltip.required-nanite=Required Nanite: %s
 
 GT5U.machines.tier=Tier
 GT5U.machines.workarea=Work Area

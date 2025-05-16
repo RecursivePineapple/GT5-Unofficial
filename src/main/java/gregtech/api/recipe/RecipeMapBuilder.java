@@ -29,6 +29,7 @@ import gregtech.api.objects.overclockdescriber.OverclockDescriber;
 import gregtech.api.util.GTRecipe;
 import gregtech.api.util.GTRecipeBuilder;
 import gregtech.api.util.MethodsReturnNonnullByDefault;
+import gregtech.nei.FluidDisplayFactory;
 import gregtech.nei.formatter.INEISpecialInfoFormatter;
 
 // spotless:off spotless likes formatting @code to &#64;code
@@ -488,6 +489,11 @@ public final class RecipeMapBuilder<B extends RecipeMapBackend> {
      */
     public RecipeMapBuilder<B> frontend(RecipeMapFrontend.FrontendCreator frontendCreator) {
         this.frontendCreator = frontendCreator;
+        return this;
+    }
+
+    public RecipeMapBuilder<B> fluidDisplayFactory(FluidDisplayFactory fluidDisplayFactory){
+        uiPropertiesBuilder.fluidDisplayFactory(fluidDisplayFactory);
         return this;
     }
 

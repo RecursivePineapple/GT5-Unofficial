@@ -118,6 +118,9 @@ import net.minecraftforge.oredict.OreDictionary;
 
 import org.joml.Vector3i;
 
+import buildcraft.api.transport.IPipeTile;
+import cofh.api.energy.IEnergyReceiver;
+import cofh.api.transport.IItemDuct;
 import com.google.auto.value.AutoValue;
 import com.google.common.base.Suppliers;
 import com.google.common.collect.ImmutableMap;
@@ -127,10 +130,6 @@ import com.google.common.collect.SetMultimap;
 import com.gtnewhorizon.structurelib.alignment.IAlignment;
 import com.gtnewhorizon.structurelib.alignment.IAlignmentProvider;
 import com.mojang.authlib.GameProfile;
-
-import buildcraft.api.transport.IPipeTile;
-import cofh.api.energy.IEnergyReceiver;
-import cofh.api.transport.IItemDuct;
 import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.registry.GameRegistry;
 import gregtech.GTMod;
@@ -175,6 +174,7 @@ import gregtech.api.util.extensions.ArrayExt;
 import gregtech.common.blocks.BlockOresAbstract;
 import gregtech.common.items.ItemIntegratedCircuit;
 import gregtech.common.pollution.Pollution;
+import gregtech.nei.FluidDisplayStackMode;
 import ic2.api.recipe.IRecipeInput;
 import ic2.api.recipe.RecipeInputItemStack;
 import ic2.api.recipe.RecipeInputOreDict;
@@ -1904,6 +1904,10 @@ public class GTUtility {
     public static int calculateRecipeEU(Materials aMaterial, int defaultRecipeEUPerTick) {
         return aMaterial.getProcessingMaterialTierEU() == 0 ? defaultRecipeEUPerTick
             : aMaterial.getProcessingMaterialTierEU();
+    }
+
+    public static ItemStack getFluidDisplayStack(FluidStack fluid, FluidDisplayStackMode stackMode) {
+        return getFluidDisplayStack(fluid, stackMode == FluidDisplayStackMode.SHOWN, stackMode == FluidDisplayStackMode.HIDDEN);
     }
 
     public static ItemStack getFluidDisplayStack(Fluid aFluid) {

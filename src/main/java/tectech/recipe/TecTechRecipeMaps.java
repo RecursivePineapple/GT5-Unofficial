@@ -4,8 +4,9 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
-import com.gtnewhorizons.modularui.common.widget.ProgressBar;
+import net.minecraftforge.fluids.FluidStack;
 
+import com.gtnewhorizons.modularui.common.widget.ProgressBar;
 import gregtech.api.gui.modularui.GTUITextures;
 import gregtech.api.items.ItemCondensate;
 import gregtech.api.recipe.RecipeMap;
@@ -13,9 +14,12 @@ import gregtech.api.recipe.RecipeMapBackend;
 import gregtech.api.recipe.RecipeMapBuilder;
 import gregtech.api.recipe.maps.CondensateFrontend;
 import gregtech.api.recipe.maps.LiquidCondensateFrontend;
+import gregtech.api.util.GTBECRecipe;
+import gregtech.api.util.GTDataUtils;
 import gregtech.api.util.GTRecipe;
 import gregtech.loaders.load.BECRecipeLoader;
 import gregtech.nei.formatter.HeatingCoilSpecialValueFormatter;
+import tectech.mechanics.boseEinsteinCondensate.CondensateStack;
 import tectech.thing.CustomItemList;
 import tectech.thing.gui.TecTechUITextures;
 
@@ -142,9 +146,18 @@ public class TecTechRecipeMaps {
         .logoSize(18, 18)
         .logoPos(151, 63)
         .neiRecipeBackgroundSize(170, 90)
+        .neiTransferRect(88, 8, 18, 72)
+        .neiTransferRect(124, 8, 18, 72)
+        .neiTransferRect(142, 26, 18, 18)
         .frontend(BECRecipeMapFrontend::new)
+        .fluidDisplayFactory(BECRecipeMapFrontend.CONDENSATE_FLUID_DISPLAY)
         .neiHandlerInfo(builder -> builder.setDisplayStack(ItemCondensate.getForMaterial("Water", 0)))
         .neiRecipeComparator(Comparator.comparingLong(BECRecipeLoader::getRecipeCost))
+        .neiFluidInputsGetter((r) -> {
+            GTBECRecipe recipe = (GTBECRecipe) r;
+
+            return GTDataUtils.mapToArray(recipe.mCInput, FluidStack[]::new, CondensateStack.FakeCondensateFluidStack::new);
+        })
         .build();
 
 }

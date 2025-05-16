@@ -1,4 +1,4 @@
-package tectech.thing.metaTileEntity.multi;
+package tectech.thing.metaTileEntity.multi.bec;
 
 import static gregtech.api.casing.Casings.AdvancedFusionCoilII;
 import static gregtech.api.casing.Casings.ElectromagneticWaveguide;
@@ -49,7 +49,6 @@ import gregtech.client.volumetric.LinearSound;
 import it.unimi.dsi.fastutil.Pair;
 import it.unimi.dsi.fastutil.objects.Object2LongMap;
 import it.unimi.dsi.fastutil.objects.Object2LongOpenHashMap;
-import tectech.mechanics.boseEinsteinCondensate.BECFactoryGrid;
 import tectech.mechanics.boseEinsteinCondensate.BECInventory;
 import tectech.mechanics.boseEinsteinCondensate.CondensateStack;
 import tectech.thing.CustomItemList;
@@ -241,10 +240,6 @@ public class MTEBECStorage extends MTEBECMultiblockBase<MTEBECStorage> implement
         useLongPower = true;
         lEUt = -fieldStrength;
 
-        if (network == null) {
-            BECFactoryGrid.INSTANCE.addElement(this);
-        }
-
         double stored = mStoredCondensate.values()
             .longStream()
             .mapToDouble(l -> l)
@@ -268,13 +263,6 @@ public class MTEBECStorage extends MTEBECMultiblockBase<MTEBECStorage> implement
     public void stopMachine(@Nonnull ShutDownReason reason) {
         super.stopMachine(reason);
         mStoredCondensate.clear();
-        BECFactoryGrid.INSTANCE.removeElement(this);
-    }
-
-    @Override
-    public void onRemoval() {
-        super.onRemoval();
-        BECFactoryGrid.INSTANCE.removeElement(this);
     }
 
     @Override
@@ -294,10 +282,11 @@ public class MTEBECStorage extends MTEBECMultiblockBase<MTEBECStorage> implement
             stack.amount = 0;
         }
 
-        double stored = mStoredCondensate.values()
-            .longStream()
-            .mapToDouble(l -> l)
-            .sum();
+        double stored = 0;
+
+        for (long l : mStoredCondensate.values()) {
+            stored += l;
+        }
 
         amountStored.set(stored);
     }
@@ -328,10 +317,11 @@ public class MTEBECStorage extends MTEBECMultiblockBase<MTEBECStorage> implement
             if (stack.amount > 0) consumedEverything = false;
         }
 
-        double stored = mStoredCondensate.values()
-            .longStream()
-            .mapToDouble(l -> l)
-            .sum();
+        double stored = 0;
+
+        for (long l : mStoredCondensate.values()) {
+            stored += l;
+        }
 
         amountStored.set(stored);
 

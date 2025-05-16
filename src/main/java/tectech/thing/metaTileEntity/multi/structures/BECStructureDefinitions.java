@@ -2813,5 +2813,143 @@ public class BECStructureDefinitions {
 
     //#endregion
 
+    //#region Diode
+
+    public static final String[][] BEC_DIODE = {{
+        "                 ",
+        "                 ",
+        "                 ",
+        "                 ",
+        "  B  B  B  B  B  ",
+        "  B  B  ~  B  B  ",
+        "  B  B  B  B  B  ",
+        "                 ",
+        "                 ",
+        "                 ",
+        "                 "
+    },{
+        "                 ",
+        "                 ",
+        "  B  B  B  B  B  ",
+        "  B  B  B  B  B  ",
+        "  B  B  B  B  B  ",
+        " BBAABAABAABAABB ",
+        "  B  B  B  B  B  ",
+        "  B  B  B  B  B  ",
+        "  B  B  B  B  B  ",
+        "                 ",
+        "                 "
+    },{
+        "                 ",
+        "  B  B  B  B  B  ",
+        "  BAABAABAABAAB  ",
+        "              D  ",
+        "              D  ",
+        "BBA  A  A  A  DBB",
+        "              D  ",
+        "              D  ",
+        "  BAABAABAABAAB  ",
+        "  B  B  B  B  B  ",
+        "                 "
+    },{
+        "                 ",
+        "  B  B  B  B  B  ",
+        "              D  ",
+        "                 ",
+        "     C  D  C     ",
+        "B A  C  D  C    B",
+        "     C  D  C     ",
+        "                 ",
+        "              D  ",
+        "  B  B  B  B  B  ",
+        "                 "
+    },{
+        "  B  B  B  B  B  ",
+        "  B  B  B  B  B  ",
+        "              D  ",
+        "     C  D  C     ",
+        "B D             B",
+        "B D             B",
+        "B D             B",
+        "     C  D  C     ",
+        "              D  ",
+        "  B  B  B  B  B  ",
+        "  B  B  B  B  B  "
+    },{
+        "  B  B  B  B  B  ",
+        " BBAABAABAABAABB ",
+        "BBA  A  A  A  DBB",
+        "B A  C  D  C    B",
+        "B D             B",
+        "1               2",
+        "B D             B",
+        "B A  C  D  C    B",
+        "BBA  A  A  A  DBB",
+        " BBAABAABAABAABB ",
+        "  B  B  B  B  B  "
+    },{
+        "  B  B  B  B  B  ",
+        "  B  B  B  B  B  ",
+        "              D  ",
+        "     C  D  C     ",
+        "B D             B",
+        "B D             B",
+        "B D             B",
+        "     C  D  C     ",
+        "              D  ",
+        "  B  B  B  B  B  ",
+        "  B  B  B  B  B  "
+    },{
+        "                 ",
+        "  B  B  B  B  B  ",
+        "              D  ",
+        "                 ",
+        "     C  D  C     ",
+        "B A  C  D  C    B",
+        "     C  D  C     ",
+        "                 ",
+        "              D  ",
+        "  B  B  B  B  B  ",
+        "                 "
+    },{
+        "                 ",
+        "  B  B  B  B  B  ",
+        "  BAABAABAABAAB  ",
+        "              D  ",
+        "              D  ",
+        "BBA  A  A  A  DBB",
+        "              D  ",
+        "              D  ",
+        "  BAABAABAABAAB  ",
+        "  B  B  B  B  B  ",
+        "                 "
+    },{
+        "                 ",
+        "                 ",
+        "  B  B  B  B  B  ",
+        "  B  B  B  B  B  ",
+        "  B  B  B  B  B  ",
+        " BBAABAABAABAABB ",
+        "  B  B  B  B  B  ",
+        "  B  B  B  B  B  ",
+        "  B  B  B  B  B  ",
+        "                 ",
+        "                 "
+    },{
+        "                 ",
+        "                 ",
+        "                 ",
+        "                 ",
+        "  B  B  B  B  B  ",
+        "  B  B  B  B  B  ",
+        "  B  B  B  B  B  ",
+        "                 ",
+        "                 ",
+        "                 ",
+        "                 "
+    }};
+
+    //#endregion
+
     // spotless:on
 }

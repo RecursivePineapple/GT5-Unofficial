@@ -1,6 +1,7 @@
 package gregtech.api.recipe;
 
 import java.awt.Rectangle;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.IntFunction;
@@ -24,6 +25,7 @@ import gregtech.api.gui.modularui.GTUITextures;
 import gregtech.api.gui.modularui.SteamTexture;
 import gregtech.api.util.MethodsReturnNonnullByDefault;
 import gregtech.common.gui.modularui.UIHelper;
+import gregtech.nei.FluidDisplayFactory;
 
 /**
  * Builder class for {@link BasicUIProperties}.
@@ -51,7 +53,7 @@ public final class BasicUIPropertiesBuilder {
 
     private boolean useSpecialSlot;
 
-    private final ImmutableList.Builder<Rectangle> neiTransferRect = ImmutableList.builder();
+    private final List<Rectangle> neiTransferRect = new ArrayList<>();
     @Nullable
     private String neiTransferRectId;
 
@@ -71,13 +73,15 @@ public final class BasicUIPropertiesBuilder {
 
     private int amperage = 1;
 
+    private FluidDisplayFactory fluidDisplayFactory = FluidDisplayFactory.STANDARD_FLUID_DISPLAY;
+
     BasicUIPropertiesBuilder() {}
 
     public BasicUIProperties build() {
         if (maxItemInputs == 0 && maxItemOutputs == 0 && maxFluidInputs == 0 && maxFluidOutputs == 0) {
             throw new IllegalArgumentException("Set either of max I/O count");
         }
-        List<Rectangle> builtNEITransferRect = neiTransferRect.build();
+        List<Rectangle> builtNEITransferRect = ImmutableList.copyOf(neiTransferRect);
         if (builtNEITransferRect.isEmpty()) {
             builtNEITransferRect = Collections.singletonList(
                 new Rectangle(
@@ -112,7 +116,14 @@ public final class BasicUIPropertiesBuilder {
             specialItemPositionGetter,
             fluidInputPositionsGetter,
             fluidOutputPositionsGetter,
-            amperage);
+            amperage,
+            fluidDisplayFactory);
+    }
+
+    @SuppressWarnings("MethodDoesntCallSuperMethod")
+    @Override
+    public BasicUIPropertiesBuilder clone() {
+        return this.build().toBuilder();
     }
 
     public BasicUIPropertiesBuilder maxItemInputs(int maxItemInputs) {
@@ -179,6 +190,11 @@ public final class BasicUIPropertiesBuilder {
 
     public BasicUIPropertiesBuilder useSpecialSlot(boolean useSpecialSlot) {
         this.useSpecialSlot = useSpecialSlot;
+        return this;
+    }
+
+    public BasicUIPropertiesBuilder clearNEITransferRects() {
+        this.neiTransferRect.clear();
         return this;
     }
 
@@ -259,6 +275,11 @@ public final class BasicUIPropertiesBuilder {
 
     public BasicUIPropertiesBuilder amperage(int amperage) {
         this.amperage = amperage;
+        return this;
+    }
+
+    public BasicUIPropertiesBuilder fluidDisplayFactory(FluidDisplayFactory fluidDisplayFactory){
+        this.fluidDisplayFactory = fluidDisplayFactory;
         return this;
     }
 }

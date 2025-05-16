@@ -6,6 +6,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.function.Function;
 import java.util.function.IntFunction;
+import java.util.function.Predicate;
+
+import it.unimi.dsi.fastutil.Pair;
 
 /**
  * Various util methods for managing raw data structures that are minecraft/gt agnostic.
@@ -49,11 +52,43 @@ public class GTDataUtils {
         return -1;
     }
 
+    public static <T> int findIndex(T[] array, Predicate<T> matcher) {
+        for (int i = 0; i < array.length; i++) {
+            if (matcher.test(array[i])) return i;
+        }
+
+        return -1;
+    }
+
     public static <T> T getIndexSafe(T[] array, int index) {
         return array == null || index < 0 || index >= array.length ? null : array[index];
     }
 
     public static <T> T getIndexSafe(List<T> list, int index) {
         return list == null || index < 0 || index >= list.size() ? null : list.get(index);
+    }
+
+    public static <L, R> Iterator<Pair<L, R>> zip(Iterator<L> left, Iterator<R> right) {
+        return new Iterator<Pair<L, R>>() {
+
+            @Override
+            public boolean hasNext() {
+                boolean l = left.hasNext();
+                boolean r = right.hasNext();
+
+                if (l != r) throw new IllegalStateException("zipped iterators did not have the same length: " + (l ? "left had more than right" : "right had more than left"));
+
+                return l && r;
+            }
+
+            @Override
+            public Pair<L, R> next() {
+                return Pair.of(left.next(), right.next());
+            }
+        };
+    }
+
+    public static <T> Iterable<T> oneshot(Iterator<T> iter) {
+        return () -> iter;
     }
 }

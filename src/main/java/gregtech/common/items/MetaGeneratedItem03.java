@@ -280,6 +280,7 @@ import gregtech.api.items.MetaGeneratedItemX32;
 import gregtech.api.objects.ItemData;
 import gregtech.api.render.TextureFactory;
 import gregtech.api.util.GTOreDictUnificator;
+import gregtech.api.util.GTUtility;
 import gregtech.common.covers.CoverMetricsTransmitter;
 import gregtech.common.covers.CoverSolarPanel;
 import mods.railcraft.common.items.firestone.IItemFirestoneBurning;
@@ -1578,8 +1579,7 @@ public class MetaGeneratedItem03 extends MetaGeneratedItemX32 implements IItemFi
             NaniteTier tier = NaniteTier.fromStack(aStack);
 
             if (tier != null) {
-                aList.add(
-                    net.minecraft.util.StatCollector.translateToLocalFormatted("gt.tooltip.nanite-tier", tier.tier));
+                aList.add(GTUtility.translate("gt.tooltip.nanite-tier", tier.tier));
             }
         }
     }

@@ -284,7 +284,8 @@ public abstract class StandardFactoryGrid<TSelf extends StandardFactoryGrid<TSel
                         "A factory element isn't following the graph adjacency contract. Edge B -> A was kept when edge A -> B was removed. A = "
                             + element
                             + ", B = "
-                            + oldNeighbour);
+                            + oldNeighbour,
+                        new Exception());
                 }
 
                 oldNeighbour.onNeighbourRemoved(element);
@@ -301,7 +302,8 @@ public abstract class StandardFactoryGrid<TSelf extends StandardFactoryGrid<TSel
                         "A factory element isn't following the graph adjacency contract. Edge B -> A was not added when edge A -> B was added. A = "
                             + element
                             + ", B = "
-                            + currentNeighbour);
+                            + currentNeighbour,
+                        new Exception());
                 }
 
                 currentNeighbour.onNeighbourAdded(element);

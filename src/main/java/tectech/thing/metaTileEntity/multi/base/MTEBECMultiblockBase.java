@@ -2,11 +2,16 @@ package tectech.thing.metaTileEntity.multi.base;
 
 import static gregtech.api.casing.Casings.MolecularCasing;
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Deque;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
+import java.util.Set;
 
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
@@ -21,6 +26,7 @@ import com.gtnewhorizon.structurelib.structure.ISurvivalBuildEnvironment;
 import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.relauncher.Side;
 import gregtech.api.enums.StructureError;
+import gregtech.api.factory.RoutedNode;
 import gregtech.api.interfaces.IHatchElement;
 import gregtech.api.interfaces.IIconContainer;
 import gregtech.api.interfaces.ITexture;
@@ -33,19 +39,23 @@ import gregtech.api.structure.StructureWrapper;
 import gregtech.api.structure.StructureWrapperInstanceInfo;
 import gregtech.api.util.IGTHatchAdder;
 import gtPlusPlus.xmod.gregtech.common.blocks.textures.TexturesGtBlock;
+import it.unimi.dsi.fastutil.objects.ObjectIntPair;
 import mcp.mobius.waila.api.IWailaConfigHandler;
 import mcp.mobius.waila.api.IWailaDataAccessor;
 import tectech.mechanics.boseEinsteinCondensate.BECFactoryElement;
+import tectech.mechanics.boseEinsteinCondensate.BECFactoryGrid;
 import tectech.mechanics.boseEinsteinCondensate.BECFactoryNetwork;
+import tectech.mechanics.boseEinsteinCondensate.BECRouteInfo;
+import tectech.mechanics.boseEinsteinCondensate.NotableBECFactoryElement;
 import tectech.thing.CustomItemList;
 import tectech.thing.metaTileEntity.hatch.MTEHatchBEC;
 
 public abstract class MTEBECMultiblockBase<TSelf extends MTEBECMultiblockBase<TSelf>> extends TTMultiblockBase
-    implements ISurvivalConstructable, BECFactoryElement, IStructureProvider<TSelf> {
+    implements ISurvivalConstructable, BECFactoryElement, NotableBECFactoryElement, IStructureProvider<TSelf> {
 
     protected static final String STRUCTURE_PIECE_MAIN = "main";
 
-    protected final List<BECFactoryElement> mBECHatches = new ArrayList<>();
+    protected final List<MTEHatchBEC> mBECHatches = new ArrayList<>();
 
     protected BECFactoryNetwork network;
 
@@ -142,10 +152,13 @@ public abstract class MTEBECMultiblockBase<TSelf extends MTEBECMultiblockBase<TS
         return structureInstanceInfo;
     }
 
+    private List<MTEHatchBEC> mPreviousBECHatches;
+
     @Override
     protected void clearHatches_EM() {
         super.clearHatches_EM();
 
+        mPreviousBECHatches = new ArrayList<>(mBECHatches);
         mBECHatches.clear();
     }
 
@@ -164,10 +177,14 @@ public abstract class MTEBECMultiblockBase<TSelf extends MTEBECMultiblockBase<TS
     @Override
     @SuppressWarnings("unchecked")
     public boolean checkMachine_EM(IGregTechTileEntity iGregTechTileEntity, ItemStack itemStack) {
-        return structure.checkStructure((TSelf) this);
-    }
+        boolean success = structure.checkStructure((TSelf) this);
 
-    private String errorMessage;
+        if (!Objects.equals(mPreviousBECHatches, mBECHatches)) {
+            BECFactoryGrid.INSTANCE.addElement(this);
+        }
+
+        return success;
+    }
 
     @Override
     protected void validateStructure(Collection<StructureError> errors, NBTTagCompound context) {
@@ -205,6 +222,47 @@ public abstract class MTEBECMultiblockBase<TSelf extends MTEBECMultiblockBase<TS
         neighbours.addAll(mBECHatches);
     }
 
+    protected List<? extends BECFactoryElement> getRoutedDiscoverySeeds() {
+        return mBECHatches;
+    }
+
+    @Override
+    public List<RoutedNode<NotableBECFactoryElement, BECRouteInfo>> getRoutedNeighbours() {
+        List<RoutedNode<NotableBECFactoryElement, BECRouteInfo>> nodes = new ArrayList<>();
+
+        HashSet<BECFactoryElement> visited = new HashSet<>();
+
+        for (BECFactoryElement seed : getRoutedDiscoverySeeds()) {
+
+            Deque<ObjectIntPair<BECFactoryElement>> queue = new ArrayDeque<>();
+
+            queue.add(ObjectIntPair.of(seed, 0));
+
+            while (!queue.isEmpty()) {
+                ObjectIntPair<BECFactoryElement> curr = queue.pop();
+
+                if (!visited.add(curr.left())) continue;
+
+                if (curr.left() instanceof NotableBECFactoryElement notable) {
+                    if (notable != this) {
+                        nodes.add(new RoutedNode<>(notable, new BECRouteInfo(curr.rightInt())));
+                    }
+
+                    continue;
+                }
+
+                Set<BECFactoryElement> edges = BECFactoryGrid.INSTANCE.edges.get(curr.left());
+                int dist = curr.rightInt() + 1;
+
+                for (BECFactoryElement conn : edges) {
+                    queue.add(ObjectIntPair.of(conn, dist));
+                }
+            }
+        }
+
+        return nodes;
+    }
+
     @Override
     public BECFactoryNetwork getNetwork() {
         return this.network;
@@ -227,6 +285,20 @@ public abstract class MTEBECMultiblockBase<TSelf extends MTEBECMultiblockBase<TS
             .getSide() == Side.SERVER;
 
         return igte.isServerSide();
+    }
+
+    @Override
+    public void onFirstTick_EM(IGregTechTileEntity aBaseMetaTileEntity) {
+        super.onFirstTick_EM(aBaseMetaTileEntity);
+
+        BECFactoryGrid.INSTANCE.addElement(this);
+    }
+
+    @Override
+    public void onRemoval() {
+        super.onRemoval();
+
+        BECFactoryGrid.INSTANCE.removeElement(this);
     }
 
     public enum BECHatches implements IHatchElement<MTEBECMultiblockBase<?>> {
